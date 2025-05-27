@@ -1,0 +1,8 @@
+{
+    "@@locale": "en",
+    "hello": "Hello (in American accent)",
+    "@hello": {
+        "description": "Greeting message",
+        "type": "text"   
+    }
+}

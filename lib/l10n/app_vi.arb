@@ -1,0 +1,8 @@
+{
+    "@@locale": "vi",
+    "hello": "Xin chào",
+    "@hello": {
+        "description": "Greeting message",
+        "type": "text"   
+    }
+}
