@@ -57,7 +57,7 @@ linter:
     camel_case_types: true
     constant_identifier_names: true
     sort_pub_dependencies: true
-    avoid_classes_with_only_static_members: true
+    avoid_classes_with_only_static_members: false
     public_member_api_docs: true
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
