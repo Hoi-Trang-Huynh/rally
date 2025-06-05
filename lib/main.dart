@@ -1,46 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rally/providers/theme_provider.dart';
+import 'package:rally/themes/app_theme.dart';
+import 'package:rally/themes/app_text_styles.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appThemeMode = ref.watch(themeProvider);
+    final themeNotifier = ref.read(themeProvider.notifier);
+
     return MaterialApp(
       title: 'Flutter Demo',
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: themeNotifier.MaterialThemeMode,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('en', ''), // English, no country code
-        Locale('vn', ''), // Vietnamese, no country code
-      ],
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      supportedLocales: const [Locale('en', ''), Locale('vn', '')],
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends ConsumerWidget {
   const MyHomePage({super.key, required this.title});
-  final dynamic title;
+  final String title;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeNotifier = ref.read(themeProvider.notifier);
+    final currentTheme = ref.watch(themeProvider);
+
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.hello)),
-      body: Center(child: Text(AppLocalizations.of(context)!.hello)),
+      appBar: AppBar(
+        title: Text(
+          AppLocalizations.of(context)!.hello,
+          style: AppTextStyles.headlineLarge(context),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.brightness_6),
+            onPressed: () {
+              final next =
+                  currentTheme == AppThemeMode.light
+                      ? AppThemeMode.dark
+                      : AppThemeMode.light;
+              themeNotifier.setThemeMode(next);
+            },
+          ),
+        ],
+      ),
+      body: Center(
+        child: Text(
+          'Current Theme: $currentTheme',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+      ),
     );
   }
 }
