@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:rally/l10n/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/providers/theme_provider.dart';
 import 'package:rally/themes/app_theme.dart';
@@ -29,8 +29,8 @@ class MyApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [Locale('en', ''), Locale('vn', '')],
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const MyHomePage(title: 'Rally Demo'),
     );
   }
 }
