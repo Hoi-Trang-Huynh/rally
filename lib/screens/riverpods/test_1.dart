@@ -12,8 +12,12 @@ class TestApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appThemeMode = ref.watch(themeProvider);
+    final themeState = ref.watch(themeProvider);
     final themeNotifier = ref.read(themeProvider.notifier);
+
+    if (themeState.isLoading) {
+      return const CircularProgressIndicator(); // or splash screen
+    }
 
     return MaterialApp(
       title: 'Flutter Demo',
@@ -32,7 +36,7 @@ class ParentWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentTheme = ref.watch(themeProvider);
+    final themeMode = ref.watch(themeProvider);
     final themeNotifier = ref.read(themeProvider.notifier);
     return Scaffold(
       appBar: AppBar(
@@ -42,7 +46,7 @@ class ParentWidget extends ConsumerWidget {
             icon: const Icon(Icons.brightness_6),
             onPressed: () {
               final next =
-                  currentTheme == AppThemeMode.light
+                  themeMode.mode == AppThemeMode.light
                       ? AppThemeMode.dark
                       : AppThemeMode.light;
               themeNotifier.setThemeMode(next);
