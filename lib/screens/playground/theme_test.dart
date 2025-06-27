@@ -4,8 +4,8 @@ import 'package:rally/l10n/generated/app_localizations.dart';
 import 'package:rally/providers/theme_provider.dart';
 import 'package:rally/themes/app_text_styles.dart';
 
-class MyHomePage extends ConsumerWidget {
-  const MyHomePage({super.key, required this.title});
+class ThemeTestScreen extends ConsumerWidget {
+  const ThemeTestScreen({super.key, required this.title});
   final String title;
 
   @override

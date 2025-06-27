@@ -4,7 +4,7 @@ import 'package:rally/l10n/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/providers/theme_provider.dart';
 import 'package:rally/themes/app_theme.dart';
-import 'package:rally/screens/test_screen.dart';
+import 'package:rally/screens/playground/theme_test.dart';
 
 void main() {
   runApp(const ProviderScope(child: RallyApp()));
@@ -30,7 +30,7 @@ class RallyApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const MyHomePage(title: 'Rally Demo'),
+      home: const ThemeTestScreen(title: 'Rally Demo'),
     );
   }
 }
