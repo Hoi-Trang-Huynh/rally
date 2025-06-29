@@ -41,7 +41,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
     state = ThemeState(mode: mode, isLoading: false);
   }
 
-  ThemeMode get MaterialThemeMode {
+  ThemeMode get currentThemeMode {
     switch (state.mode) {
       case AppThemeMode.light:
         return ThemeMode.light;
