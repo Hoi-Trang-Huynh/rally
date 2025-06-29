@@ -1,8 +1,0 @@
-{
-    "@@locale": "kr",
-    "hello": "안녕하세요",
-    "@hello": {
-        "description": "Greeting message",
-        "type": "text"   
-    }
-}

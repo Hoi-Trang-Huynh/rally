@@ -1,21 +1,21 @@
 {
-    "@@locale": "vi",
-    "hello": "Xin chào",
+    "@@locale": "ko",
+    "hello": "안녕하세요",
     "@hello": {
         "description": "Greeting message",
         "type": "text"   
     },
-    "languageEnglish": "Tiếng Anh",
+    "languageEnglish": "영어",
     "@languageEnglish": {
         "description": "Language option for English",
         "type": "text"
     },
-    "languageVietnamese": "Tiếng Việt",
+    "languageVietnamese": "베트남어",
     "@languageVietnamese": {
         "description": "Language option for Vietnamese",
         "type": "text"
     },
-    "languageKorean": "Tiếng Hàn",
+    "languageKorean": "한국어",
     "@languageKorean": {
         "description": "Language option for Korean",
         "type": "text"
