@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/l10n/generated/app_localizations.dart';
 import 'package:rally/providers/theme_provider.dart';
+import 'package:rally/screens/playground/locale_test.dart';
 import 'package:rally/themes/app_text_styles.dart';
 
 class ThemeTestScreen extends ConsumerWidget {
@@ -32,12 +33,7 @@ class ThemeTestScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Center(
-        child: Text(
-          'Current Theme: ${themeState.mode}',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-      ),
+      body: const LocaleTestScreen(title: 'Local Demo'),
     );
   }
 }
