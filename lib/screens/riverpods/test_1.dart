@@ -23,7 +23,7 @@ class TestApp extends ConsumerWidget {
       title: 'Flutter Demo',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: themeNotifier.MaterialThemeMode,
+      themeMode: themeNotifier.currentThemeMode,
       home: const ParentWidget(title: 'Rally Demo'),
     );
   }
