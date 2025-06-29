@@ -2,26 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/l10n/generated/app_localizations.dart';
 import 'package:rally/providers/locale_provider.dart';
+import 'package:rally/utils/locale_utils.dart';
 
 class LocaleTestScreen extends ConsumerWidget {
   final String title;
 
   const LocaleTestScreen({super.key, required this.title});
-
-  String _getLocalizedName(BuildContext context, Locale locale) {
-    final AppLocalizations localizations = AppLocalizations.of(context)!;
-
-    switch (locale.languageCode) {
-      case 'en':
-        return localizations.languageEnglish;
-      case 'vi':
-        return localizations.languageVietnamese;
-      case 'ko':
-        return localizations.languageKorean;
-      default:
-        return locale.languageCode;
-    }
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,7 +36,7 @@ class LocaleTestScreen extends ConsumerWidget {
                   supported.map((Locale locale) {
                     return DropdownMenuItem<Locale>(
                       value: locale,
-                      child: Text(_getLocalizedName(context, locale)),
+                      child: Text(getLocalizedLanguageName(context, locale)),
                     );
                   }).toList(),
             ),
