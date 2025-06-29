@@ -10,8 +10,8 @@ class ThemeTestScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeNotifier = ref.read(themeProvider.notifier);
-    final currentTheme = ref.watch(themeProvider);
+    final ThemeState themeState = ref.watch(themeProvider);
+    final ThemeNotifier themeNotifier = ref.read(themeProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -23,8 +23,8 @@ class ThemeTestScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.brightness_6),
             onPressed: () {
-              final next =
-                  currentTheme == AppThemeMode.light
+              final AppThemeMode next =
+                  themeState.mode == AppThemeMode.light
                       ? AppThemeMode.dark
                       : AppThemeMode.light;
               themeNotifier.setThemeMode(next);
@@ -34,7 +34,7 @@ class ThemeTestScreen extends ConsumerWidget {
       ),
       body: Center(
         child: Text(
-          'Current Theme: $currentTheme',
+          'Current Theme: ${themeState.mode}',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
       ),
