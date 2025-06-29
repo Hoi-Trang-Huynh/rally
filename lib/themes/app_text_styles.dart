@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppTextStyles {
   static TextStyle headlineLarge(BuildContext context) {
-    final locale = Localizations.localeOf(context);
+    final Locale locale = Localizations.localeOf(context);
     return TextStyle(
       fontSize: _getHeadlineSize(locale.languageCode),
       fontWeight: FontWeight.bold,

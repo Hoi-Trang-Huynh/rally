@@ -51,13 +51,11 @@ linter:
     require_trailing_commas: true
     unnecessary_this: true
     use_key_in_widget_constructors: true
-    sort_constructors_first: false
     avoid_redundant_argument_values: true
     prefer_single_quotes: true
     camel_case_types: true
     constant_identifier_names: true
     sort_pub_dependencies: true
-    avoid_classes_with_only_static_members: false
     public_member_api_docs: true
     always_specify_types: true
 # Additional information about this file can be found at

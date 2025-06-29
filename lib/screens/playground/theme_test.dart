@@ -19,7 +19,7 @@ class ThemeTestScreen extends ConsumerWidget {
           AppLocalizations.of(context)!.hello,
           style: AppTextStyles.headlineLarge(context),
         ),
-        actions: [
+        actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.brightness_6),
             onPressed: () {

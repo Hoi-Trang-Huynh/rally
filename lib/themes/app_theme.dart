@@ -5,7 +5,7 @@ import 'app_theme_extension.dart';
 
 abstract class AppTheme {
   static ThemeData get light {
-    final base = ThemeData.light();
+    final ThemeData base = ThemeData.light();
     return base.copyWith(
       colorScheme: const ColorScheme.light(
         primary: AppColors.lightPrimary,
@@ -27,7 +27,7 @@ abstract class AppTheme {
   }
 
   static ThemeData get dark {
-    final base = ThemeData.dark();
+    final ThemeData base = ThemeData.dark();
     return base.copyWith(
       colorScheme: const ColorScheme.dark(
         primary: AppColors.darkPrimary,
