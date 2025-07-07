@@ -6,8 +6,10 @@ import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/themes/app_theme.dart';
 import 'package:rally/screens/loading/app_loading.dart';
 import 'package:rally/screens/playground/theme_test.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  await dotenv.load();
   runApp(const ProviderScope(child: RallyApp()));
 }
 

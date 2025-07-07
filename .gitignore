@@ -12,6 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 /lib/l10n/generated/
+.env
 
 # IntelliJ related
 *.iml
