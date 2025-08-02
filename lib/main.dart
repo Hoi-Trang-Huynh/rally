@@ -3,9 +3,9 @@ import 'package:rally/l10n/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/providers/theme_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
+import 'package:rally/screens/playground/map_test.dart';
 import 'package:rally/themes/app_theme.dart';
 import 'package:rally/screens/loading/app_loading.dart';
-import 'package:rally/screens/playground/theme_test.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
@@ -45,7 +45,7 @@ class RallyApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       locale: localeNotifier.currentLocale,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const ThemeTestScreen(title: 'Rally Demo'),
+      home: MapScreen(title: 'Google Map Screen'),
     );
   }
 }
