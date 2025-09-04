@@ -1,0 +1,62 @@
+workflows:
+  default-workflow:
+    name: Rally FE workflow
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      groups:
+        - keystore_credentials
+        - app_store_credentials
+        - manual_cert_credentials
+        - firebase_credentials
+        - other
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: "*"
+          include: true
+          source: true
+      cancel_previous_builds: false
+    cache:
+      cache_paths:
+        - $FLUTTER_ROOT/.pub-cache
+        - $HOME/.gradle/caches	
+        - $HOME/.gradle/wrapper
+        - $HOME/Library/Caches/CocoaPods
+        - $CM_BUILD_DIR/node_modules	
+    scripts:
+      - name: Installing Dependencies
+        script: |
+          echo "Installing dependencies..."
+          flutter clean
+          flutter pub get
+      - name: Build Android
+        script: |
+          echo "Building Android APK and AppBundle..."
+          flutter build apk --release
+          flutter build appbundle --release
+      - name: Build iOS
+        script: |
+          echo "Building iOS..."
+          flutter build ios --release --no-codesign
+      - name: Build Web
+        script: |
+          echo "Building Web..."
+          flutter build web --release
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
+      - build/app/outputs/bundle/release/*.aab
+      - build/ios/ipa/*.ipa
+      - build/web/**/*
+    publishing:
+      email:
+        recipients:
+          - khang.nguyen@rally-go.com
+      scripts:
+        - name: Custom publishing step
+          script: |
+            echo "Publishing build artifacts..."
