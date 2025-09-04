@@ -24,10 +24,10 @@ workflows:
     cache:
       cache_paths:
         - $FLUTTER_ROOT/.pub-cache
-        - $HOME/.gradle/caches	
+        - $HOME/.gradle/caches
         - $HOME/.gradle/wrapper
         - $HOME/Library/Caches/CocoaPods
-        - $CM_BUILD_DIR/node_modules	
+        - $CM_BUILD_DIR/node_modules
     scripts:
       - name: Installing Dependencies
         script: |
