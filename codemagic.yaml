@@ -9,6 +9,7 @@ workflows:
         - app_store_credentials
         - manual_cert_credentials
         - firebase_credentials
+        - azure_credentials
         - other
       flutter: stable
       xcode: latest
