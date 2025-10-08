@@ -70,30 +70,29 @@ workflows:
       - name: Upload Android build to SharePoint
         script: |
           set -e
-          SITE_DOMAIN="rally294.sharepoint.com"
-          SITE_PATH="/sites/Rally"
           BASE_FOLDER="Frontend/Builds"
 
           VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr -d '\r')
-          BUILD_NUMBER="${CM_BUILD_NUMBER:-0}"
           VERSION_BUILD="${VERSION}+${BUILD_NUMBER}"
           PLATFORM_FOLDER="Android"
           BUILD_FOLDER="$BASE_FOLDER/$VERSION_BUILD/$PLATFORM_FOLDER"
 
           echo "Preparing Android upload → $BUILD_FOLDER"
 
-          SITE_ID=$(curl -s -H "Authorization: Bearer $TOKEN" \
-            "https://graph.microsoft.com/v1.0/sites/${SITE_DOMAIN}:${SITE_PATH}" | jq -r .id)
-
-          DRIVE_ID=$(curl -s -H "Authorization: Bearer $TOKEN" \
-            "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives" | jq -r '.value[0].id')
-
-          for FOLDER in "$BASE_FOLDER" "$BASE_FOLDER/$VERSION" "$BUILD_FOLDER"; do
-            curl -s -X PUT \
-              -H "Authorization: Bearer $TOKEN" \
-              -H "Content-Type: application/json" \
-              -d '{"folder": {}, "@microsoft.graph.conflictBehavior": "rename"}' \
-              "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER" > /dev/null
+          for FOLDER in "$BASE_FOLDER" "$BASE_FOLDER/$VERSION_BUILD" "$BUILD_FOLDER"; do
+              echo "Ensuring folder exists: $FOLDER"
+              EXISTS=$(curl -s -H "Authorization: Bearer $TOKEN" \
+              "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER" | jq -r '.id // empty')
+              echo "  Found $FOLDER"
+              if [ -z "$EXISTS" ]; then
+              # Create folder if not exist
+              echo "  Creating $FOLDER..."
+              FOLDER_RESPONSE=$(curl -s -X PUT \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d '{"folder": {}, "@microsoft.graph.conflictBehavior": "fail"}' \
+                  "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER")
+              fi
           done
 
           upload_file() {
@@ -136,30 +135,29 @@ workflows:
       - name: Upload iOS build to SharePoint
         script: |
           set -e
-          SITE_DOMAIN="rally294.sharepoint.com"
-          SITE_PATH="/sites/Rally"
           BASE_FOLDER="Frontend/Builds"
 
           VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr -d '\r')
-          BUILD_NUMBER="${CM_BUILD_NUMBER:-0}"
           VERSION_BUILD="${VERSION}+${BUILD_NUMBER}"
           PLATFORM_FOLDER="iOS"
           BUILD_FOLDER="$BASE_FOLDER/$VERSION_BUILD/$PLATFORM_FOLDER"
 
           echo "Preparing iOS upload → $BUILD_FOLDER"
 
-          SITE_ID=$(curl -s -H "Authorization: Bearer $TOKEN" \
-            "https://graph.microsoft.com/v1.0/sites/${SITE_DOMAIN}:${SITE_PATH}" | jq -r .id)
-
-          DRIVE_ID=$(curl -s -H "Authorization: Bearer $TOKEN" \
-            "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives" | jq -r '.value[0].id')
-
-          for FOLDER in "$BASE_FOLDER" "$BASE_FOLDER/$VERSION" "$BUILD_FOLDER"; do
-            curl -s -X PUT \
-              -H "Authorization: Bearer $TOKEN" \
-              -H "Content-Type: application/json" \
-              -d '{"folder": {}, "@microsoft.graph.conflictBehavior": "rename"}' \
-              "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER" > /dev/null
+          for FOLDER in "$BASE_FOLDER" "$BASE_FOLDER/$VERSION_BUILD" "$BUILD_FOLDER"; do
+              echo "Ensuring folder exists: $FOLDER"
+              EXISTS=$(curl -s -H "Authorization: Bearer $TOKEN" \
+              "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER" | jq -r '.id // empty')
+              echo "  Found $FOLDER"
+              if [ -z "$EXISTS" ]; then
+              # Create folder if not exist
+              echo "  Creating $FOLDER..."
+              FOLDER_RESPONSE=$(curl -s -X PUT \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d '{"folder": {}, "@microsoft.graph.conflictBehavior": "fail"}' \
+                  "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER")
+              fi
           done
 
           IPA_PATH=$(find build/ios/ipa -name "*.ipa" -type f 2>/dev/null | head -n 1)
