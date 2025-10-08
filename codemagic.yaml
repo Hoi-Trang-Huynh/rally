@@ -37,96 +37,156 @@ workflows:
           echo "Installing dependencies..."
           flutter clean
           flutter pub get
+
       - name: Build Android
         script: |
           set -e
           echo "Building Android APK and AppBundle..."
           flutter build apk --release
           flutter build appbundle --release
+
       - name: Build iOS
         script: |
           set -e
           echo "Building iOS..."
           flutter build ios --release --no-codesign
+
       - name: Get OAuth2 token
         script: |
           set -e
-          TOKEN=$(curl -X POST -H "Content-Type: application/x-www-form-urlencoded" \
+          echo "Fetching Microsoft Graph OAuth2 token..."
+          TOKEN=$(curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" \
             -d "client_id=$CLIENT_ID&scope=https://graph.microsoft.com/.default&client_secret=$CLIENT_SECRET&grant_type=client_credentials" \
-            "https://login.microsoftonline.com/$TENANT_ID/oauth2/v2.0/token" \
-            | jq -r .access_token)
+            "https://login.microsoftonline.com/$TENANT_ID/oauth2/v2.0/token" | jq -r .access_token)
 
+          if [ "$TOKEN" == "null" ] || [ -z "$TOKEN" ]; then
+            echo "Failed to obtain access token."
+            exit 1
+          fi
+
+          echo "Token acquired."
           echo "TOKEN=$TOKEN" >> $CM_ENV
-      - name: Upload appbundle to OneDrive
+
+      - name: Upload Android build to SharePoint
         script: |
           set -e
-          FILE_PATH="build/app/outputs/bundle/release/app-release.aab"
-          UPLOAD_NAME="app-release-$(date +%Y%m%d%H%M%S).aab"
+          SITE_DOMAIN="rally294.sharepoint.com"
+          SITE_PATH="/sites/Rally"
+          BASE_FOLDER="Frontend/Builds"
+          TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+          BUILD_FOLDER="$BASE_FOLDER/build-$TIMESTAMP"
 
-          echo "Uploading $UPLOAD_NAME to OneDrive..."
+          echo "Preparing Android upload → $BUILD_FOLDER"
+
+          SITE_ID=$(curl -s -H "Authorization: Bearer $TOKEN" \
+            "https://graph.microsoft.com/v1.0/sites/${SITE_DOMAIN}:${SITE_PATH}" | jq -r .id)
+
+          DRIVE_ID=$(curl -s -H "Authorization: Bearer $TOKEN" \
+            "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives" | jq -r '.value[0].id')
+
+          # Create folder
+          curl -s -X PUT \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"folder": {}, "@microsoft.graph.conflictBehavior": "rename"}' \
+            "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$BUILD_FOLDER" > /dev/null
+
+          upload_file() {
+            local FILE_PATH="$1"
+            local MIME_TYPE="$2"
+            local FILE_NAME=$(basename "$FILE_PATH")
+
+            if [ ! -f "$FILE_PATH" ]; then
+              echo "File not found: $FILE_PATH — skipping"
+              return
+            fi
+
+            echo "⬆Uploading $FILE_NAME..."
+            START_TIME=$(date +%s)
+
+            RESPONSE=$(curl -s -w "%{http_code}" -o upload_result.json \
+              -X PUT \
+              -H "Authorization: Bearer $TOKEN" \
+              -H "Content-Type: $MIME_TYPE" \
+              --data-binary @"$FILE_PATH" \
+              "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$BUILD_FOLDER/$FILE_NAME:/content")
+
+            END_TIME=$(date +%s)
+            DURATION=$((END_TIME - START_TIME))
+
+            if [ "$RESPONSE" != "201" ] && [ "$RESPONSE" != "200" ]; then
+              echo "Upload failed for $FILE_NAME (HTTP $RESPONSE)"
+              cat upload_result.json
+              return
+            fi
+
+            FILE_WEBURL=$(jq -r '.webUrl' upload_result.json)
+            echo "Uploaded: $FILE_WEBURL"
+            echo "Duration: ${DURATION}s"
+          }
+
+          upload_file "build/app/outputs/bundle/release/app-release.aab" "application/octet-stream"
+          upload_file "build/app/outputs/flutter-apk/app-release.apk" "application/vnd.android.package-archive"
+
+      - name: Upload iOS build to SharePoint
+        script: |
+          set -e
+          SITE_DOMAIN="rally294.sharepoint.com"
+          SITE_PATH="/sites/Rally"
+          BASE_FOLDER="Frontend/Builds"
+          TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+          BUILD_FOLDER="$BASE_FOLDER/build-$TIMESTAMP"
+
+          echo "Preparing iOS upload → $BUILD_FOLDER"
+
+          SITE_ID=$(curl -s -H "Authorization: Bearer $TOKEN" \
+            "https://graph.microsoft.com/v1.0/sites/${SITE_DOMAIN}:${SITE_PATH}" | jq -r .id)
+
+          DRIVE_ID=$(curl -s -H "Authorization: Bearer $TOKEN" \
+            "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives" | jq -r '.value[0].id')
+
+          # Create folder
+          curl -s -X PUT \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"folder": {}, "@microsoft.graph.conflictBehavior": "rename"}' \
+            "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$BUILD_FOLDER" > /dev/null
+
+          IPA_PATH=$(find build/ios/ipa -name "*.ipa" -type f 2>/dev/null | head -n 1)
+          if [ -z "$IPA_PATH" ]; then
+            echo "No .ipa file found — skipping"
+            exit 0
+          fi
+
+          echo "⬆Uploading $(basename "$IPA_PATH")..."
           START_TIME=$(date +%s)
 
-          RESPONSE=$(curl -s -w "%{http_code}" -o upload_result_aab.json \
+          RESPONSE=$(curl -s -w "%{http_code}" -o upload_result_ios.json \
             -X PUT \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/octet-stream" \
-            --data-binary @"$FILE_PATH" \
-            "https://graph.microsoft.com/v1.0/me/drive/root:/Codemagic/$UPLOAD_NAME:/content")
+            --data-binary @"$IPA_PATH" \
+            "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$BUILD_FOLDER/$(basename "$IPA_PATH"):/content")
 
           END_TIME=$(date +%s)
           DURATION=$((END_TIME - START_TIME))
 
           if [ "$RESPONSE" != "201" ] && [ "$RESPONSE" != "200" ]; then
-            echo "Upload failed with HTTP $RESPONSE after ${DURATION}s"
-            cat upload_result_aab.json
+            echo "Upload failed (HTTP $RESPONSE)"
+            cat upload_result_ios.json
             exit 1
           fi
 
-          FILE_ID=$(jq -r '.id' upload_result_aab.json)
-          FILE_WEBURL=$(jq -r '.webUrl' upload_result_aab.json)
-          echo "Upload successful: $FILE_WEBURL (ID: $FILE_ID)"
-          echo "⏱ Duration: ${DURATION}s"
+          FILE_WEBURL=$(jq -r '.webUrl' upload_result_ios.json)
+          echo "Uploaded: $FILE_WEBURL"
+          echo "Duration: ${DURATION}s"
 
-      - name: Upload APK to OneDrive
-        script: |
-          set -e
-          FILE_PATH="build/app/outputs/flutter-apk/app-release.apk"
-          UPLOAD_NAME="app-release-$(date +%Y%m%d%H%M%S).apk"
+  artifacts:
+    - build/app/outputs/flutter-apk/*.apk
+    - build/app/outputs/bundle/release/*.aab
+    - build/ios/ipa/*.ipa
 
-          echo "Uploading $UPLOAD_NAME to OneDrive..."
-          START_TIME=$(date +%s)
-
-          RESPONSE=$(curl -s -w "%{http_code}" -o upload_result_apk.json \
-            -X PUT \
-            -H "Authorization: Bearer $TOKEN" \
-            -H "Content-Type: application/vnd.android.package-archive" \
-            --data-binary @"$FILE_PATH" \
-            "https://graph.microsoft.com/v1.0/me/drive/root:/Codemagic/$UPLOAD_NAME:/content")
-
-          END_TIME=$(date +%s)
-          DURATION=$((END_TIME - START_TIME))
-
-          if [ "$RESPONSE" != "201" ] && [ "$RESPONSE" != "200" ]; then
-            echo "Upload failed with HTTP $RESPONSE after ${DURATION}s"
-            cat upload_result_apk.json
-            exit 1
-          fi
-
-          FILE_ID=$(jq -r '.id' upload_result_apk.json)
-          FILE_WEBURL=$(jq -r '.webUrl' upload_result_apk.json)
-          echo "Upload successful: $FILE_WEBURL (ID: $FILE_ID)"
-          echo "⏱ Duration: ${DURATION}s"
-
-    artifacts:
-      - build/app/outputs/flutter-apk/*.apk
-      - build/app/outputs/bundle/release/*.aab
-      - build/ios/ipa/*.ipa
-      - build/web/**/*
-    publishing:
-      email:
-        recipients:
-          - khang.nguyen@rally-go.com
-      scripts:
-        - name: Custom publishing step
-          script: |
-            echo "Publishing build artifacts..."
+  publishing:
+    email:
+      recipients:
+        - khang.nguyen@rally-go.com
