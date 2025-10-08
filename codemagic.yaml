@@ -11,6 +11,8 @@ workflows:
         - firebase_credentials
         - azure_credentials
         - other
+      vars:
+        BUILD_TIMESTAMP: $(date +"%Y-%m-%d_%H-%M-%S")
       flutter: stable
       xcode: latest
       cocoapods: default
@@ -73,8 +75,7 @@ workflows:
           SITE_DOMAIN="rally294.sharepoint.com"
           SITE_PATH="/sites/Rally"
           BASE_FOLDER="Frontend/Builds"
-          TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
-          BUILD_FOLDER="$BASE_FOLDER/build-$TIMESTAMP"
+          BUILD_FOLDER="$BASE_FOLDER/build-$BUILD_TIMESTAMP"
 
           echo "Preparing Android upload → $BUILD_FOLDER"
 
@@ -134,8 +135,7 @@ workflows:
           SITE_DOMAIN="rally294.sharepoint.com"
           SITE_PATH="/sites/Rally"
           BASE_FOLDER="Frontend/Builds"
-          TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
-          BUILD_FOLDER="$BASE_FOLDER/build-$TIMESTAMP"
+          BUILD_FOLDER="$BASE_FOLDER/build-$BUILD_TIMESTAMP"
 
           echo "Preparing iOS upload → $BUILD_FOLDER"
 
