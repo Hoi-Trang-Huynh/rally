@@ -11,8 +11,6 @@ workflows:
         - firebase_credentials
         - azure_credentials
         - other
-      vars:
-        BUILD_TIMESTAMP: $(date +"%Y-%m-%d_%H-%M-%S")
       flutter: stable
       xcode: latest
       cocoapods: default
@@ -75,7 +73,12 @@ workflows:
           SITE_DOMAIN="rally294.sharepoint.com"
           SITE_PATH="/sites/Rally"
           BASE_FOLDER="Frontend/Builds"
-          BUILD_FOLDER="$BASE_FOLDER/build-$BUILD_TIMESTAMP"
+
+          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr -d '\r')
+          BUILD_NUMBER="${CM_BUILD_NUMBER:-0}"
+          VERSION_BUILD="${VERSION}+${BUILD_NUMBER}"
+          PLATFORM_FOLDER="Android"
+          BUILD_FOLDER="$BASE_FOLDER/$VERSION_BUILD/$PLATFORM_FOLDER"
 
           echo "Preparing Android upload → $BUILD_FOLDER"
 
@@ -85,12 +88,13 @@ workflows:
           DRIVE_ID=$(curl -s -H "Authorization: Bearer $TOKEN" \
             "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives" | jq -r '.value[0].id')
 
-          # Create folder
-          curl -s -X PUT \
-            -H "Authorization: Bearer $TOKEN" \
-            -H "Content-Type: application/json" \
-            -d '{"folder": {}, "@microsoft.graph.conflictBehavior": "rename"}' \
-            "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$BUILD_FOLDER" > /dev/null
+          for FOLDER in "$BASE_FOLDER" "$BASE_FOLDER/$VERSION" "$BUILD_FOLDER"; do
+            curl -s -X PUT \
+              -H "Authorization: Bearer $TOKEN" \
+              -H "Content-Type: application/json" \
+              -d '{"folder": {}, "@microsoft.graph.conflictBehavior": "rename"}' \
+              "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER" > /dev/null
+          done
 
           upload_file() {
             local FILE_PATH="$1"
@@ -102,7 +106,7 @@ workflows:
               return
             fi
 
-            echo "⬆Uploading $FILE_NAME..."
+            echo "⬆ Uploading $FILE_NAME..."
             START_TIME=$(date +%s)
 
             RESPONSE=$(curl -s -w "%{http_code}" -o upload_result.json \
@@ -122,8 +126,8 @@ workflows:
             fi
 
             FILE_WEBURL=$(jq -r '.webUrl' upload_result.json)
-            echo "Uploaded: $FILE_WEBURL"
-            echo "Duration: ${DURATION}s"
+            echo "✅ Uploaded: $FILE_WEBURL"
+            echo "⏱ Duration: ${DURATION}s"
           }
 
           upload_file "build/app/outputs/bundle/release/app-release.aab" "application/octet-stream"
@@ -135,7 +139,12 @@ workflows:
           SITE_DOMAIN="rally294.sharepoint.com"
           SITE_PATH="/sites/Rally"
           BASE_FOLDER="Frontend/Builds"
-          BUILD_FOLDER="$BASE_FOLDER/build-$BUILD_TIMESTAMP"
+
+          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr -d '\r')
+          BUILD_NUMBER="${CM_BUILD_NUMBER:-0}"
+          VERSION_BUILD="${VERSION}+${BUILD_NUMBER}"
+          PLATFORM_FOLDER="iOS"
+          BUILD_FOLDER="$BASE_FOLDER/$VERSION_BUILD/$PLATFORM_FOLDER"
 
           echo "Preparing iOS upload → $BUILD_FOLDER"
 
@@ -145,12 +154,13 @@ workflows:
           DRIVE_ID=$(curl -s -H "Authorization: Bearer $TOKEN" \
             "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives" | jq -r '.value[0].id')
 
-          # Create folder
-          curl -s -X PUT \
-            -H "Authorization: Bearer $TOKEN" \
-            -H "Content-Type: application/json" \
-            -d '{"folder": {}, "@microsoft.graph.conflictBehavior": "rename"}' \
-            "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$BUILD_FOLDER" > /dev/null
+          for FOLDER in "$BASE_FOLDER" "$BASE_FOLDER/$VERSION" "$BUILD_FOLDER"; do
+            curl -s -X PUT \
+              -H "Authorization: Bearer $TOKEN" \
+              -H "Content-Type: application/json" \
+              -d '{"folder": {}, "@microsoft.graph.conflictBehavior": "rename"}' \
+              "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER" > /dev/null
+          done
 
           IPA_PATH=$(find build/ios/ipa -name "*.ipa" -type f 2>/dev/null | head -n 1)
           if [ -z "$IPA_PATH" ]; then
@@ -178,8 +188,8 @@ workflows:
           fi
 
           FILE_WEBURL=$(jq -r '.webUrl' upload_result_ios.json)
-          echo "Uploaded: $FILE_WEBURL"
-          echo "Duration: ${DURATION}s"
+          echo "✅ Uploaded: $FILE_WEBURL"
+          echo "⏱ Duration: ${DURATION}s"
 
     artifacts:
       - build/app/outputs/flutter-apk/*.apk
