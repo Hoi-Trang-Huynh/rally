@@ -181,12 +181,11 @@ workflows:
           echo "Uploaded: $FILE_WEBURL"
           echo "Duration: ${DURATION}s"
 
-  artifacts:
-    - build/app/outputs/flutter-apk/*.apk
-    - build/app/outputs/bundle/release/*.aab
-    - build/ios/ipa/*.ipa
-
-  publishing:
-    email:
-      recipients:
-        - khang.nguyen@rally-go.com
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
+      - build/app/outputs/bundle/release/*.aab
+      - build/ios/ipa/*.ipa
+    publishing:
+      email:
+        recipients:
+          - khang.nguyen@rally-go.com
