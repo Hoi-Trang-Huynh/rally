@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "371906055890",
+    "project_id": "rally-go-6",
+    "storage_bucket": "rally-go-6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:371906055890:android:6c9724bf6b2848a3a3e70b",
+        "android_client_info": {
+          "package_name": "com.example.rally"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "371906055890-e39sikbk42o83ejhij90pt4f4tudj8eg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbCDXsSAPGz4l1pLEPtH0I-Vgaj3-iD1Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "371906055890-e39sikbk42o83ejhij90pt4f4tudj8eg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

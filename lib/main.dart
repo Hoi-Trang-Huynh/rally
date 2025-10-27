@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:rally/l10n/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:rally/l10n/generated/app_localizations.dart';
 import 'package:rally/providers/theme_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/themes/app_theme.dart';
 import 'package:rally/screens/loading/app_loading.dart';
 import 'package:rally/screens/playground/theme_test.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:rally/firebase_options.dart';
 
 void main() async {
-  await dotenv.load();
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await dotenv.load();
+  } catch (e) {
+    debugPrint('Warning: .env file not found or failed to load: $e');
+  }
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const ProviderScope(child: RallyApp()));
 }
 
