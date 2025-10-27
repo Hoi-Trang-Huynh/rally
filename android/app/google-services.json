@@ -29,6 +29,13 @@
             {
               "client_id": "371906055890-e39sikbk42o83ejhij90pt4f4tudj8eg.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "371906055890-kvp9vg8hse7ja7sodkgqgl2qiq2u7eru.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.rally"
+              }
             }
           ]
         }
