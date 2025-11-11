@@ -9,9 +9,15 @@ import 'package:rally/themes/app_theme.dart';
 import 'package:rally/screens/loading/app_loading.dart';
 import 'package:rally/screens/playground/theme_test.dart';
 import 'package:rally/firebase_options.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-void main() async {
+/// Entry point for the Rally app.
+///
+/// Initializes Flutter bindings, disables Google Fonts runtime fetching,
+/// loads environment variables, initializes Firebase, and runs the app.
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   try {
     await dotenv.load();
@@ -23,9 +29,17 @@ void main() async {
   runApp(const ProviderScope(child: RallyApp()));
 }
 
+/// The root widget for the Rally app.
+///
+/// Handles theme and locale state, shows a loading screen while providers initialize,
+/// and sets up the main MaterialApp with theming and localization.
 class RallyApp extends ConsumerWidget {
+  /// Creates a new instance of the RallyApp widget.
+  ///
+  /// The [key] parameter is used to control how one widget replaces another widget in the tree.
   const RallyApp({super.key});
 
+  /// Builds the Rally app UI, applying theme, locale, and loading state.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeState themeState = ref.watch(themeProvider);
@@ -55,7 +69,7 @@ class RallyApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       locale: localeNotifier.currentLocale,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const ThemeTestScreen(title: 'Rally Demo'),
+      home: const ThemeTestScreen(title: 'Rally'),
     );
   }
 }
