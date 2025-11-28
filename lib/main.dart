@@ -1,15 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:rally/l10n/generated/app_localizations.dart';
-import 'package:rally/providers/theme_provider.dart';
-import 'package:rally/providers/locale_provider.dart';
-import 'package:rally/themes/app_theme.dart';
-import 'package:rally/screens/loading/app_loading.dart';
-import 'package:rally/screens/playground/theme_test.dart';
-import 'package:rally/firebase_options.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rally/firebase_options.dart';
+import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/providers/locale_provider.dart';
+import 'package:rally/providers/theme_provider.dart';
+import 'package:rally/screens/playground/theme_test.dart';
+import 'package:rally/services/shared_prefs_service.dart';
+import 'package:rally/themes/app_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Entry point for the Rally app.
 ///
@@ -26,7 +27,15 @@ Future<void> main() async {
   }
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const ProviderScope(child: RallyApp()));
+
+  final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+
+  runApp(
+    ProviderScope(
+      overrides: <Override>[sharedPrefsServiceProvider.overrideWithValue(sharedPrefs)],
+      child: const RallyApp(),
+    ),
+  );
 }
 
 /// The root widget for the Rally app.
@@ -42,24 +51,12 @@ class RallyApp extends ConsumerWidget {
   /// Builds the Rally app UI, applying theme, locale, and loading state.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ThemeState themeState = ref.watch(themeProvider);
     final ThemeNotifier themeNotifier = ref.read(themeProvider.notifier);
-
-    final LocaleState localeState = ref.watch(localeProvider);
     final LocaleNotifier localeNotifier = ref.read(localeProvider.notifier);
 
-    final bool isLoading =
-        themeState.isLoading ||
-        localeState
-            .isLoading; // Add more loading flag from other providers in the future
-
-    // Return the app startup screen while loading all providers
-    if (isLoading) {
-      return const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: AppLoadingScreen(),
-      );
-    }
+    // Watch the state to rebuild when it changes
+    ref.watch(themeProvider);
+    ref.watch(localeProvider);
 
     return MaterialApp(
       title: 'Flutter Demo',
