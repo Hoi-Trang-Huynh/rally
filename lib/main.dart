@@ -5,9 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rally/firebase_options.dart';
 import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/models/app_user.dart';
+import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/providers/theme_provider.dart';
-import 'package:rally/screens/playground/theme_test.dart';
+import 'package:rally/screens/loading/app_loading.dart';
+import 'package:rally/screens/playground/auth_test.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:rally/themes/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -58,6 +61,8 @@ class RallyApp extends ConsumerWidget {
     ref.watch(themeProvider);
     ref.watch(localeProvider);
 
+    final AsyncValue<AppUser?> authState = ref.watch(appUserProvider);
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: AppTheme.light,
@@ -66,7 +71,13 @@ class RallyApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       locale: localeNotifier.currentLocale,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const ThemeTestScreen(title: 'Rally'),
+      home: authState.when(
+        data: (AppUser? user) => const AuthTestScreen(),
+        loading: () => const AppLoadingScreen(),
+        error:
+            (Object error, StackTrace stack) =>
+                Scaffold(body: Center(child: Text('Error: $error'))),
+      ),
     );
   }
 }
