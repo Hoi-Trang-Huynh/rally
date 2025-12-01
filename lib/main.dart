@@ -9,8 +9,9 @@ import 'package:rally/models/app_user.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/providers/theme_provider.dart';
+import 'package:rally/screens/auth/login_screen.dart';
 import 'package:rally/screens/loading/app_loading.dart';
-import 'package:rally/screens/playground/auth_test.dart';
+import 'package:rally/screens/playground/theme_test.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:rally/themes/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -72,7 +73,9 @@ class RallyApp extends ConsumerWidget {
       locale: localeNotifier.currentLocale,
       supportedLocales: AppLocalizations.supportedLocales,
       home: authState.when(
-        data: (AppUser? user) => const AuthTestScreen(),
+        data:
+            (AppUser? user) =>
+                user != null ? const ThemeTestScreen(title: 'Rally Home') : const LoginScreen(),
         loading: () => const AppLoadingScreen(),
         error:
             (Object error, StackTrace stack) =>
