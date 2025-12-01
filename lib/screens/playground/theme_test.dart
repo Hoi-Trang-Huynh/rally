@@ -16,11 +16,14 @@ import 'package:rally/providers/theme_provider.dart';
 // ---
 
 /// A helper function to convert a Color object to a hex string.
-String toHex(Color c) =>
-    '#${c.value.toRadixString(16).substring(2).toUpperCase()}';
+String toHex(Color c) => '#${c.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
 
+/// A playground screen for testing theme switching and color roles.
 class ThemeTestScreen extends ConsumerWidget {
+  /// Creates a new [ThemeTestScreen] with the given [title].
   const ThemeTestScreen({super.key, required this.title});
+
+  /// The title of the screen.
   final String title;
 
   @override
@@ -42,14 +45,12 @@ class ThemeTestScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
-        actions: [
+        actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.brightness_6),
             onPressed: () {
               final AppThemeMode next =
-                  themeState.mode == AppThemeMode.light
-                      ? AppThemeMode.dark
-                      : AppThemeMode.light;
+                  themeState.mode == AppThemeMode.light ? AppThemeMode.dark : AppThemeMode.light;
               themeNotifier.setThemeMode(next);
             },
           ),
@@ -60,11 +61,11 @@ class ThemeTestScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: <Widget>[
               Text('Main Roles', style: textTheme.titleLarge),
               const SizedBox(height: 12),
               Row(
-                children: [
+                children: <Widget>[
                   Expanded(
                     child: ColorRoleSwatch(
                       label: 'Primary',
@@ -97,7 +98,7 @@ class ThemeTestScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Row(
-                children: [
+                children: <Widget>[
                   Expanded(
                     child: ColorRoleSwatch(
                       label: 'On Primary',
@@ -130,7 +131,7 @@ class ThemeTestScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Row(
-                children: [
+                children: <Widget>[
                   Expanded(
                     child: ColorRoleSwatch(
                       label: 'Primary Container',
@@ -163,7 +164,7 @@ class ThemeTestScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Row(
-                children: [
+                children: <Widget>[
                   Expanded(
                     child: ColorRoleSwatch(
                       label: 'On Primary Container',
@@ -198,19 +199,11 @@ class ThemeTestScreen extends ConsumerWidget {
               Text('Surface Roles', style: textTheme.titleLarge),
               const SizedBox(height: 12),
               Row(
-                children: [
+                children: <Widget>[
                   Expanded(
-                    child: ColorRoleSwatch(
-                      label: 'Surface Dim',
-                      color: colorScheme.surfaceDim,
-                    ),
+                    child: ColorRoleSwatch(label: 'Surface Dim', color: colorScheme.surfaceDim),
                   ),
-                  Expanded(
-                    child: ColorRoleSwatch(
-                      label: 'Surface',
-                      color: colorScheme.surface,
-                    ),
-                  ),
+                  Expanded(child: ColorRoleSwatch(label: 'Surface', color: colorScheme.surface)),
                   Expanded(
                     child: ColorRoleSwatch(
                       label: 'Surface Bright',
@@ -221,7 +214,7 @@ class ThemeTestScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Row(
-                children: [
+                children: <Widget>[
                   Expanded(
                     child: ColorRoleSwatch(
                       label: 'Surf. Container Lowest',
@@ -258,7 +251,7 @@ class ThemeTestScreen extends ConsumerWidget {
               Text('Other Roles', style: textTheme.titleLarge),
               const SizedBox(height: 12),
               Row(
-                children: [
+                children: <Widget>[
                   Expanded(
                     child: ColorRoleSwatch(
                       label: 'On Surface',
@@ -273,12 +266,7 @@ class ThemeTestScreen extends ConsumerWidget {
                       onColor: colorScheme.surfaceContainer,
                     ),
                   ),
-                  Expanded(
-                    child: ColorRoleSwatch(
-                      label: 'Outline',
-                      color: colorScheme.outline,
-                    ),
-                  ),
+                  Expanded(child: ColorRoleSwatch(label: 'Outline', color: colorScheme.outline)),
                   Expanded(
                     child: ColorRoleSwatch(
                       label: 'Outline Variant',
@@ -289,7 +277,7 @@ class ThemeTestScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Row(
-                children: [
+                children: <Widget>[
                   Expanded(
                     child: ColorRoleSwatch(
                       label: 'Inverse Surface',
@@ -312,28 +300,15 @@ class ThemeTestScreen extends ConsumerWidget {
                     ),
                   ),
                   Expanded(
-                    child: ColorRoleSwatch(
-                      label: 'Surface Tint',
-                      color: colorScheme.surfaceTint,
-                    ),
+                    child: ColorRoleSwatch(label: 'Surface Tint', color: colorScheme.surfaceTint),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               Row(
-                children: [
-                  Expanded(
-                    child: ColorRoleSwatch(
-                      label: 'Shadow',
-                      color: colorScheme.shadow,
-                    ),
-                  ),
-                  Expanded(
-                    child: ColorRoleSwatch(
-                      label: 'Scrim',
-                      color: colorScheme.scrim,
-                    ),
-                  ),
+                children: <Widget>[
+                  Expanded(child: ColorRoleSwatch(label: 'Shadow', color: colorScheme.shadow)),
+                  Expanded(child: ColorRoleSwatch(label: 'Scrim', color: colorScheme.scrim)),
                   const Spacer(flex: 2),
                 ],
               ),
@@ -350,23 +325,25 @@ class ThemeTestScreen extends ConsumerWidget {
 /// It shows the color, its label, and its hex code.
 /// It automatically calculates a contrasting text color if no 'onColor' is given.
 class ColorRoleSwatch extends StatelessWidget {
-  const ColorRoleSwatch({
-    super.key,
-    required this.label,
-    required this.color,
-    this.onColor,
-  });
+  /// Creates a new [ColorRoleSwatch].
+  const ColorRoleSwatch({super.key, required this.label, required this.color, this.onColor});
 
+  /// The label to display for this color role.
   final String label;
+
+  /// The color to display.
   final Color color;
+
+  /// The color to use for text on top of [color].
+  ///
+  /// If null, a contrasting color (black or white) will be calculated.
   final Color? onColor;
 
   @override
   Widget build(BuildContext context) {
     // Determine the best text color for readability
     final Color textColor =
-        onColor ??
-        (color.computeLuminance() > 0.5 ? Colors.black : Colors.white);
+        onColor ?? (color.computeLuminance() > 0.5 ? Colors.black : Colors.white);
 
     return SizedBox(
       height: 100,
@@ -377,7 +354,7 @@ class ColorRoleSwatch extends StatelessWidget {
           padding: const EdgeInsets.all(12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: <Widget>[
               Text(
                 label,
                 style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
@@ -385,10 +362,7 @@ class ColorRoleSwatch extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               const Spacer(),
-              Text(
-                toHex(color),
-                style: TextStyle(color: textColor, fontSize: 12),
-              ),
+              Text(toHex(color), style: TextStyle(color: textColor, fontSize: 12)),
             ],
           ),
         ),

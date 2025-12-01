@@ -4,9 +4,12 @@ import 'package:rally/l10n/generated/app_localizations.dart';
 import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/utils/locale_utils.dart';
 
+/// A playground screen for testing locale switching.
 class LocaleTestScreen extends ConsumerWidget {
+  /// The title of the screen.
   final String title;
 
+  /// Creates a new [LocaleTestScreen] with the given [title].
   const LocaleTestScreen({super.key, required this.title});
 
   @override
