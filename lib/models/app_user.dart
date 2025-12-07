@@ -58,6 +58,21 @@ class AppUser {
     );
   }
 
+  /// Factory constructor to create an empty [AppUser].
+  factory AppUser.fromEmpty() {
+    return const AppUser(
+      uid: '',
+      id: '',
+      email: '',
+      username: '',
+      firstName: '',
+      lastName: '',
+      avatarUrl: '',
+      isEmailVerified: false,
+      isOnboarding: true,
+    );
+  }
+
   /// Factory constructor to create an [AppUser] from backend profile response.
   ///
   /// [firebaseUid] is required as the backend doesn't return the Firebase UID.

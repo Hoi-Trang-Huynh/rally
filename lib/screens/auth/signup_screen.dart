@@ -1,12 +1,12 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rally/l10n/generated/app_localizations.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/screens/auth/login_screen.dart';
 import 'package:rally/screens/playground/auth_test.dart';
+import 'package:rally/utils/auth_helpers.dart';
+import 'package:rally/utils/ui_helpers.dart';
 import 'package:rally/utils/validators.dart';
 import 'package:rally/widgets/auth_google_button.dart';
 import 'package:rally/widgets/auth_header_row.dart';
@@ -14,6 +14,7 @@ import 'package:rally/widgets/auth_primary_button.dart';
 import 'package:rally/widgets/auth_text_field.dart';
 import 'package:rally/widgets/or_divider.dart';
 import 'package:rally/widgets/password_requirements.dart';
+import 'package:rally/widgets/profile_fields_form.dart';
 
 /// Signup steps enum for clarity.
 enum SignupStep {
@@ -53,7 +54,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // State
   SignupStep _currentStep = SignupStep.email;
@@ -94,7 +94,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     _confirmPasswordError = null;
   }
 
-  /// Placeholder: check if email exists.
+  /// TODO: check if email exists.
   Future<bool> _checkEmailExists(String email) async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
     return false;
@@ -229,7 +229,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         });
       }
     } catch (e) {
-      _showErrorSnackBar(e.toString());
+      showErrorSnackBar(context, e.toString());
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -240,15 +240,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     try {
       await ref.read(authRepositoryProvider).sendEmailVerification();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.signupEmailResent),
-            backgroundColor: Colors.green,
-          ),
-        );
+        showSuccessSnackBar(context, AppLocalizations.of(context)!.signupEmailResent);
       }
     } catch (e) {
-      _showErrorSnackBar(e.toString());
+      showErrorSnackBar(context, e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -278,43 +273,22 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           context,
         ).pushReplacement(MaterialPageRoute<void>(builder: (_) => const AuthTestScreen()));
       } else if (mounted) {
-        _showErrorSnackBar(AppLocalizations.of(context)!.signupEmailNotVerified);
+        showErrorSnackBar(context, AppLocalizations.of(context)!.signupEmailNotVerified);
       }
     } catch (e) {
-      _showErrorSnackBar(e.toString());
+      showErrorSnackBar(context, e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _signInWithGoogle() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await ref.read(authRepositoryProvider).signInWithCredential(credential);
-    } catch (e) {
-      _showErrorSnackBar(e.toString());
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  void _showErrorSnackBar(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Theme.of(context).colorScheme.error),
+    await handleGoogleSignInWithNavigation(
+      ref: ref,
+      context: context,
+      onLoadingChanged: (bool isLoading) {
+        if (mounted) setState(() => _isLoading = isLoading);
+      },
     );
   }
 
@@ -432,43 +406,20 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   List<Widget> _buildProfileStep(BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return <Widget>[
       _buildBackButton(_emailController.text, colorScheme),
       const SizedBox(height: 16),
-      AuthTextField(
-        controller: _usernameController,
-        labelText: l10n.signupUsername,
-        errorText: _usernameError,
-      ),
-      const SizedBox(height: 16),
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: AuthTextField(
-              controller: _firstNameController,
-              labelText: l10n.signupFirstName,
-              errorText: _firstNameError,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: AuthTextField(
-              controller: _lastNameController,
-              labelText: l10n.signupLastName,
-              errorText: _lastNameError,
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 24),
-      AuthPrimaryButton(
-        text: l10n.loginContinue,
-        onPressed: _onContinueStep2,
+      ProfileFieldsForm(
+        usernameController: _usernameController,
+        firstNameController: _firstNameController,
+        lastNameController: _lastNameController,
+        usernameError: _usernameError,
+        firstNameError: _firstNameError,
+        lastNameError: _lastNameError,
         isLoading: _isLoading,
+        onContinue: _onContinueStep2,
       ),
     ];
   }

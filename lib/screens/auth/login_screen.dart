@@ -1,10 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rally/l10n/generated/app_localizations.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/screens/auth/signup_screen.dart';
+import 'package:rally/utils/auth_helpers.dart';
 import 'package:rally/widgets/auth_google_button.dart';
 import 'package:rally/widgets/auth_header_row.dart';
 import 'package:rally/widgets/auth_primary_button.dart';
@@ -23,7 +22,6 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   String? _errorMessage;
   bool _isLoading = false;
@@ -56,30 +54,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _signInWithGoogle() async {
-    setState(() {
-      _errorMessage = null;
-      _isLoading = true;
-    });
-
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await ref.read(authRepositoryProvider).signInWithCredential(credential);
-    } catch (e) {
-      setState(() => _errorMessage = e.toString());
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
+    setState(() => _errorMessage = null);
+    await handleGoogleSignInWithNavigation(
+      ref: ref,
+      context: context,
+      onLoadingChanged: (bool isLoading) {
+        if (mounted) setState(() => _isLoading = isLoading);
+      },
+    );
   }
 
   void _navigateToSignup() {

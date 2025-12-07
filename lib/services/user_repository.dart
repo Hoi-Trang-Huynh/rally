@@ -71,23 +71,23 @@ class UserRepository {
     String? username,
     String? firstName,
     String? lastName,
-    String? bio,
-    String? location,
-    String? phone,
-    String? dateOfBirth,
+    String? bioText,
+    String? phoneNumber,
     String? avatarUrl,
+    bool? isActive,
     bool? isEmailVerified,
+    bool? isOnboarding,
   }) async {
     final Map<String, dynamic> body = <String, dynamic>{
       if (username != null) 'username': username,
       if (firstName != null) 'firstName': firstName,
       if (lastName != null) 'lastName': lastName,
-      if (bio != null) 'bio': bio,
-      if (location != null) 'location': location,
-      if (phone != null) 'phone': phone,
-      if (dateOfBirth != null) 'dateOfBirth': dateOfBirth,
+      if (bioText != null) 'bioText': bioText,
+      if (phoneNumber != null) 'phoneNumber': phoneNumber,
       if (avatarUrl != null) 'avatarUrl': avatarUrl,
+      if (isActive != null) 'isActive': isActive,
       if (isEmailVerified != null) 'isEmailVerified': isEmailVerified,
+      if (isOnboarding != null) 'isOnboarding': isOnboarding,
     };
 
     final dynamic response = await _apiClient.put('/api/v1/user/$userId/profile', body: body);
