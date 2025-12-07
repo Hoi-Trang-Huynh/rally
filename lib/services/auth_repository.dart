@@ -42,4 +42,19 @@ class AuthRepository {
   Future<UserCredential> signInWithCredential(AuthCredential credential) async {
     return await _firebaseAuth.signInWithCredential(credential);
   }
+
+  /// Sends email verification to the current user.
+  ///
+  /// The user must be signed in before calling this method.
+  Future<void> sendEmailVerification() async {
+    await _firebaseAuth.currentUser?.sendEmailVerification();
+  }
+
+  /// Reloads the current user and returns whether email is verified.
+  ///
+  /// This should be called after the user clicks the verification link.
+  Future<bool> isEmailVerified() async {
+    await _firebaseAuth.currentUser?.reload();
+    return _firebaseAuth.currentUser?.emailVerified ?? false;
+  }
 }

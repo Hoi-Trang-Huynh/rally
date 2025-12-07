@@ -17,8 +17,22 @@ class AppUser {
   /// The URL of the user's profile photo.
   final String? photoUrl;
 
+  /// Whether the user's email has been verified.
+  final bool emailVerified;
+
+  /// Whether the user has completed the onboarding flow.
+  /// This will be fetched from Firestore in the future.
+  final bool hasCompletedOnboarding;
+
   /// Creates a new [AppUser].
-  const AppUser({required this.uid, this.email, this.displayName, this.photoUrl});
+  const AppUser({
+    required this.uid,
+    this.email,
+    this.displayName,
+    this.photoUrl,
+    this.emailVerified = false,
+    this.hasCompletedOnboarding = false,
+  });
 
   /// Factory constructor to create an [AppUser] from a Firebase [User].
   factory AppUser.fromFirebaseUser(User user) {
@@ -27,6 +41,7 @@ class AppUser {
       email: user.email,
       displayName: user.displayName,
       photoUrl: user.photoURL,
+      emailVerified: user.emailVerified,
     );
   }
 
@@ -43,11 +58,18 @@ class AppUser {
         other.uid == uid &&
         other.email == email &&
         other.displayName == displayName &&
-        other.photoUrl == photoUrl;
+        other.photoUrl == photoUrl &&
+        other.emailVerified == emailVerified &&
+        other.hasCompletedOnboarding == hasCompletedOnboarding;
   }
 
   @override
   int get hashCode {
-    return uid.hashCode ^ email.hashCode ^ displayName.hashCode ^ photoUrl.hashCode;
+    return uid.hashCode ^
+        email.hashCode ^
+        displayName.hashCode ^
+        photoUrl.hashCode ^
+        emailVerified.hashCode ^
+        hasCompletedOnboarding.hashCode;
   }
 }

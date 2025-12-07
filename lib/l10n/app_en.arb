@@ -19,5 +19,172 @@
     "@languageKorean": {
         "description": "Language option for Korean",
         "type": "text"
+    },
+    "loginWelcomeBack": "Welcome Back\nwith Rally",
+    "@loginWelcomeBack": {
+        "description": "Welcome back message on login screen"
+    },
+    "loginCreateTripHeadline": "Create a trip you\nenjoy with us",
+    "@loginCreateTripHeadline": {
+        "description": "Headline for creating a trip on signup screen"
+    },
+    "loginEmailAddress": "Email Address",
+    "@loginEmailAddress": {
+        "description": "Label for email input"
+    },
+    "loginPassword": "Password",
+    "@loginPassword": {
+        "description": "Label for password input"
+    },
+    "loginContinue": "Continue",
+    "@loginContinue": {
+        "description": "Text for continue button"
+    },
+    "loginGoogle": "Google",
+    "@loginGoogle": {
+        "description": "Text for Google sign in button"
+    },
+    "loginNeedAccount": "Need an account? Create one",
+    "@loginNeedAccount": {
+        "description": "Link text to switch to signup"
+    },
+    "loginAlreadyHaveAccount": "Already have an account?",
+    "@loginAlreadyHaveAccount": {
+        "description": "Link text to switch to login"
+    },
+    "orDivider": "Or",
+    "@orDivider": {
+        "description": "Text for the divider between login methods"
+    },
+    "signupUsername": "Username",
+    "@signupUsername": {
+        "description": "Label for username input"
+    },
+    "signupFirstName": "First Name",
+    "@signupFirstName": {
+        "description": "Label for first name input"
+    },
+    "signupLastName": "Last Name",
+    "@signupLastName": {
+        "description": "Label for last name input"
+    },
+    "signupConfirmPassword": "Confirm Password",
+    "@signupConfirmPassword": {
+        "description": "Label for confirm password input"
+    },
+    "signupStepProfile": "Profile",
+    "@signupStepProfile": {
+        "description": "Label for the profile step breadcrumb"
+    },
+    "validationRequired": "This field is required",
+    "@validationRequired": {
+        "description": "Error message when a field is empty"
+    },
+    "validationEmailInvalid": "Please enter a valid email address",
+    "@validationEmailInvalid": {
+        "description": "Error message for invalid email format"
+    },
+    "validationUsernameTooShort": "Username must be at least {minLength} characters",
+    "@validationUsernameTooShort": {
+        "description": "Error message when username is too short",
+        "placeholders": {
+            "minLength": {
+                "type": "int"
+            }
+        }
+    },
+    "validationUsernameTooLong": "Username must be at most {maxLength} characters",
+    "@validationUsernameTooLong": {
+        "description": "Error message when username is too long",
+        "placeholders": {
+            "maxLength": {
+                "type": "int"
+            }
+        }
+    },
+    "validationNameTooShort": "Must be at least {minLength} characters",
+    "@validationNameTooShort": {
+        "description": "Error message when name is too short",
+        "placeholders": {
+            "minLength": {
+                "type": "int"
+            }
+        }
+    },
+    "validationNameTooLong": "Must be at most {maxLength} characters",
+    "@validationNameTooLong": {
+        "description": "Error message when name is too long",
+        "placeholders": {
+            "maxLength": {
+                "type": "int"
+            }
+        }
+    },
+    "validationPasswordTooShort": "Password must be at least {minLength} characters",
+    "@validationPasswordTooShort": {
+        "description": "Error message when password is too short",
+        "placeholders": {
+            "minLength": {
+                "type": "int"
+            }
+        }
+    },
+    "validationPasswordsDoNotMatch": "Passwords do not match",
+    "@validationPasswordsDoNotMatch": {
+        "description": "Error message when passwords don't match"
+    },
+    "passwordRuleMinLength": "At least {minLength} characters",
+    "@passwordRuleMinLength": {
+        "description": "Password rule: minimum length",
+        "placeholders": {
+            "minLength": {
+                "type": "int"
+            }
+        }
+    },
+    "passwordRuleUppercase": "At least one uppercase letter",
+    "@passwordRuleUppercase": {
+        "description": "Password rule: uppercase letter"
+    },
+    "passwordRuleLowercase": "At least one lowercase letter",
+    "@passwordRuleLowercase": {
+        "description": "Password rule: lowercase letter"
+    },
+    "passwordRuleNumber": "At least one number",
+    "@passwordRuleNumber": {
+        "description": "Password rule: digit/number"
+    },
+    "signupVerifyEmail": "Verify your email",
+    "@signupVerifyEmail": {
+        "description": "Title for email verification step"
+    },
+    "signupVerifyEmailSubtitle": "We sent a verification link to {email}. Click the link to verify your account.",
+    "@signupVerifyEmailSubtitle": {
+        "description": "Subtitle for email verification step",
+        "placeholders": {
+            "email": {
+                "type": "String"
+            }
+        }
+    },
+    "signupResendEmail": "Resend email",
+    "@signupResendEmail": {
+        "description": "Button text to resend verification email"
+    },
+    "signupEmailResent": "Verification email resent",
+    "@signupEmailResent": {
+        "description": "Snackbar message when email is resent"
+    },
+    "signupCheckVerification": "I've verified my email",
+    "@signupCheckVerification": {
+        "description": "Button text to check verification status"
+    },
+    "signupEmailNotVerified": "Email not verified yet. Please check your inbox.",
+    "@signupEmailNotVerified": {
+        "description": "Error message when email is not yet verified"
+    },
+    "signupStepPassword": "Password",
+    "@signupStepPassword": {
+        "description": "Label for the password step breadcrumb"
     }
 }

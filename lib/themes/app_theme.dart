@@ -1,8 +1,8 @@
 // themes/app_theme.dart
 import 'package:flutter/material.dart';
+
 import 'app_colors.dart';
 import 'app_theme_extension.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// AppTheme provides the Rally app's theme configuration using Material 3.
 ///
@@ -65,15 +65,12 @@ abstract class AppTheme {
         surfaceContainerHigh: const Color(0xfff6e4e3),
         surfaceContainerHighest: const Color(0xfff0dedd),
       ),
-      textTheme: GoogleFonts.getTextTheme('Inclusive Sans', base.textTheme),
+      textTheme: base.textTheme.apply(fontFamily: 'Inclusive Sans'),
       extensions: <ThemeExtension<dynamic>>[
         const AppThemeExtension(
           successColor: AppColors.success500,
           warningColor: AppColors.warning500,
-          specialTextStyle: TextStyle(
-            fontStyle: FontStyle.italic,
-            fontWeight: FontWeight.bold,
-          ),
+          specialTextStyle: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -135,15 +132,12 @@ abstract class AppTheme {
         surfaceContainerHigh: const Color(0xff322827),
         surfaceContainerHighest: const Color(0xff3d3231),
       ),
-      textTheme: GoogleFonts.getTextTheme('Inclusive Sans', base.textTheme),
+      textTheme: base.textTheme.apply(fontFamily: 'Inclusive Sans'),
       extensions: <ThemeExtension<dynamic>>[
         const AppThemeExtension(
           successColor: AppColors.success500,
           warningColor: AppColors.warning500,
-          specialTextStyle: TextStyle(
-            fontStyle: FontStyle.italic,
-            fontWeight: FontWeight.bold,
-          ),
+          specialTextStyle: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold),
         ),
       ],
     );

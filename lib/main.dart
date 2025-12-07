@@ -47,8 +47,7 @@ Future<void> main() async {
 /// Handles theme and locale state, shows a loading screen while providers initialize,
 /// and sets up the main MaterialApp with theming and localization.
 class RallyApp extends ConsumerWidget {
-  /// Creates a new instance of the RallyApp widget.
-  ///
+  /// Creates a new instance of the RallyApp widget.ub1txeasdsiuytrewq  gfgfdsaBVVFGFC VVDVV   ///
   /// The [key] parameter is used to control how one widget replaces another widget in the tree.
   const RallyApp({super.key});
 
@@ -73,9 +72,18 @@ class RallyApp extends ConsumerWidget {
       locale: localeNotifier.currentLocale,
       supportedLocales: AppLocalizations.supportedLocales,
       home: authState.when(
-        data:
-            (AppUser? user) =>
-                user != null ? const ThemeTestScreen(title: 'Rally Home') : const LoginScreen(),
+        data: (AppUser? user) {
+          // Not logged in - show login screen
+          if (user == null) {
+            return const LoginScreen();
+          }
+          // Logged in but email not verified - show login screen
+          if (!user.emailVerified) {
+            return const LoginScreen();
+          }
+          // Fully authenticated - show home
+          return const ThemeTestScreen(title: 'Rally Home');
+        },
         loading: () => const AppLoadingScreen(),
         error:
             (Object error, StackTrace stack) =>
