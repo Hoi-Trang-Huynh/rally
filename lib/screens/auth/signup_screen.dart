@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/screens/auth/login_screen.dart';
+import 'package:rally/screens/playground/auth_test.dart';
 import 'package:rally/utils/validators.dart';
 import 'package:rally/widgets/auth_google_button.dart';
 import 'package:rally/widgets/auth_header_row.dart';
@@ -70,6 +72,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   String? _savedUsername;
   String? _savedFirstName;
   String? _savedLastName;
+  String? _savedUserId;
 
   @override
   void dispose() {
@@ -177,6 +180,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // Step 1: Create Firebase user
       await ref
           .read(authRepositoryProvider)
           .createUserWithEmailAndPassword(
@@ -184,12 +188,39 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             _passwordController.text.trim(),
           );
 
-      await ref.read(authRepositoryProvider).sendEmailVerification();
+      // Step 2: Get Firebase ID token
+      final String? idToken = await ref.read(authRepositoryProvider).getIdToken();
+      if (idToken == null) {
+        throw Exception('Failed to get Firebase ID token');
+      }
 
-      // ignore: avoid_print
-      print(
-        'Saved: username=$_savedUsername, firstName=$_savedFirstName, lastName=$_savedLastName',
-      );
+      // Step 3: Register user in backend with Firebase ID token
+      final Map<String, dynamic> registerResponse = await ref
+          .read(userRepositoryProvider)
+          .register(idToken: idToken);
+
+      // Step 4: Extract user ID from register response
+      final Map<String, dynamic>? user = registerResponse['user'] as Map<String, dynamic>?;
+      final String? userId = user?['id'] as String?;
+      _savedUserId = userId;
+
+      if (userId != null) {
+        // Step 5: Force refresh the token to ensure it's valid for the next request
+        await ref.read(authRepositoryProvider).getIdToken(forceRefresh: true);
+
+        // Step 6: Update user profile with provided information
+        await ref
+            .read(userRepositoryProvider)
+            .updateUserProfile(
+              userId: userId,
+              username: _savedUsername,
+              firstName: _savedFirstName,
+              lastName: _savedLastName,
+            );
+      }
+
+      // Step 6: Send email verification
+      await ref.read(authRepositoryProvider).sendEmailVerification();
 
       if (mounted) {
         setState(() {
@@ -228,8 +259,24 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     try {
       final bool isVerified = await ref.read(authRepositoryProvider).isEmailVerified();
+
       if (isVerified && mounted) {
-        Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
+        // Update email verification status in backend
+        if (_savedUserId != null) {
+          await ref
+              .read(userRepositoryProvider)
+              .updateUserProfile(userId: _savedUserId!, isEmailVerified: true);
+        }
+
+        if (!mounted) return;
+
+        // Invalidate the auth provider to refresh the user state
+        // This ensures main.dart sees the updated emailVerified status
+        ref.invalidate(appUserProvider);
+
+        Navigator.of(
+          context,
+        ).pushReplacement(MaterialPageRoute<void>(builder: (_) => const AuthTestScreen()));
       } else if (mounted) {
         _showErrorSnackBar(AppLocalizations.of(context)!.signupEmailNotVerified);
       }

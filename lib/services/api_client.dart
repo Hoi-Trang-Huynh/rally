@@ -40,7 +40,7 @@ class ApiClient {
 
   /// Gets the authorization headers with Firebase ID token.
   Future<Map<String, String>> _getHeaders() async {
-    final String? token = await _authRepository.getIdToken();
+    final String? token = await _authRepository.getIdToken(forceRefresh: true);
     return <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',

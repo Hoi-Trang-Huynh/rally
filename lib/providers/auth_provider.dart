@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/models/app_user.dart';
+import 'package:rally/providers/api_provider.dart';
 import 'package:rally/services/auth_repository.dart';
 
 /// Provider for the [AuthRepository].
@@ -15,19 +16,26 @@ final StreamProvider<User?> authStateChangesProvider = StreamProvider<User?>((Re
 
 /// Provider for the current [AppUser].
 ///
-/// This provider transforms the Firebase [User] into an [AppUser].
-/// It returns null if the user is not signed in.
+/// This provider fetches user profile data from the backend API when
+/// Firebase auth state changes. Falls back to Firebase user data if
+/// backend fetch fails.
 final StreamProvider<AppUser?> appUserProvider = StreamProvider<AppUser?>((Ref ref) {
-  final AsyncValue<User?> authState = ref.watch(authStateChangesProvider);
+  final AuthRepository authRepository = ref.watch(authRepositoryProvider);
 
-  return authState.when(
-    data: (User? user) {
-      if (user == null) {
-        return Stream<AppUser?>.value(null);
-      }
-      return Stream<AppUser?>.value(AppUser.fromFirebaseUser(user));
-    },
-    loading: () => const Stream<AppUser?>.empty(),
-    error: (_, __) => const Stream<AppUser?>.empty(),
-  );
+  return authRepository.authStateChanges.asyncMap((User? firebaseUser) async {
+    if (firebaseUser == null) {
+      return null;
+    }
+
+    try {
+      // Fetch profile from backend
+      final Map<String, dynamic> profileData =
+          await ref.read(userRepositoryProvider).getMyProfile();
+      return AppUser.fromBackendProfile(firebaseUid: firebaseUser.uid, profileData: profileData);
+    } catch (e) {
+      // Fallback to Firebase user if backend fetch fails
+      // This can happen if user just registered and profile isn't synced yet
+      return AppUser.fromFirebaseUser(firebaseUser);
+    }
+  });
 });

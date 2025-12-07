@@ -2,52 +2,86 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 /// Represents a user in the application.
 ///
-/// This class wraps the Firebase [User] and provides a consistent interface
-/// for user data throughout the app.
+/// This class wraps user data from both Firebase and the backend API,
+/// providing a consistent interface for user data throughout the app.
 class AppUser {
-  /// The unique identifier for the user.
+  /// The Firebase UID (used for authentication).
   final String uid;
+
+  /// The MongoDB document ID.
+  final String? id;
 
   /// The user's email address.
   final String? email;
 
-  /// The user's display name.
-  final String? displayName;
+  /// The user's username.
+  final String? username;
 
-  /// The URL of the user's profile photo.
-  final String? photoUrl;
+  /// The user's first name.
+  final String? firstName;
+
+  /// The user's last name.
+  final String? lastName;
+
+  /// The URL of the user's avatar.
+  final String? avatarUrl;
 
   /// Whether the user's email has been verified.
-  final bool emailVerified;
+  final bool isEmailVerified;
 
-  /// Whether the user has completed the onboarding flow.
-  /// This will be fetched from Firestore in the future.
-  final bool hasCompletedOnboarding;
+  /// Whether the user is still in the onboarding flow.
+  final bool isOnboarding;
 
   /// Creates a new [AppUser].
   const AppUser({
     required this.uid,
+    this.id,
     this.email,
-    this.displayName,
-    this.photoUrl,
-    this.emailVerified = false,
-    this.hasCompletedOnboarding = false,
+    this.username,
+    this.firstName,
+    this.lastName,
+    this.avatarUrl,
+    this.isEmailVerified = false,
+    this.isOnboarding = true,
   });
 
   /// Factory constructor to create an [AppUser] from a Firebase [User].
+  ///
+  /// This is used as a fallback when backend profile is not available.
   factory AppUser.fromFirebaseUser(User user) {
     return AppUser(
       uid: user.uid,
       email: user.email,
-      displayName: user.displayName,
-      photoUrl: user.photoURL,
-      emailVerified: user.emailVerified,
+      username: user.displayName,
+      avatarUrl: user.photoURL,
+      isEmailVerified: user.emailVerified,
+    );
+  }
+
+  /// Factory constructor to create an [AppUser] from backend profile response.
+  ///
+  /// [firebaseUid] is required as the backend doesn't return the Firebase UID.
+  /// [profileData] is the response from `/api/v1/users/me/profile`.
+  factory AppUser.fromBackendProfile({
+    required String firebaseUid,
+    required Map<String, dynamic> profileData,
+  }) {
+    return AppUser(
+      uid: firebaseUid,
+      id: profileData['id'] as String?,
+      email: profileData['email'] as String?,
+      username: profileData['username'] as String?,
+      firstName: profileData['firstName'] as String?,
+      lastName: profileData['lastName'] as String?,
+      avatarUrl: profileData['avatarUrl'] as String?,
+      isEmailVerified: profileData['isEmailVerified'] as bool? ?? false,
+      isOnboarding: profileData['isOnboarding'] as bool? ?? true,
     );
   }
 
   @override
   String toString() {
-    return 'AppUser(uid: $uid, email: $email, displayName: $displayName)';
+    return 'AppUser(uid: $uid, id: $id, email: $email, username: $username)';
   }
 
   @override
@@ -56,20 +90,26 @@ class AppUser {
 
     return other is AppUser &&
         other.uid == uid &&
+        other.id == id &&
         other.email == email &&
-        other.displayName == displayName &&
-        other.photoUrl == photoUrl &&
-        other.emailVerified == emailVerified &&
-        other.hasCompletedOnboarding == hasCompletedOnboarding;
+        other.username == username &&
+        other.firstName == firstName &&
+        other.lastName == lastName &&
+        other.avatarUrl == avatarUrl &&
+        other.isEmailVerified == isEmailVerified &&
+        other.isOnboarding == isOnboarding;
   }
 
   @override
   int get hashCode {
     return uid.hashCode ^
+        id.hashCode ^
         email.hashCode ^
-        displayName.hashCode ^
-        photoUrl.hashCode ^
-        emailVerified.hashCode ^
-        hasCompletedOnboarding.hashCode;
+        username.hashCode ^
+        firstName.hashCode ^
+        lastName.hashCode ^
+        avatarUrl.hashCode ^
+        isEmailVerified.hashCode ^
+        isOnboarding.hashCode;
   }
 }
