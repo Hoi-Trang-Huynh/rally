@@ -188,6 +188,125 @@ workflows:
           FILE_WEBURL=$(jq -r '.webUrl' upload_result_ios.json)
           echo "✅ Uploaded: $FILE_WEBURL"
           echo "⏱ Duration: ${DURATION}s"
+          
+          # Mark success for notification
+          echo "BUILD_SUCCESS=true" >> $CM_ENV
+      
+      - name: Send Teams Notification
+        script: |
+          #!/bin/bash
+          # This script MUST run even if previous steps failed
+          # Using a subshell with error handling
+          (
+            VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr -d '\r' 2>/dev/null || echo "Unknown")
+            VERSION_BUILD="${VERSION}+${BUILD_NUMBER}"
+            
+            # Check if build was successful (BUILD_SUCCESS was set)
+            if [ "$BUILD_SUCCESS" = "true" ]; then
+              # Success notification
+              PAYLOAD=$(cat <<'EOF'
+          {
+            "@type": "MessageCard",
+            "@context": "https://schema.org/extensions",
+            "summary": "Build Successful",
+            "themeColor": "28a745",
+            "title": "✅ Build Successful - Rally FE",
+            "sections": [
+              {
+                "activityTitle": "Build #BUILD_NUM completed successfully",
+                "facts": [
+                  {
+                    "name": "Version:",
+                    "value": "VERSION_VAL"
+                  },
+                  {
+                    "name": "Branch:",
+                    "value": "BRANCH_VAL"
+                  },
+                  {
+                    "name": "Commit:",
+                    "value": "COMMIT_VAL"
+                  },
+                  {
+                    "name": "Platforms:",
+                    "value": "Android APK, AAB, iOS"
+                  }
+                ]
+              }
+            ],
+            "potentialAction": [
+              {
+                "@type": "OpenUri",
+                "name": "View Build",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "BUILD_URL_VAL"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+              )
+              PAYLOAD=$(echo "$PAYLOAD" | sed "s|BUILD_NUM|${BUILD_NUMBER}|g" | sed "s|VERSION_VAL|${VERSION_BUILD}|g" | sed "s|BRANCH_VAL|${CM_BRANCH}|g" | sed "s|COMMIT_VAL|${CM_COMMIT}|g" | sed "s|BUILD_URL_VAL|${CM_BUILD_URL}|g")
+            else
+              # Failure notification
+              PAYLOAD=$(cat <<'EOF'
+          {
+            "@type": "MessageCard",
+            "@context": "https://schema.org/extensions",
+            "summary": "Build Failed",
+            "themeColor": "dc3545",
+            "title": "❌ Build Failed - Rally FE",
+            "sections": [
+              {
+                "activityTitle": "Build #BUILD_NUM failed",
+                "facts": [
+                  {
+                    "name": "Version:",
+                    "value": "VERSION_VAL"
+                  },
+                  {
+                    "name": "Branch:",
+                    "value": "BRANCH_VAL"
+                  },
+                  {
+                    "name": "Commit:",
+                    "value": "COMMIT_VAL"
+                  }
+                ],
+                "text": "Check build logs for error details"
+              }
+            ],
+            "potentialAction": [
+              {
+                "@type": "OpenUri",
+                "name": "View Build Logs",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "BUILD_URL_VAL"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+              )
+              PAYLOAD=$(echo "$PAYLOAD" | sed "s|BUILD_NUM|${BUILD_NUMBER}|g" | sed "s|VERSION_VAL|${VERSION_BUILD}|g" | sed "s|BRANCH_VAL|${CM_BRANCH}|g" | sed "s|COMMIT_VAL|${CM_COMMIT}|g" | sed "s|BUILD_URL_VAL|${CM_BUILD_URL}|g")
+            fi
+            
+            # Send to Teams
+            curl -H "Content-Type: application/json" \
+              -d "$PAYLOAD" \
+              "$TEAMS_WEBHOOK_URL"
+            
+            echo "Teams notification sent"
+          ) || echo "Warning: Teams notification failed but continuing..."
+          
+          # Always exit successfully so this doesn't fail the build
+          exit 0
 
     artifacts:
       - build/app/outputs/flutter-apk/*.apk
@@ -197,3 +316,6 @@ workflows:
       email:
         recipients:
           - khang.nguyen@rally-go.com
+        notify:
+          success: true
+          failure: true
