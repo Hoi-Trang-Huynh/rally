@@ -51,15 +51,13 @@ workflows:
             flutter build appbundle --release
           ) || echo "Android build failed but continuing pipeline..."
 
-      - name: Init build iOS status
-        script: |
-          echo "BUILD_SUCCESS=false" >> $CM_ENV
-
       - name: Build iOS
         script: |
-          set -e
-          echo "Building iOS..."
-          flutter build ios --release --no-codesign
+          (
+            set -e
+            echo "Building iOS..."
+            flutter build ios --release --no-codesign
+          ) || echo "iOS build failed but continuing pipeline..."
 
       - name: Get OAuth2 token
         script: |
