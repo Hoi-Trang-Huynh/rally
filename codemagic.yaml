@@ -40,31 +40,16 @@ workflows:
 
       - name: Build Android
         script: |
-          echo "Running Android build..."
-          set +e
-          flutter build appbundle --release
-          BUILD_ANDROID_EXIT_CODE=$?
-          echo "BUILD_ANDROID_EXIT_CODE=$BUILD_ANDROID_EXIT_CODE" >> $CM_ENV
           set -e
-
+          echo "Building Android APK and AppBundle..."
+          flutter build apk --release
+          flutter build appbundle --release
 
       - name: Build iOS
         script: |
-          echo "Running iOS build..."
-          set +e
-          flutter build ios --release --no-codesign
-          BUILD_IOS_EXIT_CODE=$?
-          echo "BUILD_IOS_EXIT_CODE=$BUILD_IOS_EXIT_CODE" >> $CM_ENV
           set -e
-
-      - name: Init build status
-        script: |
-          source $CM_ENV
-          if [ "$BUILD_ANDROID_EXIT_CODE" = "0" ] && [ "$BUILD_IOS_EXIT_CODE" = "0" ]; then
-            echo "BUILD_SUCCESS=true" >> $CM_ENV
-          else
-            echo "BUILD_SUCCESS=false" >> $CM_ENV
-          fi
+          echo "Building iOS..."
+          flutter build ios --release --no-codesign
 
       - name: Get OAuth2 token
         script: |
@@ -149,12 +134,6 @@ workflows:
 
       - name: Upload iOS build to SharePoint
         script: |
-          source $CM_ENV
-          if [ "$BUILD_IOS_EXIT_CODE" != "0" ]; then
-            echo "iOS build failed - skipping upload"
-            exit 0
-          fi
-
           set -e
           BASE_FOLDER="Frontend/Builds"
 
@@ -209,132 +188,9 @@ workflows:
           FILE_WEBURL=$(jq -r '.webUrl' upload_result_ios.json)
           echo "✅ Uploaded: $FILE_WEBURL"
           echo "⏱ Duration: ${DURATION}s"
-      
-      - name: Send Teams Notification
-        script: |          
-          #!/bin/bash
-          source $CM_ENV
-
-          # This script MUST run even if previous steps failed
-          # Using a subshell with error handling
-          (
-            VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr -d '\r' 2>/dev/null || echo "Unknown")
-            VERSION_BUILD="${VERSION}+${BUILD_NUMBER}"
-            
-            # Check if build was successful (BUILD_SUCCESS was set)
-            if [ "$BUILD_SUCCESS" = "true" ]; then
-              # Success notification
-              PAYLOAD=$(cat <<'EOF'
-          {
-            "@type": "MessageCard",
-            "@context": "https://schema.org/extensions",
-            "summary": "Build Successful",
-            "themeColor": "28a745",
-            "title": "✅ Build Successful - Rally FE",
-            "sections": [
-              {
-                "activityTitle": "Build #BUILD_NUM completed successfully",
-                "facts": [
-                  {
-                    "name": "Version:",
-                    "value": "VERSION_VAL"
-                  },
-                  {
-                    "name": "Branch:",
-                    "value": "BRANCH_VAL"
-                  },
-                  {
-                    "name": "Commit:",
-                    "value": "COMMIT_VAL"
-                  },
-                  {
-                    "name": "Platforms:",
-                    "value": "Android APK, AAB, iOS"
-                  }
-                ]
-              }
-            ],
-            "potentialAction": [
-              {
-                "@type": "OpenUri",
-                "name": "View Build",
-                "targets": [
-                  {
-                    "os": "default",
-                    "uri": "BUILD_URL_VAL"
-                  }
-                ]
-              }
-            ]
-          }
-          EOF
-              )
-              PAYLOAD=$(echo "$PAYLOAD" | sed "s|BUILD_NUM|${BUILD_NUMBER}|g" | sed "s|VERSION_VAL|${VERSION_BUILD}|g" | sed "s|BRANCH_VAL|${CM_BRANCH}|g" | sed "s|COMMIT_VAL|${CM_COMMIT}|g" | sed "s|BUILD_URL_VAL|${CM_BUILD_URL}|g")
-            else
-              # Failure notification
-              PAYLOAD=$(cat <<'EOF'
-          {
-            "@type": "MessageCard",
-            "@context": "https://schema.org/extensions",
-            "summary": "Build Failed",
-            "themeColor": "dc3545",
-            "title": "❌ Build Failed - Rally FE",
-            "sections": [
-              {
-                "activityTitle": "Build #BUILD_NUM failed",
-                "facts": [
-                  {
-                    "name": "Version:",
-                    "value": "VERSION_VAL"
-                  },
-                  {
-                    "name": "Branch:",
-                    "value": "BRANCH_VAL"
-                  },
-                  {
-                    "name": "Commit:",
-                    "value": "COMMIT_VAL"
-                  }
-                ],
-                "text": "Check build logs for error details"
-              }
-            ],
-            "potentialAction": [
-              {
-                "@type": "OpenUri",
-                "name": "View Build Logs",
-                "targets": [
-                  {
-                    "os": "default",
-                    "uri": "BUILD_URL_VAL"
-                  }
-                ]
-              }
-            ]
-          }
-          EOF
-              )
-              PAYLOAD=$(echo "$PAYLOAD" | sed "s|BUILD_NUM|${BUILD_NUMBER}|g" | sed "s|VERSION_VAL|${VERSION_BUILD}|g" | sed "s|BRANCH_VAL|${CM_BRANCH}|g" | sed "s|COMMIT_VAL|${CM_COMMIT}|g" | sed "s|BUILD_URL_VAL|${CM_BUILD_URL}|g")
-            fi
-            
-            # Send to Teams
-            curl -H "Content-Type: application/json" \
-              -d "$PAYLOAD" \
-              "$TEAMS_WEBHOOK_URL"
-            
-            echo "Teams notification sent"
-          ) || echo "Warning: Teams notification failed but continuing..."
           
-          # Always exit successfully so this doesn't fail the build
-          echo "Teams notification sent"
-
-      - name: Fail pipeline if needed
-        script: |
-          source $CM_ENV
-          if [ "$BUILD_ANDROID_EXIT_CODE" != "0" ] || [ "$BUILD_IOS_EXIT_CODE" != "0" ]; then
-            echo "Build failed – throwing error so Codemagic marks pipeline as FAILED."
-            exit 1
-          fi
+          # Mark success for notification
+          echo "BUILD_SUCCESS=true" >> $CM_ENV
     artifacts:
       - build/app/outputs/flutter-apk/*.apk
       - build/app/outputs/bundle/release/*.aab
@@ -346,3 +202,49 @@ workflows:
         notify:
           success: true
           failure: true
+      scripts:
+        - name: Send Teams Workflow Notification
+          script: |
+            #!/bin/bash
+            source $CM_ENV
+            
+            # This script MUST run even if previous steps failed
+            (
+              VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr -d '\r' 2>/dev/null || echo "Unknown")
+              VERSION_BUILD="${VERSION}+${BUILD_NUMBER}"
+
+              if [ "$BUILD_SUCCESS" = "true" ]; then
+                # SUCCESS payload for Teams Workflow
+                PAYLOAD=$(cat <<EOF
+            {
+              "status": "success",
+              "build_number": "${BUILD_NUMBER}",
+              "version": "${VERSION_BUILD}",
+              "branch": "${CM_BRANCH}",
+              "commit": "${CM_COMMIT}",
+              "url": "${CM_BUILD_URL}"
+            }
+            EOF
+            )
+              else
+                # FAILURE payload for Teams Workflow
+                PAYLOAD=$(cat <<EOF
+            {
+              "status": "failed",
+              "build_number": "${BUILD_NUMBER}",
+              "version": "${VERSION_BUILD}",
+              "branch": "${CM_BRANCH}",
+              "commit": "${CM_COMMIT}",
+              "url": "${CM_BUILD_URL}"
+            }
+            EOF
+            )
+              fi
+
+              # Send to Teams Workflow
+              curl -X POST -H "Content-Type: application/json" \
+                -d "$PAYLOAD" \
+                "$TEAMS_WORKFLOW_URL"
+
+              echo "Teams workflow notification sent"
+            ) || echo "Warning: Teams notification failed but continuing..."
