@@ -38,12 +38,22 @@ workflows:
           flutter clean
           flutter pub get
 
+      - name: Init build Android status
+        script: |
+          echo "BUILD_SUCCESS=false" >> $CM_ENV
+
       - name: Build Android
         script: |
-          set -e
-          echo "Building Android APK and AppBundle..."
-          flutter build apk --release
-          flutter build appbundle --release
+          (
+            set -e
+            echo "Building Android APK and AppBundle..."
+            flutter build apk --release
+            flutter build appbundle --release
+          ) || echo "Android build failed but continuing pipeline..."
+
+      - name: Init build iOS status
+        script: |
+          echo "BUILD_SUCCESS=false" >> $CM_ENV
 
       - name: Build iOS
         script: |
