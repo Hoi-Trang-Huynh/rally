@@ -1,31 +1,32 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rally/constants/shared_pref_keys.dart';
 import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/services/shared_prefs_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+/// State class for the [LocaleNotifier].
 class LocaleState {
+  /// The current locale.
   final Locale locale;
-  final bool isLoading;
 
-  LocaleState({required this.locale, required this.isLoading});
+  /// Creates a new [LocaleState].
+  const LocaleState({required this.locale});
 }
 
-final StateNotifierProvider<LocaleNotifier, LocaleState> localeProvider =
-    StateNotifierProvider<LocaleNotifier, LocaleState>((Ref ref) {
-      return LocaleNotifier(ref);
-    });
+/// Provider for the [LocaleNotifier].
+final NotifierProvider<LocaleNotifier, LocaleState> localeProvider =
+    NotifierProvider<LocaleNotifier, LocaleState>(LocaleNotifier.new);
 
-class LocaleNotifier extends StateNotifier<LocaleState> {
-  final Ref ref;
-
-  LocaleNotifier(this.ref)
-    : super(LocaleState(locale: const Locale('en'), isLoading: true)) {
-    _loadLocale();
+/// Notifier for managing the app's locale.
+class LocaleNotifier extends Notifier<LocaleState> {
+  @override
+  LocaleState build() {
+    return _loadLocale();
   }
 
-  Future<void> _loadLocale() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+  LocaleState _loadLocale() {
+    final SharedPreferences prefs = ref.watch(sharedPrefsServiceProvider);
     final String? code = prefs.getString(SharedPrefKeys.languageCode);
 
     // Fallback to first supported locale if invalid
@@ -34,14 +35,16 @@ class LocaleNotifier extends StateNotifier<LocaleState> {
       orElse: () => const Locale('en'),
     );
 
-    state = LocaleState(locale: matched, isLoading: false);
+    return LocaleState(locale: matched);
   }
 
+  /// Sets the app's locale to [localeCode].
   Future<void> setLocale(Locale localeCode) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = ref.read(sharedPrefsServiceProvider);
     await prefs.setString(SharedPrefKeys.languageCode, localeCode.languageCode);
-    state = LocaleState(locale: localeCode, isLoading: false);
+    state = LocaleState(locale: localeCode);
   }
 
+  /// Returns the current locale.
   Locale get currentLocale => state.locale;
 }

@@ -51,7 +51,7 @@ linter:
     require_trailing_commas: true
     unnecessary_this: true
     use_key_in_widget_constructors: true
-    avoid_redundant_argument_values: true
+    avoid_redundant_argument_values: false
     prefer_single_quotes: true
     camel_case_types: true
     constant_identifier_names: true
