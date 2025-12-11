@@ -38,26 +38,33 @@ workflows:
           flutter clean
           flutter pub get
 
-      - name: Init build Android status
-        script: |
-          echo "BUILD_SUCCESS=false" >> $CM_ENV
-
       - name: Build Android
         script: |
-          (
-            set -e
-            echo "Building Android APK and AppBundle..."
-            flutter build apk --release
-            flutter build appbundle --release
-          ) || echo "Android build failed but continuing pipeline..."
+          echo "Running Android build..."
+          set +e
+          flutter build appbundle --release
+          BUILD_ANDROID_EXIT_CODE=$?
+          echo "BUILD_ANDROID_EXIT_CODE=$BUILD_ANDROID_EXIT_CODE" >> $CM_ENV
+          set -e
+
 
       - name: Build iOS
         script: |
-          (
-            set -e
-            echo "Building iOS..."
-            flutter build ios --release --no-codesign
-          ) || echo "iOS build failed but continuing pipeline..."
+          echo "Running iOS build..."
+          set +e
+          flutter build ios --release --no-codesign
+          BUILD_IOS_EXIT_CODE=$?
+          echo "BUILD_IOS_EXIT_CODE=$BUILD_IOS_EXIT_CODE" >> $CM_ENV
+          set -e
+
+      - name: Init build status
+        script: |
+          source $CM_ENV
+          if [ "$BUILD_ANDROID_EXIT_CODE" = "0" ] && [ "$BUILD_IOS_EXIT_CODE" = "0" ]; then
+            echo "BUILD_SUCCESS=true" >> $CM_ENV
+          else
+            echo "BUILD_SUCCESS=false" >> $CM_ENV
+          fi
 
       - name: Get OAuth2 token
         script: |
@@ -142,6 +149,12 @@ workflows:
 
       - name: Upload iOS build to SharePoint
         script: |
+          source $CM_ENV
+          if [ "$BUILD_IOS_EXIT_CODE" != "0" ]; then
+            echo "iOS build failed - skipping upload"
+            exit 0
+          fi
+
           set -e
           BASE_FOLDER="Frontend/Builds"
 
@@ -196,13 +209,12 @@ workflows:
           FILE_WEBURL=$(jq -r '.webUrl' upload_result_ios.json)
           echo "✅ Uploaded: $FILE_WEBURL"
           echo "⏱ Duration: ${DURATION}s"
-          
-          # Mark success for notification
-          echo "BUILD_SUCCESS=true" >> $CM_ENV
       
       - name: Send Teams Notification
-        script: |
+        script: |          
           #!/bin/bash
+          source $CM_ENV
+
           # This script MUST run even if previous steps failed
           # Using a subshell with error handling
           (
@@ -314,8 +326,15 @@ workflows:
           ) || echo "Warning: Teams notification failed but continuing..."
           
           # Always exit successfully so this doesn't fail the build
-          exit 0
+          echo "Teams notification sent"
 
+      - name: Fail pipeline if needed
+        script: |
+          source $CM_ENV
+          if [ "$BUILD_ANDROID_EXIT_CODE" != "0" ] || [ "$BUILD_IOS_EXIT_CODE" != "0" ]; then
+            echo "Build failed – throwing error so Codemagic marks pipeline as FAILED."
+            exit 1
+          fi
     artifacts:
       - build/app/outputs/flutter-apk/*.apk
       - build/app/outputs/bundle/release/*.aab
