@@ -6,14 +6,10 @@ workflows:
     environment:
       groups:
         - keystore_credentials
-        - app_store_credentials
-        - manual_cert_credentials
         - firebase_credentials
         - azure_credentials
         - other
       flutter: stable
-      xcode: latest
-      cocoapods: default
     triggering:
       events:
         - push
@@ -27,7 +23,6 @@ workflows:
         - $FLUTTER_ROOT/.pub-cache
         - $HOME/.gradle/caches
         - $HOME/.gradle/wrapper
-        - $HOME/Library/Caches/CocoaPods
         - $CM_BUILD_DIR/node_modules
     scripts:
       - name: Installing Dependencies
@@ -38,6 +33,32 @@ workflows:
           flutter clean
           flutter pub get
 
+      - name: Generate l10n files
+        script: |
+          set -e
+          echo "Generating localization files..."
+          flutter gen-l10n
+
+      - name: Setup Firebase
+        script: |
+          set -e
+          echo "Installing Firebase CLI..."
+          curl -sL https://firebase.tools | bash
+          
+          echo "Activating FlutterFire CLI..."
+          dart pub global activate flutterfire_cli
+          export PATH="$PATH:$HOME/.pub-cache/bin"
+          
+          echo "Logging into Firebase..."
+          firebase login --token "$FIREBASE_TOKEN"
+          
+          echo "Configuring Firebase..."
+          flutterfire configure \
+            --project=$FIREBASE_PROJECT_ID \
+            --platforms=android \
+            --android-package-name=$ANDROID_PACKAGE_NAME \
+            --yes
+
       - name: Build Android
         script: |
           set -e
@@ -45,11 +66,7 @@ workflows:
           flutter build apk --release
           flutter build appbundle --release
 
-      - name: Build iOS
-        script: |
-          set -e
-          echo "Building iOS..."
-          flutter build ios --release --no-codesign
+
 
       - name: Get OAuth2 token
         script: |
@@ -132,69 +149,9 @@ workflows:
           upload_file "build/app/outputs/bundle/release/app-release.aab" "application/octet-stream"
           upload_file "build/app/outputs/flutter-apk/app-release.apk" "application/vnd.android.package-archive"
 
-      - name: Upload iOS build to SharePoint
-        script: |
-          set -e
-          BASE_FOLDER="Frontend/Builds"
-
-          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr -d '\r')
-          VERSION_BUILD="${VERSION}+${BUILD_NUMBER}"
-          PLATFORM_FOLDER="iOS"
-          BUILD_FOLDER="$BASE_FOLDER/$VERSION_BUILD/$PLATFORM_FOLDER"
-
-          echo "Preparing iOS upload → $BUILD_FOLDER"
-
-          for FOLDER in "$BASE_FOLDER" "$BASE_FOLDER/$VERSION_BUILD" "$BUILD_FOLDER"; do
-              echo "Ensuring folder exists: $FOLDER"
-              EXISTS=$(curl -s -H "Authorization: Bearer $TOKEN" \
-              "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER" | jq -r '.id // empty')
-              echo "  Found $FOLDER"
-              if [ -z "$EXISTS" ]; then
-              # Create folder if not exist
-              echo "  Creating $FOLDER..."
-              FOLDER_RESPONSE=$(curl -s -X PUT \
-                  -H "Authorization: Bearer $TOKEN" \
-                  -H "Content-Type: application/json" \
-                  -d '{"folder": {}, "@microsoft.graph.conflictBehavior": "fail"}' \
-                  "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER")
-              fi
-          done
-
-          IPA_PATH=$(find build/ios/ipa -name "*.ipa" -type f 2>/dev/null | head -n 1)
-          if [ -z "$IPA_PATH" ]; then
-            echo "No .ipa file found — skipping"
-            exit 0
-          fi
-
-          echo "⬆Uploading $(basename "$IPA_PATH")..."
-          START_TIME=$(date +%s)
-
-          RESPONSE=$(curl -s -w "%{http_code}" -o upload_result_ios.json \
-            -X PUT \
-            -H "Authorization: Bearer $TOKEN" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @"$IPA_PATH" \
-            "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$BUILD_FOLDER/$(basename "$IPA_PATH"):/content")
-
-          END_TIME=$(date +%s)
-          DURATION=$((END_TIME - START_TIME))
-
-          if [ "$RESPONSE" != "201" ] && [ "$RESPONSE" != "200" ]; then
-            echo "Upload failed (HTTP $RESPONSE)"
-            cat upload_result_ios.json
-            exit 1
-          fi
-
-          FILE_WEBURL=$(jq -r '.webUrl' upload_result_ios.json)
-          echo "✅ Uploaded: $FILE_WEBURL"
-          echo "⏱ Duration: ${DURATION}s"
-          
-          # Mark success for notification
-          echo "BUILD_SUCCESS=true" >> $CM_ENV
     artifacts:
       - build/app/outputs/flutter-apk/*.apk
       - build/app/outputs/bundle/release/*.aab
-      - build/ios/ipa/*.ipa
     publishing:
       email:
         recipients:
