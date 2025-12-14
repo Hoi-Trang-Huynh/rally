@@ -4,6 +4,8 @@ workflows:
     instance_type: linux
     max_build_duration: 60
     environment:
+      android_signing:
+        - rally_key
       groups:
         - keystore_credentials
         - firebase_credentials
