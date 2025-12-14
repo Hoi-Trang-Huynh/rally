@@ -58,6 +58,8 @@ dev_dependencies:
 
   flutter_test:
     sdk: flutter
+  
+  flutter_launcher_icons: "^0.14.4"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -94,3 +96,8 @@ flutter:
         - asset: assets/google_fonts/InclusiveSans-Regular.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "assets/images/rally_logo_light_inverse.png"
+  min_sdk_android: 21
