@@ -1,4 +1,4 @@
-package com.example.rally
+package com.rally.go
 
 import io.flutter.embedding.android.FlutterActivity
 
