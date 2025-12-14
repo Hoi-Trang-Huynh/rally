@@ -320,6 +320,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final bool isSmallScreen = screenHeight < 700;
 
     return Scaffold(
       body: SafeArea(
@@ -331,22 +333,23 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   children: <Widget>[
-                    const SizedBox(height: 60),
+                    SizedBox(height: isSmallScreen ? 24 : 60),
                     if (_currentStep != SignupStep.emailVerification) ...<Widget>[
-                      Image.asset('assets/images/rally_logo_transparent.png', height: 100),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        height: 80,
-                        child: Text(
-                          AppLocalizations.of(context)!.loginCreateTripHeadline,
-                          textAlign: TextAlign.center,
-                          style: textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
-                          ),
+                      Image.asset(
+                        'assets/images/rally_logo_transparent.png',
+                        height: isSmallScreen ? 70 : 100,
+                      ),
+                      SizedBox(height: isSmallScreen ? 16 : 24),
+                      Text(
+                        AppLocalizations.of(context)!.loginCreateTripHeadline,
+                        textAlign: TextAlign.center,
+                        style: textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                          fontSize: isSmallScreen ? 22 : null,
                         ),
                       ),
-                      const SizedBox(height: 40),
+                      SizedBox(height: isSmallScreen ? 24 : 40),
                     ],
                     ..._buildCurrentStep(context),
                   ],
