@@ -33,6 +33,13 @@ workflows:
           flutter clean
           flutter pub get
 
+      - name: Create .env file
+        script: |
+          set -e
+          echo "Creating .env file..."
+          echo "API_BACKEND_URL=$API_BACKEND_URL" > .env
+          echo ".env file created with API_BACKEND_URL"
+
       - name: Generate l10n files
         script: |
           set -e
@@ -48,9 +55,6 @@ workflows:
           echo "Activating FlutterFire CLI..."
           dart pub global activate flutterfire_cli
           export PATH="$PATH:$HOME/.pub-cache/bin"
-          
-          echo "Logging into Firebase..."
-          firebase login --token "$FIREBASE_TOKEN"
           
           echo "Configuring Firebase..."
           flutterfire configure \
