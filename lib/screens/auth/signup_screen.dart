@@ -333,7 +333,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   children: <Widget>[
-                    SizedBox(height: isSmallScreen ? 24 : 60),
                     if (_currentStep != SignupStep.emailVerification) ...<Widget>[
                       Image.asset(
                         'assets/images/rally_logo_transparent.png',

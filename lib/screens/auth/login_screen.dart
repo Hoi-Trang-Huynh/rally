@@ -89,7 +89,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    SizedBox(height: isSmallScreen ? 24 : 60),
                     Image.asset(
                       'assets/images/rally_logo_transparent.png',
                       height: isSmallScreen ? 70 : 100,
