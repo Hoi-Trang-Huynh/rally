@@ -1,7 +1,7 @@
 workflows:
   default-workflow:
     name: Rally FE workflow
-    instance_type: mac_mini_m2
+    instance_type: linux
     max_build_duration: 60
     environment:
       groups:
@@ -65,11 +65,20 @@ workflows:
 
       - name: Display SHA fingerprints
         script: |
-          set -e
           echo "=============================================="
           echo "SHA FINGERPRINTS FOR FIREBASE CONSOLE"
           echo "=============================================="
-          keytool -list -v -keystore $CM_KEYSTORE_PATH -storepass $CM_KEYSTORE_PASSWORD -alias $CM_KEY_ALIAS 2>/dev/null | grep -A1 "SHA1\|SHA256" || echo "Could not extract SHA fingerprints"
+          echo "Keystore path: $CM_KEYSTORE_PATH"
+          echo "Key alias: $CM_KEY_ALIAS"
+          echo ""
+          if [ -f "$CM_KEYSTORE_PATH" ]; then
+            echo "Keystore file exists. Extracting fingerprints..."
+            keytool -list -v -keystore "$CM_KEYSTORE_PATH" -storepass "$CM_KEYSTORE_PASSWORD" -alias "$CM_KEY_ALIAS" | grep "SHA"
+          else
+            echo "ERROR: Keystore file not found at $CM_KEYSTORE_PATH"
+            echo "Make sure keystore_credentials group is properly configured."
+          fi
+          echo ""
           echo "=============================================="
           echo "Add the SHA1 fingerprint to Firebase Console:"
           echo "Project Settings -> Your Android App -> Add fingerprint"
