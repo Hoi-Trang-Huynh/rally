@@ -75,6 +75,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
     final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final bool isSmallScreen = screenHeight < 700;
 
     return Scaffold(
       body: SafeArea(
@@ -87,21 +89,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    const SizedBox(height: 60),
-                    Image.asset('assets/images/rally_logo_transparent.png', height: 100),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      height: 80,
-                      child: Text(
-                        l10n.loginWelcomeBack,
-                        textAlign: TextAlign.center,
-                        style: textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
-                        ),
+                    SizedBox(height: isSmallScreen ? 24 : 60),
+                    Image.asset(
+                      'assets/images/rally_logo_transparent.png',
+                      height: isSmallScreen ? 70 : 100,
+                    ),
+                    SizedBox(height: isSmallScreen ? 16 : 24),
+                    Text(
+                      l10n.loginWelcomeBack,
+                      textAlign: TextAlign.center,
+                      style: textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                        fontSize: isSmallScreen ? 22 : null,
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    SizedBox(height: isSmallScreen ? 24 : 40),
 
                     // Error Message
                     if (_errorMessage != null) ...<Widget>[
