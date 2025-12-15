@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/screens/auth/signup_screen.dart';
 import 'package:rally/utils/auth_helpers.dart';
@@ -74,7 +74,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final double screenHeight = MediaQuery.of(context).size.height;
     final bool isSmallScreen = screenHeight < 700;
 
@@ -95,7 +94,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     SizedBox(height: isSmallScreen ? 16 : 24),
                     Text(
-                      l10n.loginWelcomeBack,
+                      t.auth.login.welcomeBack,
                       textAlign: TextAlign.center,
                       style: textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
@@ -118,7 +117,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // Email Field
                     AuthTextField(
                       controller: _emailController,
-                      labelText: l10n.loginEmailAddress,
+                      labelText: t.auth.login.emailAddress,
                       keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: 16),
@@ -126,14 +125,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // Password Field
                     AuthTextField(
                       controller: _passwordController,
-                      labelText: l10n.loginPassword,
+                      labelText: t.auth.login.password,
                       obscureText: true,
                     ),
                     const SizedBox(height: 24),
 
-                    // Continue Button
                     AuthPrimaryButton(
-                      text: l10n.loginContinue,
+                      text: t.common.continueButton,
                       onPressed: _signIn,
                       isLoading: _isLoading,
                     ),
@@ -144,7 +142,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     // Google Button
                     AuthGoogleButton(
-                      text: l10n.loginGoogle,
+                      text: t.auth.login.google,
                       onPressed: _signInWithGoogle,
                       isLoading: _isLoading,
                     ),
@@ -159,7 +157,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: TextButton(
                 onPressed: _navigateToSignup,
                 child: Text(
-                  l10n.loginNeedAccount,
+                  t.auth.login.needAccount,
                   style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
               ),

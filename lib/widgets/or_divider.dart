@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 
 /// A reusable horizontal divider with "Or" text in the middle.
 ///
@@ -17,10 +17,7 @@ class OrDivider extends StatelessWidget {
         Expanded(child: Divider(color: colorScheme.outline)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            AppLocalizations.of(context)!.orDivider,
-            style: TextStyle(color: colorScheme.onSurfaceVariant),
-          ),
+          child: Text(t.common.orDivider, style: TextStyle(color: colorScheme.onSurfaceVariant)),
         ),
         Expanded(child: Divider(color: colorScheme.outline)),
       ],

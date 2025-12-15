@@ -1,14 +1,14 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/constants/shared_pref_keys.dart';
-import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// State class for the [LocaleNotifier].
 class LocaleState {
   /// The current locale.
-  final Locale locale;
+  final AppLocale locale;
 
   /// Creates a new [LocaleState].
   const LocaleState({required this.locale});
@@ -29,22 +29,32 @@ class LocaleNotifier extends Notifier<LocaleState> {
     final SharedPreferences prefs = ref.watch(sharedPrefsServiceProvider);
     final String? code = prefs.getString(SharedPrefKeys.languageCode);
 
-    // Fallback to first supported locale if invalid
-    final Locale matched = AppLocalizations.supportedLocales.firstWhere(
-      (Locale loc) => loc.languageCode == code,
-      orElse: () => const Locale('en'),
+    // Fallback to English if invalid
+    final AppLocale matched = AppLocale.values.firstWhere(
+      (AppLocale loc) => loc.languageCode == code,
+      orElse: () => AppLocale.en,
     );
+
+    // Sync slang's LocaleSettings with our saved locale
+    LocaleSettings.setLocaleSync(matched);
 
     return LocaleState(locale: matched);
   }
 
-  /// Sets the app's locale to [localeCode].
-  Future<void> setLocale(Locale localeCode) async {
+  /// Sets the app's locale to [locale].
+  Future<void> setLocale(AppLocale locale) async {
     final SharedPreferences prefs = ref.read(sharedPrefsServiceProvider);
-    await prefs.setString(SharedPrefKeys.languageCode, localeCode.languageCode);
-    state = LocaleState(locale: localeCode);
+    await prefs.setString(SharedPrefKeys.languageCode, locale.languageCode);
+    await LocaleSettings.setLocale(locale);
+    state = LocaleState(locale: locale);
   }
 
   /// Returns the current locale.
-  Locale get currentLocale => state.locale;
+  AppLocale get currentLocale => state.locale;
+
+  /// Returns the current Flutter locale.
+  Locale get currentFlutterLocale => state.locale.flutterLocale;
+
+  /// Returns all supported locales.
+  static List<AppLocale> get supportedLocales => AppLocale.values;
 }

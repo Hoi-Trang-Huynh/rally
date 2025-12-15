@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/widgets/auth_primary_button.dart';
 import 'package:rally/widgets/auth_text_field.dart';
 
@@ -55,7 +55,6 @@ class ProfileFieldsForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Column(
@@ -74,7 +73,7 @@ class ProfileFieldsForm extends StatelessWidget {
         if (onBack != null) const SizedBox(height: 16),
         AuthTextField(
           controller: usernameController,
-          labelText: l10n.signupUsername,
+          labelText: t.auth.signup.username,
           errorText: usernameError,
         ),
         const SizedBox(height: 16),
@@ -84,7 +83,7 @@ class ProfileFieldsForm extends StatelessWidget {
             Expanded(
               child: AuthTextField(
                 controller: firstNameController,
-                labelText: l10n.signupFirstName,
+                labelText: t.auth.signup.firstName,
                 errorText: firstNameError,
               ),
             ),
@@ -92,14 +91,18 @@ class ProfileFieldsForm extends StatelessWidget {
             Expanded(
               child: AuthTextField(
                 controller: lastNameController,
-                labelText: l10n.signupLastName,
+                labelText: t.auth.signup.lastName,
                 errorText: lastNameError,
               ),
             ),
           ],
         ),
         const SizedBox(height: 24),
-        AuthPrimaryButton(text: l10n.loginContinue, onPressed: onContinue, isLoading: isLoading),
+        AuthPrimaryButton(
+          text: t.common.continueButton,
+          onPressed: onContinue,
+          isLoading: isLoading,
+        ),
       ],
     );
   }

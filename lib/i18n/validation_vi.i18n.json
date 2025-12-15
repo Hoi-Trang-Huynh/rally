@@ -1,0 +1,22 @@
+{
+  "required": "Trường này là bắt buộc",
+  "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ",
+  "username": {
+    "tooShort": "Tên người dùng phải có ít nhất $minLength ký tự",
+    "tooLong": "Tên người dùng tối đa $maxLength ký tự"
+  },
+  "name": {
+    "tooShort": "Phải có ít nhất $minLength ký tự",
+    "tooLong": "Tối đa $maxLength ký tự"
+  },
+  "password": {
+    "tooShort": "Mật khẩu phải có ít nhất $minLength ký tự",
+    "doNotMatch": "Mật khẩu không khớp"
+  },
+  "passwordRule": {
+    "minLength": "Ít nhất $minLength ký tự",
+    "uppercase": "Ít nhất một chữ hoa",
+    "lowercase": "Ít nhất một chữ thường",
+    "number": "Ít nhất một chữ số"
+  }
+}

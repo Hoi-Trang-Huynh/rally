@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/screens/auth/login_screen.dart';
@@ -103,10 +103,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   // --- Step Handlers ---
 
   Future<void> _onContinueStep1() async {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
     _clearErrors();
 
-    _emailError = Validators.validateEmail(_emailController.text, l10n);
+    _emailError = Validators.validateEmail(_emailController.text);
     setState(() {});
 
     if (_emailError != null) return;
@@ -136,12 +135,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   void _onContinueStep2() {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
     _clearErrors();
 
-    _usernameError = Validators.validateUsername(_usernameController.text, l10n);
-    _firstNameError = Validators.validateFirstName(_firstNameController.text, l10n);
-    _lastNameError = Validators.validateLastName(_lastNameController.text, l10n);
+    _usernameError = Validators.validateUsername(_usernameController.text);
+    _firstNameError = Validators.validateFirstName(_firstNameController.text);
+    _lastNameError = Validators.validateLastName(_lastNameController.text);
 
     setState(() {});
 
@@ -157,14 +155,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   Future<void> _onContinueStep3() async {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
     _clearErrors();
 
-    _passwordError = Validators.validatePassword(_passwordController.text, l10n);
+    _passwordError = Validators.validatePassword(_passwordController.text);
     _confirmPasswordError = Validators.validateConfirmPassword(
       _confirmPasswordController.text,
       _passwordController.text,
-      l10n,
     );
 
     setState(() {});
@@ -240,7 +236,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     try {
       await ref.read(authRepositoryProvider).sendEmailVerification();
       if (mounted) {
-        showSuccessSnackBar(context, AppLocalizations.of(context)!.signupEmailResent);
+        showSuccessSnackBar(context, t.auth.signup.emailResent);
       }
     } catch (e) {
       showErrorSnackBar(context, e.toString());
@@ -273,7 +269,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           context,
         ).pushReplacement(MaterialPageRoute<void>(builder: (_) => const AuthTestScreen()));
       } else if (mounted) {
-        showErrorSnackBar(context, AppLocalizations.of(context)!.signupEmailNotVerified);
+        showErrorSnackBar(context, t.auth.signup.emailNotVerified);
       }
     } catch (e) {
       showErrorSnackBar(context, e.toString());
@@ -340,7 +336,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ),
                       SizedBox(height: isSmallScreen ? 16 : 24),
                       Text(
-                        AppLocalizations.of(context)!.loginCreateTripHeadline,
+                        t.auth.login.createTripHeadline,
                         textAlign: TextAlign.center,
                         style: textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -360,7 +356,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               child: TextButton(
                 onPressed: _navigateToLogin,
                 child: Text(
-                  AppLocalizations.of(context)!.loginAlreadyHaveAccount,
+                  t.auth.login.alreadyHaveAccount,
                   style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
               ),
@@ -385,25 +381,27 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   List<Widget> _buildEmailStep(BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
-
     return <Widget>[
       AuthTextField(
         controller: _emailController,
-        labelText: l10n.loginEmailAddress,
+        labelText: t.auth.login.emailAddress,
         errorText: _emailError,
         keyboardType: TextInputType.emailAddress,
       ),
       const SizedBox(height: 24),
       AuthPrimaryButton(
-        text: l10n.loginContinue,
+        text: t.common.continueButton,
         onPressed: _onContinueStep1,
         isLoading: _isLoading,
       ),
       const SizedBox(height: 24),
       const OrDivider(),
       const SizedBox(height: 24),
-      AuthGoogleButton(text: l10n.loginGoogle, onPressed: _signInWithGoogle, isLoading: _isLoading),
+      AuthGoogleButton(
+        text: t.auth.login.google,
+        onPressed: _signInWithGoogle,
+        isLoading: _isLoading,
+      ),
     ];
   }
 
@@ -427,15 +425,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   List<Widget> _buildPasswordStep(BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return <Widget>[
-      _buildBackButton(l10n.signupStepProfile, colorScheme),
+      _buildBackButton(t.auth.signup.stepProfile, colorScheme),
       const SizedBox(height: 16),
       AuthTextField(
         controller: _passwordController,
-        labelText: l10n.loginPassword,
+        labelText: t.auth.login.password,
         errorText: _passwordError,
         obscureText: true,
         onChanged: (String value) => setState(() => _currentPassword = value),
@@ -445,13 +442,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       const SizedBox(height: 16),
       AuthTextField(
         controller: _confirmPasswordController,
-        labelText: l10n.signupConfirmPassword,
+        labelText: t.auth.signup.confirmPassword,
         errorText: _confirmPasswordError,
         obscureText: true,
       ),
       const SizedBox(height: 24),
       AuthPrimaryButton(
-        text: l10n.loginContinue,
+        text: t.common.continueButton,
         onPressed: _onContinueStep3,
         isLoading: _isLoading,
       ),
@@ -461,13 +458,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   List<Widget> _buildEmailVerificationStep(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
 
     return <Widget>[
       Icon(Icons.mark_email_read_outlined, size: 80, color: colorScheme.primary),
       const SizedBox(height: 24),
       Text(
-        l10n.signupVerifyEmail,
+        t.auth.signup.verifyEmail,
         style: textTheme.headlineSmall?.copyWith(
           fontWeight: FontWeight.bold,
           color: colorScheme.onSurface,
@@ -476,20 +472,20 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       ),
       const SizedBox(height: 12),
       Text(
-        l10n.signupVerifyEmailSubtitle(_emailController.text.trim()),
+        t.auth.signup.verifyEmailSubtitle(email: _emailController.text.trim()),
         style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
         textAlign: TextAlign.center,
       ),
       const SizedBox(height: 32),
       AuthPrimaryButton(
-        text: l10n.signupCheckVerification,
+        text: t.auth.signup.checkVerification,
         onPressed: _checkEmailVerification,
         isLoading: _isLoading,
       ),
       const SizedBox(height: 16),
       TextButton(
         onPressed: _isLoading ? null : _resendVerificationEmail,
-        child: Text(l10n.signupResendEmail, style: TextStyle(color: colorScheme.primary)),
+        child: Text(t.auth.signup.resendEmail, style: TextStyle(color: colorScheme.primary)),
       ),
     ];
   }

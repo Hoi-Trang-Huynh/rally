@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/utils/validation_constants.dart';
 
 /// A widget that displays password requirements with real-time validation.
@@ -15,29 +15,28 @@ class PasswordRequirements extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _PasswordRuleItem(
-          text: l10n.passwordRuleMinLength(PasswordValidation.minLength),
+          text: t.validation.passwordRule.minLength(minLength: PasswordValidation.minLength),
           isMet: PasswordValidation.hasMinLength(password),
           colorScheme: colorScheme,
         ),
         _PasswordRuleItem(
-          text: l10n.passwordRuleUppercase,
+          text: t.validation.passwordRule.uppercase,
           isMet: PasswordValidation.hasUppercase(password),
           colorScheme: colorScheme,
         ),
         _PasswordRuleItem(
-          text: l10n.passwordRuleLowercase,
+          text: t.validation.passwordRule.lowercase,
           isMet: PasswordValidation.hasLowercase(password),
           colorScheme: colorScheme,
         ),
         _PasswordRuleItem(
-          text: l10n.passwordRuleNumber,
+          text: t.validation.passwordRule.number,
           isMet: PasswordValidation.hasDigit(password),
           colorScheme: colorScheme,
         ),

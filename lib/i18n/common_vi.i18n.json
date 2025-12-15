@@ -1,0 +1,10 @@
+{
+  "hello": "Xin chào",
+  "orDivider": "Hoặc",
+  "continueButton": "Tiếp tục",
+  "language": {
+    "english": "Tiếng Anh",
+    "vietnamese": "Tiếng Việt",
+    "korean": "Tiếng Hàn"
+  }
+}
