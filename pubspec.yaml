@@ -47,6 +47,8 @@ dependencies:
   http: ^1.2.2
   intl: ^0.20.2
   shared_preferences: ^2.5.3
+  slang: ^4.11.0
+  slang_flutter: ^4.11.0
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -54,13 +56,14 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
+  change_app_package_name: ^1.4.0
+  flutter_launcher_icons: "^0.14.4"
   flutter_lints: ^5.0.0
 
   flutter_test:
     sdk: flutter
   
-  flutter_launcher_icons: "^0.14.4"
-  change_app_package_name: ^1.4.0
+  slang_build_runner: ^4.11.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
