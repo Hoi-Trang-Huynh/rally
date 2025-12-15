@@ -1,0 +1,10 @@
+{
+  "hello": "Hello",
+  "orDivider": "Or",
+  "continueButton": "Continue",
+  "language": {
+    "english": "English",
+    "vietnamese": "Vietnamese",
+    "korean": "Korean"
+  }
+}

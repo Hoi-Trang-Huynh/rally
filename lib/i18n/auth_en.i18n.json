@@ -1,0 +1,25 @@
+{
+  "login": {
+    "welcomeBack": "Welcome Back\nwith Rally",
+    "createTripHeadline": "Create a trip you\nenjoy with us",
+    "emailAddress": "Email Address",
+    "password": "Password",
+    "google": "Google",
+    "needAccount": "Need an account? Create one",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "signup": {
+    "username": "Username",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "confirmPassword": "Confirm Password",
+    "stepProfile": "Profile",
+    "stepPassword": "Password",
+    "verifyEmail": "Verify your email",
+    "verifyEmailSubtitle": "We sent a verification link to $email. Click the link to verify your account.",
+    "resendEmail": "Resend email",
+    "emailResent": "Verification email resent",
+    "checkVerification": "I've verified my email",
+    "emailNotVerified": "Email not verified yet. Please check your inbox."
+  }
+}

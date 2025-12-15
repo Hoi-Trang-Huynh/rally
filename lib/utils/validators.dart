@@ -1,4 +1,4 @@
-import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/utils/validation_constants.dart';
 
 /// Collection of validation functions for form fields.
@@ -7,15 +7,15 @@ import 'package:rally/utils/validation_constants.dart';
 class Validators {
   /// Validates an email address.
   /// Returns error message if invalid, null if valid.
-  static String? validateEmail(String value, AppLocalizations l10n) {
+  static String? validateEmail(String value) {
     final String email = value.trim();
 
     if (email.isEmpty) {
-      return l10n.validationRequired;
+      return t.validation.required;
     }
 
     if (!emailRegex.hasMatch(email)) {
-      return l10n.validationEmailInvalid;
+      return t.validation.emailInvalid;
     }
 
     return null;
@@ -23,19 +23,19 @@ class Validators {
 
   /// Validates a username.
   /// Returns error message if invalid, null if valid.
-  static String? validateUsername(String value, AppLocalizations l10n) {
+  static String? validateUsername(String value) {
     final String username = value.trim();
 
     if (username.isEmpty) {
-      return l10n.validationRequired;
+      return t.validation.required;
     }
 
     if (username.length < UsernameValidation.minLength) {
-      return l10n.validationUsernameTooShort(UsernameValidation.minLength);
+      return t.validation.username.tooShort(minLength: UsernameValidation.minLength);
     }
 
     if (username.length > UsernameValidation.maxLength) {
-      return l10n.validationUsernameTooLong(UsernameValidation.maxLength);
+      return t.validation.username.tooLong(maxLength: UsernameValidation.maxLength);
     }
 
     return null;
@@ -43,19 +43,19 @@ class Validators {
 
   /// Validates a first name.
   /// Returns error message if invalid, null if valid.
-  static String? validateFirstName(String value, AppLocalizations l10n) {
+  static String? validateFirstName(String value) {
     final String firstName = value.trim();
 
     if (firstName.isEmpty) {
-      return l10n.validationRequired;
+      return t.validation.required;
     }
 
     if (firstName.length < FirstNameValidation.minLength) {
-      return l10n.validationNameTooShort(FirstNameValidation.minLength);
+      return t.validation.name.tooShort(minLength: FirstNameValidation.minLength);
     }
 
     if (firstName.length > FirstNameValidation.maxLength) {
-      return l10n.validationNameTooLong(FirstNameValidation.maxLength);
+      return t.validation.name.tooLong(maxLength: FirstNameValidation.maxLength);
     }
 
     return null;
@@ -63,19 +63,19 @@ class Validators {
 
   /// Validates a last name.
   /// Returns error message if invalid, null if valid.
-  static String? validateLastName(String value, AppLocalizations l10n) {
+  static String? validateLastName(String value) {
     final String lastName = value.trim();
 
     if (lastName.isEmpty) {
-      return l10n.validationRequired;
+      return t.validation.required;
     }
 
     if (lastName.length < LastNameValidation.minLength) {
-      return l10n.validationNameTooShort(LastNameValidation.minLength);
+      return t.validation.name.tooShort(minLength: LastNameValidation.minLength);
     }
 
     if (lastName.length > LastNameValidation.maxLength) {
-      return l10n.validationNameTooLong(LastNameValidation.maxLength);
+      return t.validation.name.tooLong(maxLength: LastNameValidation.maxLength);
     }
 
     return null;
@@ -83,15 +83,15 @@ class Validators {
 
   /// Validates a password.
   /// Returns error message if invalid, null if valid.
-  static String? validatePassword(String value, AppLocalizations l10n) {
+  static String? validatePassword(String value) {
     final String password = value.trim();
 
     if (password.isEmpty) {
-      return l10n.validationRequired;
+      return t.validation.required;
     }
 
     if (!PasswordValidation.isValid(password)) {
-      return l10n.validationPasswordTooShort(PasswordValidation.minLength);
+      return t.validation.password.tooShort(minLength: PasswordValidation.minLength);
     }
 
     return null;
@@ -99,20 +99,16 @@ class Validators {
 
   /// Validates confirm password matches password.
   /// Returns error message if invalid, null if valid.
-  static String? validateConfirmPassword(
-    String confirmPassword,
-    String password,
-    AppLocalizations l10n,
-  ) {
+  static String? validateConfirmPassword(String confirmPassword, String password) {
     final String trimmedConfirm = confirmPassword.trim();
     final String trimmedPassword = password.trim();
 
     if (trimmedConfirm.isEmpty) {
-      return l10n.validationRequired;
+      return t.validation.required;
     }
 
     if (trimmedConfirm != trimmedPassword) {
-      return l10n.validationPasswordsDoNotMatch;
+      return t.validation.password.doNotMatch;
     }
 
     return null;

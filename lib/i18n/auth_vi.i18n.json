@@ -1,0 +1,25 @@
+{
+  "login": {
+    "welcomeBack": "Chào mừng trở lại\nvới Rally",
+    "createTripHeadline": "Tạo chuyến đi bạn\nthích cùng chúng tôi",
+    "emailAddress": "Địa chỉ Email",
+    "password": "Mật khẩu",
+    "google": "Google",
+    "needAccount": "Chưa có tài khoản? Tạo mới",
+    "alreadyHaveAccount": "Đã có tài khoản?"
+  },
+  "signup": {
+    "username": "Tên người dùng",
+    "firstName": "Tên",
+    "lastName": "Họ",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "stepProfile": "Hồ sơ",
+    "stepPassword": "Mật khẩu",
+    "verifyEmail": "Xác minh email",
+    "verifyEmailSubtitle": "Chúng tôi đã gửi liên kết xác minh đến $email. Nhấn vào liên kết để xác minh tài khoản.",
+    "resendEmail": "Gửi lại email",
+    "emailResent": "Đã gửi lại email xác minh",
+    "checkVerification": "Tôi đã xác minh email",
+    "emailNotVerified": "Email chưa được xác minh. Vui lòng kiểm tra hộp thư."
+  }
+}

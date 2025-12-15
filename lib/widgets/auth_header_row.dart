@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/providers/theme_provider.dart';
 
@@ -16,7 +16,7 @@ class AuthHeaderRow extends ConsumerWidget {
     // Locale state
     final LocaleState localeState = ref.watch(localeProvider);
     final LocaleNotifier localeNotifier = ref.read(localeProvider.notifier);
-    final List<Locale> supportedLocales = AppLocalizations.supportedLocales;
+    final List<AppLocale> supportedLocales = LocaleNotifier.supportedLocales;
 
     // Theme state
     final ThemeState themeState = ref.watch(themeProvider);
@@ -34,16 +34,16 @@ class AuthHeaderRow extends ConsumerWidget {
               const Icon(Icons.language, size: 20),
               const SizedBox(width: 4),
               DropdownButtonHideUnderline(
-                child: DropdownButton<Locale>(
+                child: DropdownButton<AppLocale>(
                   value: localeState.locale,
-                  onChanged: (Locale? selected) {
+                  onChanged: (AppLocale? selected) {
                     if (selected != null) {
                       localeNotifier.setLocale(selected);
                     }
                   },
                   items:
-                      supportedLocales.map((Locale locale) {
-                        return DropdownMenuItem<Locale>(
+                      supportedLocales.map((AppLocale locale) {
+                        return DropdownMenuItem<AppLocale>(
                           value: locale,
                           child: Text(locale.languageCode.toUpperCase()),
                         );

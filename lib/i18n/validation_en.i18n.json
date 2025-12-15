@@ -1,0 +1,22 @@
+{
+  "required": "This field is required",
+  "emailInvalid": "Please enter a valid email address",
+  "username": {
+    "tooShort": "Username must be at least $minLength characters",
+    "tooLong": "Username must be at most $maxLength characters"
+  },
+  "name": {
+    "tooShort": "Must be at least $minLength characters",
+    "tooLong": "Must be at most $maxLength characters"
+  },
+  "password": {
+    "tooShort": "Password must be at least $minLength characters",
+    "doNotMatch": "Passwords do not match"
+  },
+  "passwordRule": {
+    "minLength": "At least $minLength characters",
+    "uppercase": "At least one uppercase letter",
+    "lowercase": "At least one lowercase letter",
+    "number": "At least one number"
+  }
+}

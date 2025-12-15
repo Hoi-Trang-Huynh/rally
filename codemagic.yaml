@@ -45,8 +45,8 @@ workflows:
       - name: Generate l10n files
         script: |
           set -e
-          echo "Generating localization files..."
-          flutter gen-l10n
+          echo "Generating localization files with slang..."
+          dart run slang
 
       - name: Setup Firebase
         script: |

@@ -11,7 +11,7 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
-/lib/l10n/generated/
+/lib/i18n/generated/
 /lib/firebase_options.dart
 .env
 

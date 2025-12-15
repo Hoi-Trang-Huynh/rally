@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/utils/locale_utils.dart';
 
@@ -17,27 +17,27 @@ class LocaleTestScreen extends ConsumerWidget {
     final LocaleState localeState = ref.watch(localeProvider);
     final LocaleNotifier localeNotifier = ref.read(localeProvider.notifier);
 
-    final List<Locale> supported = AppLocalizations.supportedLocales;
-    final Locale current = localeState.locale;
+    final List<AppLocale> supported = LocaleNotifier.supportedLocales;
+    final AppLocale current = localeState.locale;
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.hello)),
+      appBar: AppBar(title: Text(t.common.hello)),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text('Current Locale: ${current.languageCode}'),
             const SizedBox(height: 16),
-            DropdownButton<Locale>(
+            DropdownButton<AppLocale>(
               value: current,
-              onChanged: (Locale? selected) {
+              onChanged: (AppLocale? selected) {
                 if (selected != null) {
                   localeNotifier.setLocale(selected);
                 }
               },
               items:
-                  supported.map((Locale locale) {
-                    return DropdownMenuItem<Locale>(
+                  supported.map((AppLocale locale) {
+                    return DropdownMenuItem<AppLocale>(
                       value: locale,
                       child: Text(getLocalizedLanguageName(context, locale)),
                     );

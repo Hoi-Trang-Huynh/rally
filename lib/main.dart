@@ -1,10 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rally/constants/shared_pref_keys.dart';
 import 'package:rally/firebase_options.dart';
-import 'package:rally/l10n/generated/app_localizations.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/models/app_user.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
@@ -12,7 +14,6 @@ import 'package:rally/providers/theme_provider.dart';
 import 'package:rally/screens/auth/login_screen.dart';
 import 'package:rally/screens/loading/app_loading.dart';
 import 'package:rally/screens/playground/auth_test.dart';
-// import 'package:rally/screens/playground/theme_test.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:rally/themes/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,10 +36,18 @@ Future<void> main() async {
 
   final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
 
+  // Initialize locale (await deferred loading)
+  final String? languageCode = sharedPrefs.getString(SharedPrefKeys.languageCode);
+  final AppLocale locale = AppLocale.values.firstWhere(
+    (AppLocale loc) => loc.languageCode == languageCode,
+    orElse: () => AppLocale.en,
+  );
+  await LocaleSettings.setLocale(locale);
+
   runApp(
     ProviderScope(
       overrides: <Override>[sharedPrefsServiceProvider.overrideWithValue(sharedPrefs)],
-      child: const RallyApp(),
+      child: TranslationProvider(child: const RallyApp()),
     ),
   );
 }
@@ -48,7 +57,8 @@ Future<void> main() async {
 /// Handles theme and locale state, shows a loading screen while providers initialize,
 /// and sets up the main MaterialApp with theming and localization.
 class RallyApp extends ConsumerWidget {
-  /// Creates a new instance of the RallyApp widget.ub1txeasdsiuytrewq  gfgfdsaBVVFGFC VVDVV   ///
+  /// Creates a new instance of the RallyApp widget.
+  ///
   /// The [key] parameter is used to control how one widget replaces another widget in the tree.
   const RallyApp({super.key});
 
@@ -65,13 +75,13 @@ class RallyApp extends ConsumerWidget {
     final AsyncValue<AppUser?> authState = ref.watch(appUserProvider);
 
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Rally',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeNotifier.currentThemeMode,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      locale: localeNotifier.currentLocale,
-      supportedLocales: AppLocalizations.supportedLocales,
+      locale: localeNotifier.currentFlutterLocale,
+      supportedLocales: AppLocaleUtils.supportedLocales,
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: authState.when(
         data: (AppUser? user) {
           // Not logged in - show login screen
