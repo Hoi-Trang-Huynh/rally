@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rally/constants/shared_pref_keys.dart';
 import 'package:rally/firebase_options.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/models/app_user.dart';
@@ -34,6 +35,14 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+
+  // Initialize locale (await deferred loading)
+  final String? languageCode = sharedPrefs.getString(SharedPrefKeys.languageCode);
+  final AppLocale locale = AppLocale.values.firstWhere(
+    (AppLocale loc) => loc.languageCode == languageCode,
+    orElse: () => AppLocale.en,
+  );
+  await LocaleSettings.setLocale(locale);
 
   runApp(
     ProviderScope(
