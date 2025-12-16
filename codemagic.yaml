@@ -1,8 +1,8 @@
 workflows:
   default-workflow:
     name: Rally FE workflow
-    instance_type: mac_mini_m2
-    max_build_duration: 60
+    instance_type: linux
+    max_build_duration: 30
     environment:
       android_signing:
         - rally_key
@@ -42,7 +42,7 @@ workflows:
           echo "API_BACKEND_URL=$API_BACKEND_URL" > .env
           echo ".env file created with API_BACKEND_URL"
 
-      - name: Generate l10n files
+      - name: Generate i18n files
         script: |
           set -e
           echo "Generating localization files with slang..."
@@ -196,97 +196,11 @@ workflows:
           upload_file "build/app/outputs/bundle/release/app-release.aab" "application/octet-stream"
           upload_file "build/app/outputs/flutter-apk/app-release.apk" "application/vnd.android.package-archive"
 
-      - name: Build iOS
-        script: |
-          echo "Running iOS build..."
-          STATE_FILE="$CM_BUILD_DIR/state.env"
-          touch "$STATE_FILE"
-          set +e
-          flutter build ios --release --no-codesign
-          BUILD_IOS_EXIT_CODE=$?
-          sed -i '/^BUILD_IOS_EXIT_CODE=/d' "$STATE_FILE"
-          echo "BUILD_IOS_EXIT_CODE=$BUILD_IOS_EXIT_CODE" >> "$STATE_FILE"
-          if [ "$BUILD_IOS_EXIT_CODE" -eq 0 ]; then
-            echo "IOS_STATUS=SUCCESS" >> "$STATE_FILE"
-          else
-            echo "IOS_STATUS=FAILED" >> "$STATE_FILE"
-          fi
-          set -e
-          
-      - name: Upload iOS build to SharePoint
-        script: |
-          STATE_FILE="$CM_BUILD_DIR/state.env"
-          source "$STATE_FILE"
 
-          if [ -z "$TOKEN" ]; then
-            echo "No OAuth token available — skipping upload"
-            exit 0
-          fi
-
-          if [ "$BUILD_IOS_EXIT_CODE" != "0" ]; then
-            echo "iOS build failed - skipping upload"
-            exit 0
-          fi
-
-          set -e
-          BASE_FOLDER="Frontend/Builds"
-
-          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr -d '\r')
-          VERSION_BUILD="${VERSION}+${BUILD_NUMBER}"
-          PLATFORM_FOLDER="iOS"
-          BUILD_FOLDER="$BASE_FOLDER/$VERSION_BUILD/$PLATFORM_FOLDER"
-
-          echo "Preparing iOS upload → $BUILD_FOLDER"
-
-          for FOLDER in "$BASE_FOLDER" "$BASE_FOLDER/$VERSION_BUILD" "$BUILD_FOLDER"; do
-              echo "Ensuring folder exists: $FOLDER"
-              EXISTS=$(curl -s -H "Authorization: Bearer $TOKEN" \
-              "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER" | jq -r '.id // empty')
-              echo "  Found $FOLDER"
-              if [ -z "$EXISTS" ]; then
-              # Create folder if not exist
-              echo "  Creating $FOLDER..."
-              FOLDER_RESPONSE=$(curl -s -X PUT \
-                  -H "Authorization: Bearer $TOKEN" \
-                  -H "Content-Type: application/json" \
-                  -d '{"folder": {}, "@microsoft.graph.conflictBehavior": "fail"}' \
-                  "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER")
-              fi
-          done
-
-          IPA_PATH=$(find build/ios/ipa -name "*.ipa" -type f 2>/dev/null | head -n 1)
-          if [ -z "$IPA_PATH" ]; then
-            echo "No .ipa file found — skipping"
-            exit 0
-          fi
-
-          echo "⬆Uploading $(basename "$IPA_PATH")..."
-          START_TIME=$(date +%s)
-
-          RESPONSE=$(curl -s -w "%{http_code}" -o upload_result_ios.json \
-            -X PUT \
-            -H "Authorization: Bearer $TOKEN" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @"$IPA_PATH" \
-            "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$BUILD_FOLDER/$(basename "$IPA_PATH"):/content")
-
-          END_TIME=$(date +%s)
-          DURATION=$((END_TIME - START_TIME))
-
-          if [ "$RESPONSE" != "201" ] && [ "$RESPONSE" != "200" ]; then
-            echo "Upload failed (HTTP $RESPONSE)"
-            cat upload_result_ios.json
-            exit 1
-          fi
-
-          FILE_WEBURL=$(jq -r '.webUrl' upload_result_ios.json)
-          echo "✅ Uploaded: $FILE_WEBURL"
-          echo "⏱ Duration: ${DURATION}s"
 
     artifacts:
       - build/app/outputs/flutter-apk/*.apk
       - build/app/outputs/bundle/release/*.aab
-      - build/ios/ipa/*.ipa
     publishing:
       email:
         recipients:
@@ -301,7 +215,7 @@ workflows:
             STATE_FILE="$CM_BUILD_DIR/state.env"
             source "$STATE_FILE"
 
-            if [ "$BUILD_ANDROID_EXIT_CODE" -eq 0 ] && [ "$BUILD_IOS_EXIT_CODE" -eq 0 ]; then
+            if [ "$BUILD_ANDROID_EXIT_CODE" -eq 0 ]; then
               echo "BUILD_STATUS=SUCCESS" >> "$STATE_FILE"
             else
               echo "BUILD_STATUS=FAILED" >> "$STATE_FILE"
@@ -354,8 +268,7 @@ workflows:
                       {
                         "type": "FactSet",
                         "facts": [
-                          { "title": "Android:", "value": "${ANDROID_STATUS}" },
-                          { "title": "iOS:", "value": "${IOS_STATUS}" }
+                          { "title": "Android:", "value": "${ANDROID_STATUS}" }
                         ]
                       }
                     ],
