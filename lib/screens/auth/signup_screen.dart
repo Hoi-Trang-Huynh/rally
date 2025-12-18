@@ -53,7 +53,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   // State
   SignupStep _currentStep = SignupStep.email;
@@ -143,7 +144,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     setState(() {});
 
-    if (_usernameError != null || _firstNameError != null || _lastNameError != null) {
+    if (_usernameError != null ||
+        _firstNameError != null ||
+        _lastNameError != null) {
       return;
     }
 
@@ -185,7 +188,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           );
 
       // Step 2: Get Firebase ID token
-      final String? idToken = await ref.read(authRepositoryProvider).getIdToken();
+      final String? idToken =
+          await ref.read(authRepositoryProvider).getIdToken();
       if (idToken == null) {
         throw Exception('Failed to get Firebase ID token');
       }
@@ -196,7 +200,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           .register(idToken: idToken);
 
       // Step 4: Extract user ID from register response
-      final Map<String, dynamic>? user = registerResponse['user'] as Map<String, dynamic>?;
+      final Map<String, dynamic>? user =
+          registerResponse['user'] as Map<String, dynamic>?;
       final String? userId = user?['id'] as String?;
       _savedUserId = userId;
 
@@ -213,6 +218,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               firstName: _savedFirstName,
               lastName: _savedLastName,
             );
+
+        // Step 7: Invalidate the auth provider to fetch the newly created profile
+        ref.invalidate(appUserProvider);
       }
 
       // Step 6: Send email verification
@@ -249,7 +257,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final bool isVerified = await ref.read(authRepositoryProvider).isEmailVerified();
+      final bool isVerified =
+          await ref.read(authRepositoryProvider).isEmailVerified();
 
       if (isVerified && mounted) {
         // Update email verification status in backend
@@ -265,9 +274,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         // This ensures main.dart sees the updated emailVerified status
         ref.invalidate(appUserProvider);
 
-        Navigator.of(
-          context,
-        ).pushReplacement(MaterialPageRoute<void>(builder: (_) => const AuthTestScreen()));
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute<void>(builder: (_) => const AuthTestScreen()),
+        );
       } else if (mounted) {
         showErrorSnackBar(context, t.auth.signup.emailNotVerified);
       }
@@ -289,9 +298,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   void _navigateToLogin() {
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute<void>(builder: (_) => const LoginScreen()));
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
+    );
   }
 
   void _goBack() {
@@ -329,7 +338,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   children: <Widget>[
-                    if (_currentStep != SignupStep.emailVerification) ...<Widget>[
+                    if (_currentStep !=
+                        SignupStep.emailVerification) ...<Widget>[
                       Image.asset(
                         'assets/images/rally_logo_transparent.png',
                         height: isSmallScreen ? 70 : 100,
@@ -352,7 +362,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
               child: TextButton(
                 onPressed: _navigateToLogin,
                 child: Text(
@@ -460,7 +473,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return <Widget>[
-      Icon(Icons.mark_email_read_outlined, size: 80, color: colorScheme.primary),
+      Icon(
+        Icons.mark_email_read_outlined,
+        size: 80,
+        color: colorScheme.primary,
+      ),
       const SizedBox(height: 24),
       Text(
         t.auth.signup.verifyEmail,
@@ -473,7 +490,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       const SizedBox(height: 12),
       Text(
         t.auth.signup.verifyEmailSubtitle(email: _emailController.text.trim()),
-        style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+        style: textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
         textAlign: TextAlign.center,
       ),
       const SizedBox(height: 32),
@@ -485,7 +504,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       const SizedBox(height: 16),
       TextButton(
         onPressed: _isLoading ? null : _resendVerificationEmail,
-        child: Text(t.auth.signup.resendEmail, style: TextStyle(color: colorScheme.primary)),
+        child: Text(
+          t.auth.signup.resendEmail,
+          style: TextStyle(color: colorScheme.primary),
+        ),
       ),
     ];
   }
@@ -497,7 +519,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         onPressed: _goBack,
         icon: const Icon(Icons.arrow_back, size: 18),
         label: Text(label),
-        style: TextButton.styleFrom(foregroundColor: colorScheme.onSurfaceVariant),
+        style: TextButton.styleFrom(
+          foregroundColor: colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
