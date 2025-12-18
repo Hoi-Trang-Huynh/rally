@@ -11,7 +11,10 @@ import 'package:rally/utils/ui_helpers.dart';
 /// Result of a Google Sign-In operation.
 class GoogleSignInResult {
   /// Creates a new [GoogleSignInResult].
-  const GoogleSignInResult({required this.userCredential, required this.userId});
+  const GoogleSignInResult({
+    required this.userCredential,
+    required this.userId,
+  });
 
   /// The Firebase user credential.
   final UserCredential userCredential;
@@ -45,7 +48,8 @@ Future<GoogleSignInResult?> signInWithGoogle({
   );
 
   // Sign in to Firebase
-  final UserCredential userCredential = await authRepository.signInWithCredential(credential);
+  final UserCredential userCredential = await authRepository
+      .signInWithCredential(credential);
 
   // Get Firebase ID token for backend API calls
   final String? idToken = await authRepository.getIdToken();
@@ -60,10 +64,13 @@ Future<GoogleSignInResult?> signInWithGoogle({
     profile = await userRepository.getMyProfile();
   } catch (e) {
     // User not found in backend - register them first
-    final Map<String, dynamic> registerResponse = await userRepository.register(idToken: idToken);
+    final Map<String, dynamic> registerResponse = await userRepository.register(
+      idToken: idToken,
+    );
 
     // Extract user data from register response
-    final Map<String, dynamic>? user = registerResponse['user'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? user =
+        registerResponse['user'] as Map<String, dynamic>?;
     profile = user ?? <String, dynamic>{};
 
     // Sync Firebase user data to MongoDB
@@ -82,7 +89,10 @@ Future<GoogleSignInResult?> signInWithGoogle({
 
   final String? userId = profile['id'] as String?;
 
-  return GoogleSignInResult(userCredential: userCredential, userId: userId ?? '');
+  return GoogleSignInResult(
+    userCredential: userCredential,
+    userId: userId ?? '',
+  );
 }
 
 /// Handles Google Sign-In with automatic navigation.
@@ -113,6 +123,11 @@ Future<void> handleGoogleSignInWithNavigation({
     }
 
     if (!context.mounted) return;
+
+    // Invalidate the auth provider to ensure we have the latest user data
+    // This is crucial if the user was just registered or their profile updated
+    ref.invalidate(appUserProvider);
+
     // Existing user - main.dart will handle routing via appUserProvider
   } catch (e) {
     if (context.mounted) {
