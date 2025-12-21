@@ -5,8 +5,10 @@
     "emailAddress": "Email Address",
     "password": "Password",
     "google": "Google",
-    "needAccount": "Need an account? Create one",
-    "alreadyHaveAccount": "Already have an account?"
+    "needAccountQuestion": "Need an account?",
+    "needAccountAction": "Join now",
+    "alreadyHaveAccountQuestion": "Already have an account?",
+    "alreadyHaveAccountAction": "Log in"
   },
   "signup": {
     "username": "Username",
