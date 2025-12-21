@@ -1,15 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:rally/widgets/auth_header_row.dart';
 
+/// A shared layout widget for authentication screens (Login and Signup).
+///
+/// This widget provides a consistent structure with a header, scrollable content area,
+/// and an optional bottom action button (e.g., "Don't have an account? Sign up").
+/// It handles responsiveness for smaller screens by adjusting padding and sizing.
 class AuthScreenLayout extends StatelessWidget {
+  /// The main content of the screen (form fields, buttons, etc.).
   final Widget child;
+
+  /// Optional title displayed at the top of the content area.
   final String? title;
+
+  /// Optional subtitle displayed below the title.
   final String? subtitle;
+
+  /// The text for the question part of the bottom link (e.g., "Need an account?").
   final String? bottomText;
+
+  /// The text for the action part of the bottom link (e.g., "Join now").
+  /// This text is styled to look clickable.
   final String? bottomButtonText;
+
+  /// Callback executed when the bottom link is pressed.
   final VoidCallback? onBottomButtonPressed;
+
+  /// Whether to display the app logo at the top. Defaults to `true`.
   final bool showLogo;
 
+  /// Creates an [AuthScreenLayout].
   const AuthScreenLayout({
     super.key,
     required this.child,
@@ -79,11 +99,14 @@ class AuthScreenLayout extends StatelessWidget {
                   child: Text.rich(
                     TextSpan(
                       text: '$bottomText ',
-                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                       children: <InlineSpan>[
                         TextSpan(
                           text: bottomButtonText,
-                          style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
+                          style: textTheme.titleMedium?.copyWith(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),

@@ -13,6 +13,7 @@ import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/providers/theme_provider.dart';
 import 'package:rally/screens/auth/signup_screen.dart';
 import 'package:rally/screens/loading/app_loading.dart';
+import 'package:rally/screens/onboarding/onboarding_screen.dart';
 import 'package:rally/screens/playground/auth_test.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:rally/themes/app_theme.dart';
@@ -84,8 +85,13 @@ class RallyApp extends ConsumerWidget {
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: authState.when(
         data: (AppUser? user) {
-          // Not logged in - show login screen
           if (user == null) {
+            final SharedPreferences prefs = ref.watch(sharedPrefsServiceProvider);
+            final bool onboardingSeen = prefs.getBool(SharedPrefKeys.onboardingSeen) ?? false;
+
+            if (!onboardingSeen) {
+              return const OnboardingScreen();
+            }
             return const SignupScreen();
           }
           // Fully authenticated - show home
