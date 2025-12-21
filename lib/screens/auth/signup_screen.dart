@@ -228,7 +228,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         });
       }
     } catch (e) {
-      showErrorSnackBar(context, e.toString());
+      if (mounted) showErrorSnackBar(context, e.toString());
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -242,7 +242,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         showSuccessSnackBar(context, t.auth.signup.emailResent);
       }
     } catch (e) {
-      showErrorSnackBar(context, e.toString());
+      if (mounted) showErrorSnackBar(context, e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -275,7 +275,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         showErrorSnackBar(context, t.auth.signup.emailNotVerified);
       }
     } catch (e) {
-      showErrorSnackBar(context, e.toString());
+      if (mounted) showErrorSnackBar(context, e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
