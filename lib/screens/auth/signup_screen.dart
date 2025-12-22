@@ -467,7 +467,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     return Align(
       alignment: Alignment.centerLeft,
       child: TextButton.icon(
-        onPressed: _goBack,
+        onPressed: _isLoading ? null : _goBack,
         icon: const Icon(Icons.arrow_back, size: 18),
         label: Text(label),
         style: TextButton.styleFrom(foregroundColor: colorScheme.onSurfaceVariant),

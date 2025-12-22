@@ -23,23 +23,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<Map<String, String>> _pages = <Map<String, String>>[
-    <String, String>{
-      'title': 'Our Tech in your hand',
-      'subtitle': 'You probably own a portable device, such as a smartphone or tablet.',
-      // 'image': 'assets/images/onboarding1.png', // Placeholder
-    },
-    <String, String>{
-      'title': 'All Control in your screen',
-      'subtitle': 'This represents a great opportunity for your business to generate sales.',
-      // 'image': 'assets/images/onboarding2.png', // Placeholder
-    },
-    <String, String>{
-      'title': 'Understand the real benefits',
-      'subtitle': 'Our portable technology gives your customers knowledge about you.',
-      // 'image': 'assets/images/onboarding3.png', // Placeholder
-    },
-  ];
+  List<Map<String, String>> _getPages() {
+    return <Map<String, String>>[
+      <String, String>{'title': t.onboarding.page1.title, 'subtitle': t.onboarding.page1.subtitle},
+      <String, String>{'title': t.onboarding.page2.title, 'subtitle': t.onboarding.page2.subtitle},
+      <String, String>{'title': t.onboarding.page3.title, 'subtitle': t.onboarding.page3.subtitle},
+    ];
+  }
 
   Future<void> _completeOnboarding() async {
     await ref.read(sharedPrefsServiceProvider).setBool(SharedPrefKeys.onboardingSeen, true);
@@ -53,6 +43,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
+    final List<Map<String, String>> pages = _getPages();
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -76,7 +67,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     _currentPage = index;
                   });
                 },
-                itemCount: _pages.length,
+                itemCount: pages.length,
                 itemBuilder: (BuildContext context, int index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -97,9 +88,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             color: colorScheme.onPrimaryContainer,
                           ),
                         ),
-                        const SizedBox(height: 64), // Increased spacing from image to title
+                        const SizedBox(height: 64),
                         Text(
-                          _pages[index]['title']!,
+                          pages[index]['title']!,
                           textAlign: TextAlign.center,
                           style: textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
@@ -108,11 +99,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          _pages[index]['subtitle']!,
+                          pages[index]['subtitle']!,
                           textAlign: TextAlign.center,
                           style: textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
-                            height: 1.6, // Slightly increased line height for readability
+                            height: 1.6,
                           ),
                         ),
                       ],
@@ -130,7 +121,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List<Widget>.generate(
-                      _pages.length,
+                      pages.length,
                       (int index) => AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -151,7 +142,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   // Next/Get Started Button
                   AuthPrimaryButton(
                     onPressed: () {
-                      if (_currentPage == _pages.length - 1) {
+                      if (_currentPage == pages.length - 1) {
                         _completeOnboarding();
                       } else {
                         _pageController.nextPage(
@@ -160,7 +151,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         );
                       }
                     },
-                    text: _currentPage == _pages.length - 1 ? t.common.getStarted : t.common.next,
+                    text: _currentPage == pages.length - 1 ? t.common.getStarted : t.common.next,
                   ),
                 ],
               ),

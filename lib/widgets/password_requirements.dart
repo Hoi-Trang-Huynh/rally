@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/themes/app_theme_extension.dart';
 import 'package:rally/utils/validation_constants.dart';
 
 /// A widget that displays password requirements with real-time validation.
@@ -16,6 +17,8 @@ class PasswordRequirements extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color successColor =
+        Theme.of(context).extension<AppThemeExtension>()?.successColor ?? Colors.green;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -24,21 +27,25 @@ class PasswordRequirements extends StatelessWidget {
           text: t.validation.passwordRule.minLength(minLength: PasswordValidation.minLength),
           isMet: PasswordValidation.hasMinLength(password),
           colorScheme: colorScheme,
+          successColor: successColor,
         ),
         _PasswordRuleItem(
           text: t.validation.passwordRule.uppercase,
           isMet: PasswordValidation.hasUppercase(password),
           colorScheme: colorScheme,
+          successColor: successColor,
         ),
         _PasswordRuleItem(
           text: t.validation.passwordRule.lowercase,
           isMet: PasswordValidation.hasLowercase(password),
           colorScheme: colorScheme,
+          successColor: successColor,
         ),
         _PasswordRuleItem(
           text: t.validation.passwordRule.number,
           isMet: PasswordValidation.hasDigit(password),
           colorScheme: colorScheme,
+          successColor: successColor,
         ),
       ],
     );
@@ -47,11 +54,17 @@ class PasswordRequirements extends StatelessWidget {
 
 /// A single password rule item with icon and text.
 class _PasswordRuleItem extends StatelessWidget {
-  const _PasswordRuleItem({required this.text, required this.isMet, required this.colorScheme});
+  const _PasswordRuleItem({
+    required this.text,
+    required this.isMet,
+    required this.colorScheme,
+    required this.successColor,
+  });
 
   final String text;
   final bool isMet;
   final ColorScheme colorScheme;
+  final Color successColor;
 
   @override
   Widget build(BuildContext context) {
@@ -62,14 +75,14 @@ class _PasswordRuleItem extends StatelessWidget {
           Icon(
             isMet ? Icons.check_circle : Icons.circle_outlined,
             size: 18,
-            color: isMet ? Colors.green : colorScheme.outline,
+            color: isMet ? successColor : colorScheme.outline,
           ),
           const SizedBox(width: 8),
           Text(
             text,
             style: TextStyle(
               fontSize: 13,
-              color: isMet ? Colors.green : colorScheme.onSurfaceVariant,
+              color: isMet ? successColor : colorScheme.onSurfaceVariant,
             ),
           ),
         ],

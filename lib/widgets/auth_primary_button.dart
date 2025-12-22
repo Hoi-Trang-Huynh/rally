@@ -23,6 +23,8 @@ class AuthPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return SizedBox(
       width: double.infinity,
       height: 48,
@@ -34,10 +36,10 @@ class AuthPrimaryButton extends StatelessWidget {
         ),
         child:
             isLoading
-                ? const SizedBox(
+                ? SizedBox(
                   height: 24,
                   width: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.onPrimary),
                 )
                 : Text(text),
       ),
