@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
+import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/screens/auth/login_screen.dart';
 import 'package:rally/screens/playground/auth_test.dart';
 import 'package:rally/utils/auth_helpers.dart';
@@ -317,6 +318,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Watch for locale changes and get the correct translations
+    final Translations t = Translations.of(context);
+
+    // Explicitly watch locale provider to ensure rebuilds (belt and suspenders)
+    ref.watch(localeProvider);
+
     return AuthScreenLayout(
       showLogo: _currentStep != SignupStep.emailVerification,
       title: _currentStep != SignupStep.emailVerification ? t.auth.login.createTripHeadline : null,
@@ -344,6 +351,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   // Note: logic for showing logo/title is now in AuthScreenLayout params.
 
   List<Widget> _buildEmailStep(BuildContext context) {
+    final Translations t = Translations.of(context);
     return <Widget>[
       AuthTextField(
         controller: _emailController,
@@ -388,6 +396,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   List<Widget> _buildPasswordStep(BuildContext context) {
+    final Translations t = Translations.of(context);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return <Widget>[
@@ -419,6 +428,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   List<Widget> _buildEmailVerificationStep(BuildContext context) {
+    final Translations t = Translations.of(context);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
 

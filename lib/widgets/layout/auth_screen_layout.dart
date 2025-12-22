@@ -76,7 +76,7 @@ class AuthScreenLayout extends StatelessWidget {
                           fontSize: isSmallScreen ? 22 : null,
                         ),
                       ),
-                      SizedBox(height: isSmallScreen ? 24 : 40),
+                      SizedBox(height: isSmallScreen ? 24 : 48), // Increased spacing
                     ],
                     if (subtitle != null) ...<Widget>[
                       Text(
@@ -84,7 +84,7 @@ class AuthScreenLayout extends StatelessWidget {
                         style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 48), // Increased spacing between subtitle and form
                     ],
                     child,
                   ],

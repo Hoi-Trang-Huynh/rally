@@ -4,6 +4,7 @@ import 'package:rally/constants/shared_pref_keys.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/screens/auth/signup_screen.dart';
 import 'package:rally/services/shared_prefs_service.dart';
+import 'package:rally/widgets/auth_primary_button.dart';
 
 /// A screen that introduces the user to the application's features.
 ///
@@ -96,7 +97,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             color: colorScheme.onPrimaryContainer,
                           ),
                         ),
-                        const SizedBox(height: 48),
+                        const SizedBox(height: 64), // Increased spacing from image to title
                         Text(
                           _pages[index]['title']!,
                           textAlign: TextAlign.center,
@@ -111,7 +112,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           textAlign: TextAlign.center,
                           style: textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
-                            height: 1.5,
+                            height: 1.6, // Slightly increased line height for readability
                           ),
                         ),
                       ],
@@ -148,25 +149,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   const SizedBox(height: 32),
 
                   // Next/Get Started Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: FilledButton(
-                      onPressed: () {
-                        if (_currentPage == _pages.length - 1) {
-                          _completeOnboarding();
-                        } else {
-                          _pageController.nextPage(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          );
-                        }
-                      },
-                      child: Text(
-                        _currentPage == _pages.length - 1 ? t.common.getStarted : t.common.next,
-                        style: textTheme.titleMedium?.copyWith(color: colorScheme.onPrimary),
-                      ),
-                    ),
+                  AuthPrimaryButton(
+                    onPressed: () {
+                      if (_currentPage == _pages.length - 1) {
+                        _completeOnboarding();
+                      } else {
+                        _pageController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    text: _currentPage == _pages.length - 1 ? t.common.getStarted : t.common.next,
                   ),
                 ],
               ),

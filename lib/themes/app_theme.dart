@@ -66,13 +66,30 @@ abstract class AppTheme {
       surfaceContainerHighest: const Color(0xfff0dedd),
     );
 
+    // Common Button Style for consistency
+    final FilledButtonThemeData filledButtonTheme = FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        minimumSize: const Size.fromHeight(56), // Mobile friendly height
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+      ),
+    );
+
     return base.copyWith(
       colorScheme: colorScheme,
-      textTheme: AppTextStyles.m3TextTheme.apply(
-        fontFamily: 'Inclusive Sans',
-        displayColor: colorScheme.onSurface,
-        bodyColor: colorScheme.onSurface,
-      ),
+      textTheme: AppTextStyles.m3TextTheme
+          .apply(
+            fontFamily: 'Inclusive Sans',
+            displayColor: colorScheme.onSurface,
+            bodyColor: colorScheme.onSurface,
+          )
+          .copyWith(
+            // Mobile optimizations
+            headlineMedium: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            titleMedium: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            bodyMedium: const TextStyle(fontSize: 16), // Readable body text
+          ),
+      filledButtonTheme: filledButtonTheme,
       extensions: <ThemeExtension<dynamic>>[
         const AppThemeExtension(
           successColor: AppColors.success500,
@@ -139,13 +156,30 @@ abstract class AppTheme {
       surfaceContainerHighest: const Color(0xff3d3231),
     );
 
+    // Common Button Style (Dark)
+    final FilledButtonThemeData filledButtonTheme = FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        minimumSize: const Size.fromHeight(56),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+      ),
+    );
+
     return base.copyWith(
       colorScheme: colorScheme,
-      textTheme: AppTextStyles.m3TextTheme.apply(
-        fontFamily: 'Inclusive Sans',
-        displayColor: colorScheme.onSurface,
-        bodyColor: colorScheme.onSurface,
-      ),
+      textTheme: AppTextStyles.m3TextTheme
+          .apply(
+            fontFamily: 'Inclusive Sans',
+            displayColor: colorScheme.onSurface,
+            bodyColor: colorScheme.onSurface,
+          )
+          .copyWith(
+            // Mobile optimizations
+            headlineMedium: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            titleMedium: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            bodyMedium: const TextStyle(fontSize: 16),
+          ),
+      filledButtonTheme: filledButtonTheme,
       extensions: <ThemeExtension<dynamic>>[
         const AppThemeExtension(
           successColor: AppColors.success500,
