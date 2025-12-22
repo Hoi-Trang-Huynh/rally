@@ -22,6 +22,7 @@
     "resendEmail": "Gửi lại email",
     "emailResent": "Đã gửi lại email xác minh",
     "checkVerification": "Tôi đã xác minh email",
-    "emailNotVerified": "Email chưa được xác minh. Vui lòng kiểm tra hộp thư."
+    "emailNotVerified": "Email chưa được xác minh. Vui lòng kiểm tra hộp thư.",
+    "completeProfile": "Hoàn thành hồ sơ"
   }
 }

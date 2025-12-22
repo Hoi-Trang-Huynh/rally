@@ -11,6 +11,7 @@ import 'package:rally/models/app_user.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/providers/theme_provider.dart';
+import 'package:rally/screens/auth/profile_completion_screen.dart';
 import 'package:rally/screens/auth/signup_screen.dart';
 import 'package:rally/screens/loading/app_loading.dart';
 import 'package:rally/screens/onboarding/onboarding_screen.dart';
@@ -94,7 +95,19 @@ class RallyApp extends ConsumerWidget {
             }
             return const SignupScreen();
           }
-          // Fully authenticated - show home
+
+          // Check if email is verified before showing home
+          if (!user.isEmailVerified) {
+            // User is logged in but email not verified - stay on signup for verification
+            return const SignupScreen();
+          }
+
+          // Check if profile needs completion (Google sign-in users)
+          if (user.needsProfileCompletion) {
+            return const ProfileCompletionScreen();
+          }
+
+          // Fully authenticated and verified - show home
           return const AuthTestScreen();
         },
         loading: () => const AppLoadingScreen(),

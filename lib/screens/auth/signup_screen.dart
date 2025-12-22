@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/models/app_user.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
@@ -74,6 +75,28 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   String? _savedFirstName;
   String? _savedLastName;
   String? _savedUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if user is already authenticated but needs email verification
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkExistingAuthState();
+    });
+  }
+
+  Future<void> _checkExistingAuthState() async {
+    final AsyncValue<AppUser?> authState = ref.read(appUserProvider);
+    authState.whenData((AppUser? user) {
+      if (user != null && !user.isEmailVerified && mounted) {
+        // User is logged in but email not verified - go to verification step
+        setState(() {
+          _emailController.text = user.email ?? '';
+          _currentStep = SignupStep.emailVerification;
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -215,8 +238,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               lastName: _savedLastName,
             );
 
-        // Step 7: Invalidate the auth provider to fetch the newly created profile
-        ref.invalidate(appUserProvider);
+        // Note: Don't invalidate appUserProvider here - wait until email is verified
+        // Otherwise main.dart will rebuild and navigate away from verification screen
       }
 
       // Step 6: Send email verification

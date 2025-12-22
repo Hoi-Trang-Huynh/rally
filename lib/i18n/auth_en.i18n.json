@@ -22,6 +22,7 @@
     "resendEmail": "Resend email",
     "emailResent": "Verification email resent",
     "checkVerification": "I've verified my email",
-    "emailNotVerified": "Email not verified yet. Please check your inbox."
+    "emailNotVerified": "Email not verified yet. Please check your inbox.",
+    "completeProfile": "Complete your profile"
   }
 }
