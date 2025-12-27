@@ -94,6 +94,16 @@ class AppUser {
     );
   }
 
+  /// Returns true if the user needs to complete their profile.
+  ///
+  /// This is used to detect Google Sign-In users who haven't filled in
+  /// their username, firstName, or lastName yet.
+  /// Checks for both null and empty strings.
+  bool get needsProfileCompletion =>
+      (username == null || username!.isEmpty) ||
+      (firstName == null || firstName!.isEmpty) ||
+      (lastName == null || lastName!.isEmpty);
+
   @override
   String toString() {
     return 'AppUser(uid: $uid, id: $id, email: $email, username: $username)';

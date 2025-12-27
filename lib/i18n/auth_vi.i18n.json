@@ -5,8 +5,10 @@
     "emailAddress": "Địa chỉ Email",
     "password": "Mật khẩu",
     "google": "Google",
-    "needAccount": "Chưa có tài khoản? Tạo mới",
-    "alreadyHaveAccount": "Đã có tài khoản?"
+    "needAccountQuestion": "Chưa có tài khoản?",
+    "needAccountAction": "Tham gia ngay",
+    "alreadyHaveAccountQuestion": "Đã có tài khoản?",
+    "alreadyHaveAccountAction": "Đăng nhập"
   },
   "signup": {
     "username": "Tên người dùng",
@@ -20,6 +22,7 @@
     "resendEmail": "Gửi lại email",
     "emailResent": "Đã gửi lại email xác minh",
     "checkVerification": "Tôi đã xác minh email",
-    "emailNotVerified": "Email chưa được xác minh. Vui lòng kiểm tra hộp thư."
+    "emailNotVerified": "Email chưa được xác minh. Vui lòng kiểm tra hộp thư.",
+    "completeProfile": "Hoàn thành hồ sơ"
   }
 }

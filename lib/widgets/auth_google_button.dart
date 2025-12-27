@@ -26,14 +26,28 @@ class AuthGoogleButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: 48,
-      child: OutlinedButton.icon(
+      child: OutlinedButton(
         onPressed: isLoading ? null : onPressed,
-        icon: const Icon(Icons.g_mobiledata, size: 28),
-        label: Text(text),
         style: OutlinedButton.styleFrom(
           foregroundColor: colorScheme.onSurface,
           side: BorderSide(color: colorScheme.outline),
         ),
+        child:
+            isLoading
+                ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+                : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const Icon(Icons.g_mobiledata, size: 28),
+                    const SizedBox(width: 8),
+                    Text(text),
+                  ],
+                ),
       ),
     );
   }

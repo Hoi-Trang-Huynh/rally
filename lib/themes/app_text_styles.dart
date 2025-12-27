@@ -17,8 +17,8 @@ class AppTextStyles {
 
       // Title
       titleLarge: TextStyle(fontSize: 22, height: 28 / 22, letterSpacing: 0),
-      titleMedium: TextStyle(fontSize: 12, letterSpacing: 0),
-      titleSmall: TextStyle(fontSize: 12, letterSpacing: 0),
+      titleMedium: TextStyle(fontSize: 16, height: 24 / 16, letterSpacing: 0.15),
+      titleSmall: TextStyle(fontSize: 14, height: 20 / 14, letterSpacing: 0.1),
 
       // Body
       bodyLarge: TextStyle(fontSize: 16, height: 24 / 16, letterSpacing: 0.5),
@@ -26,9 +26,9 @@ class AppTextStyles {
       bodySmall: TextStyle(fontSize: 12, height: 16 / 12, letterSpacing: 0.4),
 
       // Label
-      labelLarge: TextStyle(fontSize: 12, letterSpacing: 0),
-      labelMedium: TextStyle(fontSize: 12, letterSpacing: 0),
-      labelSmall: TextStyle(fontSize: 12, letterSpacing: 0),
+      labelLarge: TextStyle(fontSize: 14, height: 20 / 14, letterSpacing: 0.1),
+      labelMedium: TextStyle(fontSize: 12, height: 16 / 12, letterSpacing: 0.5),
+      labelSmall: TextStyle(fontSize: 11, height: 16 / 11, letterSpacing: 0.5),
     );
   }
 }

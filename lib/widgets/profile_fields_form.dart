@@ -18,8 +18,6 @@ class ProfileFieldsForm extends StatelessWidget {
     this.firstNameError,
     this.lastNameError,
     this.isLoading = false,
-    this.onBack,
-    this.backLabel,
     super.key,
   });
 
@@ -47,30 +45,11 @@ class ProfileFieldsForm extends StatelessWidget {
   /// Whether the form is in a loading state.
   final bool isLoading;
 
-  /// Optional callback for the back button.
-  final VoidCallback? onBack;
-
-  /// Optional label for the back button.
-  final String? backLabel;
-
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        if (onBack != null && backLabel != null)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: onBack,
-              icon: const Icon(Icons.arrow_back, size: 18),
-              label: Text(backLabel!),
-              style: TextButton.styleFrom(foregroundColor: colorScheme.onSurfaceVariant),
-            ),
-          ),
-        if (onBack != null) const SizedBox(height: 16),
         AuthTextField(
           controller: usernameController,
           labelText: t.auth.signup.username,

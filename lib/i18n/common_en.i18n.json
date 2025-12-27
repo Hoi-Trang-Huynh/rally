@@ -2,6 +2,9 @@
   "hello": "Hello",
   "orDivider": "Or",
   "continueButton": "Continue",
+  "next": "Next",
+  "getStarted": "Get Started",
+  "skip": "Skip",
   "language": {
     "english": "English",
     "vietnamese": "Vietnamese",

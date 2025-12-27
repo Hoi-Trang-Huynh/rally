@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/models/app_user.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
+import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/screens/auth/login_screen.dart';
 import 'package:rally/screens/playground/auth_test.dart';
 import 'package:rally/utils/auth_helpers.dart';
 import 'package:rally/utils/ui_helpers.dart';
 import 'package:rally/utils/validators.dart';
 import 'package:rally/widgets/auth_google_button.dart';
-import 'package:rally/widgets/auth_header_row.dart';
 import 'package:rally/widgets/auth_primary_button.dart';
 import 'package:rally/widgets/auth_text_field.dart';
+import 'package:rally/widgets/layout/auth_screen_layout.dart';
 import 'package:rally/widgets/or_divider.dart';
 import 'package:rally/widgets/password_requirements.dart';
 import 'package:rally/widgets/profile_fields_form.dart';
@@ -53,8 +55,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   // State
   SignupStep _currentStep = SignupStep.email;
@@ -74,6 +75,28 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   String? _savedFirstName;
   String? _savedLastName;
   String? _savedUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if user is already authenticated but needs email verification
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkExistingAuthState();
+    });
+  }
+
+  Future<void> _checkExistingAuthState() async {
+    final AsyncValue<AppUser?> authState = ref.read(appUserProvider);
+    authState.whenData((AppUser? user) {
+      if (user != null && !user.isEmailVerified && mounted) {
+        // User is logged in but email not verified - go to verification step
+        setState(() {
+          _emailController.text = user.email ?? '';
+          _currentStep = SignupStep.emailVerification;
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -144,9 +167,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     setState(() {});
 
-    if (_usernameError != null ||
-        _firstNameError != null ||
-        _lastNameError != null) {
+    if (_usernameError != null || _firstNameError != null || _lastNameError != null) {
       return;
     }
 
@@ -188,8 +209,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           );
 
       // Step 2: Get Firebase ID token
-      final String? idToken =
-          await ref.read(authRepositoryProvider).getIdToken();
+      final String? idToken = await ref.read(authRepositoryProvider).getIdToken();
       if (idToken == null) {
         throw Exception('Failed to get Firebase ID token');
       }
@@ -200,8 +220,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           .register(idToken: idToken);
 
       // Step 4: Extract user ID from register response
-      final Map<String, dynamic>? user =
-          registerResponse['user'] as Map<String, dynamic>?;
+      final Map<String, dynamic>? user = registerResponse['user'] as Map<String, dynamic>?;
       final String? userId = user?['id'] as String?;
       _savedUserId = userId;
 
@@ -219,8 +238,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               lastName: _savedLastName,
             );
 
-        // Step 7: Invalidate the auth provider to fetch the newly created profile
-        ref.invalidate(appUserProvider);
+        // Note: Don't invalidate appUserProvider here - wait until email is verified
+        // Otherwise main.dart will rebuild and navigate away from verification screen
       }
 
       // Step 6: Send email verification
@@ -233,7 +252,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         });
       }
     } catch (e) {
-      showErrorSnackBar(context, e.toString());
+      if (mounted) showErrorSnackBar(context, e.toString());
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -247,7 +266,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         showSuccessSnackBar(context, t.auth.signup.emailResent);
       }
     } catch (e) {
-      showErrorSnackBar(context, e.toString());
+      if (mounted) showErrorSnackBar(context, e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -257,8 +276,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final bool isVerified =
-          await ref.read(authRepositoryProvider).isEmailVerified();
+      final bool isVerified = await ref.read(authRepositoryProvider).isEmailVerified();
 
       if (isVerified && mounted) {
         // Update email verification status in backend
@@ -274,14 +292,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         // This ensures main.dart sees the updated emailVerified status
         ref.invalidate(appUserProvider);
 
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute<void>(builder: (_) => const AuthTestScreen()),
-        );
+        Navigator.of(
+          context,
+        ).pushReplacement(MaterialPageRoute<void>(builder: (_) => const AuthTestScreen()));
       } else if (mounted) {
         showErrorSnackBar(context, t.auth.signup.emailNotVerified);
       }
     } catch (e) {
-      showErrorSnackBar(context, e.toString());
+      if (mounted) showErrorSnackBar(context, e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -298,9 +316,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   void _navigateToLogin() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute<void>(builder: (_) => const LoginScreen()));
   }
 
   void _goBack() {
@@ -323,60 +341,19 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TextTheme textTheme = Theme.of(context).textTheme;
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final bool isSmallScreen = screenHeight < 700;
+    // Watch for locale changes and get the correct translations
+    final Translations t = Translations.of(context);
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            const AuthHeaderRow(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  children: <Widget>[
-                    if (_currentStep !=
-                        SignupStep.emailVerification) ...<Widget>[
-                      Image.asset(
-                        'assets/images/rally_logo_transparent.png',
-                        height: isSmallScreen ? 70 : 100,
-                      ),
-                      SizedBox(height: isSmallScreen ? 16 : 24),
-                      Text(
-                        t.auth.login.createTripHeadline,
-                        textAlign: TextAlign.center,
-                        style: textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
-                          fontSize: isSmallScreen ? 22 : null,
-                        ),
-                      ),
-                      SizedBox(height: isSmallScreen ? 24 : 40),
-                    ],
-                    ..._buildCurrentStep(context),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 16.0,
-              ),
-              child: TextButton(
-                onPressed: _navigateToLogin,
-                child: Text(
-                  t.auth.login.alreadyHaveAccount,
-                  style: TextStyle(color: colorScheme.onSurfaceVariant),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    // Explicitly watch locale provider to ensure rebuilds (belt and suspenders)
+    ref.watch(localeProvider);
+
+    return AuthScreenLayout(
+      showLogo: _currentStep != SignupStep.emailVerification,
+      title: _currentStep != SignupStep.emailVerification ? t.auth.login.createTripHeadline : null,
+      bottomText: t.auth.login.alreadyHaveAccountQuestion,
+      bottomButtonText: t.auth.login.alreadyHaveAccountAction,
+      onBottomButtonPressed: _navigateToLogin,
+      child: Column(children: _buildCurrentStep(context)),
     );
   }
 
@@ -393,7 +370,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     }
   }
 
+  // Helper method moved/removed during refactor if unused, but we keep the logic intact
+  // Note: logic for showing logo/title is now in AuthScreenLayout params.
+
   List<Widget> _buildEmailStep(BuildContext context) {
+    final Translations t = Translations.of(context);
     return <Widget>[
       AuthTextField(
         controller: _emailController,
@@ -438,6 +419,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   List<Widget> _buildPasswordStep(BuildContext context) {
+    final Translations t = Translations.of(context);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return <Widget>[
@@ -469,15 +451,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   List<Widget> _buildEmailVerificationStep(BuildContext context) {
+    final Translations t = Translations.of(context);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return <Widget>[
-      Icon(
-        Icons.mark_email_read_outlined,
-        size: 80,
-        color: colorScheme.primary,
-      ),
+      Icon(Icons.mark_email_read_outlined, size: 80, color: colorScheme.primary),
       const SizedBox(height: 24),
       Text(
         t.auth.signup.verifyEmail,
@@ -490,9 +469,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       const SizedBox(height: 12),
       Text(
         t.auth.signup.verifyEmailSubtitle(email: _emailController.text.trim()),
-        style: textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSurfaceVariant,
-        ),
+        style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
         textAlign: TextAlign.center,
       ),
       const SizedBox(height: 32),
@@ -504,10 +481,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       const SizedBox(height: 16),
       TextButton(
         onPressed: _isLoading ? null : _resendVerificationEmail,
-        child: Text(
-          t.auth.signup.resendEmail,
-          style: TextStyle(color: colorScheme.primary),
-        ),
+        child: Text(t.auth.signup.resendEmail, style: TextStyle(color: colorScheme.primary)),
       ),
     ];
   }
@@ -516,12 +490,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     return Align(
       alignment: Alignment.centerLeft,
       child: TextButton.icon(
-        onPressed: _goBack,
+        onPressed: _isLoading ? null : _goBack,
         icon: const Icon(Icons.arrow_back, size: 18),
         label: Text(label),
-        style: TextButton.styleFrom(
-          foregroundColor: colorScheme.onSurfaceVariant,
-        ),
+        style: TextButton.styleFrom(foregroundColor: colorScheme.onSurfaceVariant),
       ),
     );
   }

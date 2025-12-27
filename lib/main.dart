@@ -11,8 +11,10 @@ import 'package:rally/models/app_user.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/providers/theme_provider.dart';
-import 'package:rally/screens/auth/login_screen.dart';
+import 'package:rally/screens/auth/profile_completion_screen.dart';
+import 'package:rally/screens/auth/signup_screen.dart';
 import 'package:rally/screens/loading/app_loading.dart';
+import 'package:rally/screens/onboarding/onboarding_screen.dart';
 import 'package:rally/screens/playground/auth_test.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:rally/themes/app_theme.dart';
@@ -84,11 +86,28 @@ class RallyApp extends ConsumerWidget {
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: authState.when(
         data: (AppUser? user) {
-          // Not logged in - show login screen
           if (user == null) {
-            return const LoginScreen();
+            final SharedPreferences prefs = ref.watch(sharedPrefsServiceProvider);
+            final bool onboardingSeen = prefs.getBool(SharedPrefKeys.onboardingSeen) ?? false;
+
+            if (!onboardingSeen) {
+              return const OnboardingScreen();
+            }
+            return const SignupScreen();
           }
-          // Fully authenticated - show home
+
+          // Check if email is verified before showing home
+          if (!user.isEmailVerified) {
+            // User is logged in but email not verified - stay on signup for verification
+            return const SignupScreen();
+          }
+
+          // Check if profile needs completion (Google sign-in users)
+          if (user.needsProfileCompletion) {
+            return const ProfileCompletionScreen();
+          }
+
+          // Fully authenticated and verified - show home
           return const AuthTestScreen();
         },
         loading: () => const AppLoadingScreen(),
