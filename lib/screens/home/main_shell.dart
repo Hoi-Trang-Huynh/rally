@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../i18n/generated/translations.g.dart';
 import '../../models/nav_item_data.dart';
 import '../../widgets/navigation/app_bottom_nav_bar.dart';
+import '../profile/profile_screen.dart';
 
 /// Placeholder screen widget for tabs not yet implemented.
 class _PlaceholderScreen extends StatelessWidget {
@@ -13,6 +15,7 @@ class _PlaceholderScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
+    final Translations t = Translations.of(context);
 
     return Center(
       child: Column(
@@ -23,7 +26,7 @@ class _PlaceholderScreen extends StatelessWidget {
           Text(title, style: textTheme.headlineSmall?.copyWith(color: colorScheme.onSurface)),
           const SizedBox(height: 8),
           Text(
-            'Coming soon',
+            t.nav.comingSoon,
             style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
           ),
         ],
@@ -47,17 +50,19 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
-  /// Navigation items configuration.
-  static const List<NavItemData> _navItems = <NavItemData>[
-    NavItemData(icon: Icons.cottage_outlined, activeIcon: Icons.cottage, label: 'Home'),
-    NavItemData(icon: Icons.forum_outlined, activeIcon: Icons.forum, label: 'Chat'),
-    NavItemData(icon: Icons.map_outlined, activeIcon: Icons.map, label: 'Explore'),
-    NavItemData(
-      icon: Icons.account_circle_outlined,
-      activeIcon: Icons.account_circle,
-      label: 'Profile',
-    ),
-  ];
+  /// Build navigation items with translations.
+  List<NavItemData> _buildNavItems(Translations t) {
+    return <NavItemData>[
+      NavItemData(icon: Icons.cottage_outlined, activeIcon: Icons.cottage, label: t.nav.home),
+      NavItemData(icon: Icons.forum_outlined, activeIcon: Icons.forum, label: t.nav.chat),
+      NavItemData(icon: Icons.map_outlined, activeIcon: Icons.map, label: t.nav.explore),
+      NavItemData(
+        icon: Icons.account_circle_outlined,
+        activeIcon: Icons.account_circle,
+        label: t.nav.profile,
+      ),
+    ];
+  }
 
   void _onTabSelected(int index) {
     setState(() {
@@ -66,30 +71,36 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _onActionPressed() {
-    // TODO: Implement action button functionality (e.g., create new rally)
+    final Translations t = Translations.of(context);
     debugPrint('Action button pressed');
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Create Rally - Coming soon!'), duration: Duration(seconds: 2)),
+      SnackBar(
+        content: Text('${t.nav.createRally} - ${t.nav.comingSoon}!'),
+        duration: const Duration(seconds: 2),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final Translations t = Translations.of(context);
+    final List<NavItemData> navItems = _buildNavItems(t);
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: const <Widget>[
-          _PlaceholderScreen(title: 'Home'),
-          _PlaceholderScreen(title: 'Chat'),
-          _PlaceholderScreen(title: 'Explore'),
-          _PlaceholderScreen(title: 'Profile'),
+        children: <Widget>[
+          _PlaceholderScreen(title: t.nav.home),
+          _PlaceholderScreen(title: t.nav.chat),
+          _PlaceholderScreen(title: t.nav.explore),
+          const ProfileScreen(),
         ],
       ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _currentIndex,
         onIndexChanged: _onTabSelected,
         onActionPressed: _onActionPressed,
-        items: _navItems,
+        items: navItems,
       ),
     );
   }
