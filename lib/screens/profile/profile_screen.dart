@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/app_user.dart';
@@ -48,15 +51,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
         return Scaffold(
           backgroundColor: colorScheme.surface,
-          body: SafeArea(
+          extendBodyBehindAppBar: true, // Required for glassmorphism
+          body: AnimationLimiter(
             child: CustomScrollView(
               slivers: <Widget>[
-                // App Bar with username and settings
+                // Glassmorphism App Bar
                 SliverAppBar(
-                  backgroundColor: colorScheme.surface,
-                  surfaceTintColor: Colors.transparent,
+                  backgroundColor: colorScheme.surface.withValues(alpha: 0.7),
+                  elevation: 0,
                   pinned: true,
                   centerTitle: true,
+                  flexibleSpace: ClipRRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(color: Colors.transparent),
+                    ),
+                  ),
                   title: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
@@ -85,65 +95,73 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ],
                 ),
 
-                // Profile Content
+                // Profile Content with Staggered Animation
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
-                      children: <Widget>[
-                        const SizedBox(height: 16),
-
-                        // Avatar with online indicator
-                        ProfileAvatar(
-                          avatarUrl: user.avatarUrl,
-                          size: 100,
-                          showOnlineIndicator: true,
-                          isOnline: true, // Placeholder
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // @username
-                        Text(
-                          '@${user.username ?? 'username'}',
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
+                      children: AnimationConfiguration.toStaggeredList(
+                        duration: const Duration(milliseconds: 375),
+                        childAnimationBuilder: (Widget widget) {
+                          return SlideAnimation(
+                            verticalOffset: 50.0,
+                            child: FadeInAnimation(child: widget),
+                          );
+                        },
+                        children: <Widget>[
+                          const SizedBox(height: 100), // Spacing for extended app bar
+                          // Avatar with online indicator
+                          ProfileAvatar(
+                            avatarUrl: user.avatarUrl,
+                            size: 100,
+                            showOnlineIndicator: true,
+                            isOnline: true,
                           ),
-                        ),
 
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                        // Stats row (placeholders)
-                        ProfileStatsRow(
-                          followersCount: '03',
-                          followingCount: '03',
-                          followersLabel: t.profile.followers,
-                          followingLabel: t.profile.followings,
-                        ),
+                          // @username
+                          Text(
+                            '@${user.username ?? 'username'}',
+                            style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
 
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                        // Bio (placeholder)
-                        Text(
-                          t.profile.bio,
-                          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
-                          textAlign: TextAlign.center,
-                        ),
+                          // Stats row
+                          ProfileStatsRow(
+                            followersCount: '03',
+                            followingCount: '03',
+                            followersLabel: t.profile.followers,
+                            followingLabel: t.profile.followings,
+                          ),
 
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 16),
 
-                        // Modular Tab Bar
-                        ProfileTabBar(
-                          tabs: _buildTabs(t),
-                          selectedId: _selectedTabId,
-                          onTabSelected: (String id) {
-                            setState(() {
-                              _selectedTabId = id;
-                            });
-                          },
-                        ),
-                      ],
+                          // Bio
+                          Text(
+                            t.profile.bio,
+                            style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
+                            textAlign: TextAlign.center,
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          // Modular Tab Bar
+                          ProfileTabBar(
+                            tabs: _buildTabs(t),
+                            selectedId: _selectedTabId,
+                            onTabSelected: (String id) {
+                              setState(() {
+                                _selectedTabId = id;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -184,17 +202,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           mainAxisSpacing: 8,
         ),
         delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-          return Container(
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Text(
-                '${index + 1}',
-                style: TextStyle(
-                  color: colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.bold,
+          return AnimationConfiguration.staggeredGrid(
+            position: index,
+            duration: const Duration(milliseconds: 375),
+            columnCount: 3,
+            child: ScaleAnimation(
+              child: FadeInAnimation(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${index + 1}',
+                      style: TextStyle(
+                        color: colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/constants/shared_pref_keys.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
-import 'package:rally/screens/auth/signup_screen.dart';
+import 'package:rally/screens/auth/auth_screen.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:rally/widgets/auth_primary_button.dart';
 
@@ -34,9 +34,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Future<void> _completeOnboarding() async {
     await ref.read(sharedPrefsServiceProvider).setBool(SharedPrefKeys.onboardingSeen, true);
     if (!mounted) return;
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute<void>(builder: (_) => const SignupScreen()));
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(builder: (_) => const AuthScreen(initialIsLogin: false)),
+    );
   }
 
   @override

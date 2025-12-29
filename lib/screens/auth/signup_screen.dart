@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/models/app_user.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
-import 'package:rally/screens/auth/login_screen.dart';
 import 'package:rally/screens/playground/auth_test.dart';
 import 'package:rally/utils/auth_helpers.dart';
 import 'package:rally/utils/ui_helpers.dart';
@@ -13,7 +13,6 @@ import 'package:rally/utils/validators.dart';
 import 'package:rally/widgets/auth_google_button.dart';
 import 'package:rally/widgets/auth_primary_button.dart';
 import 'package:rally/widgets/auth_text_field.dart';
-import 'package:rally/widgets/layout/auth_screen_layout.dart';
 import 'package:rally/widgets/or_divider.dart';
 import 'package:rally/widgets/password_requirements.dart';
 import 'package:rally/widgets/profile_fields_form.dart';
@@ -23,7 +22,7 @@ enum SignupStep {
   /// Step 1: Email entry
   email,
 
-  /// Step 2: Profile info (username, first name, last name)
+  /// Step 2: Profile info
   profile,
 
   /// Step 3: Password creation
@@ -33,16 +32,15 @@ enum SignupStep {
   emailVerification,
 }
 
-/// Screen for user registration (Sign Up).
+/// Form content for Signup.
 ///
-/// This is a four-step signup flow:
-/// 1. Email entry and validation
-/// 2. Username, first name, last name
-/// 3. Password and confirm password
-/// 4. Email verification
+/// Designed to be embedded in [AuthScreen].
 class SignupScreen extends ConsumerStatefulWidget {
+  /// Callback to switch to login mode.
+  final VoidCallback onLoginClicked;
+
   /// Creates a new [SignupScreen].
-  const SignupScreen({super.key});
+  const SignupScreen({super.key, required this.onLoginClicked});
 
   @override
   ConsumerState<SignupScreen> createState() => _SignupScreenState();
@@ -59,7 +57,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   // State
   SignupStep _currentStep = SignupStep.email;
-  bool _isLoading = false;
+  bool _isSignupLoading = false;
+  bool _isGoogleLoading = false;
   String _currentPassword = '';
 
   // Field-specific error messages
@@ -70,16 +69,17 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   String? _passwordError;
   String? _confirmPasswordError;
 
-  // Saved user data (for future use)
+  // Saved user data
   String? _savedUsername;
   String? _savedFirstName;
   String? _savedLastName;
   String? _savedUserId;
 
+  bool get _anyLoading => _isSignupLoading || _isGoogleLoading;
+
   @override
   void initState() {
     super.initState();
-    // Check if user is already authenticated but needs email verification
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkExistingAuthState();
     });
@@ -89,7 +89,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final AsyncValue<AppUser?> authState = ref.read(appUserProvider);
     authState.whenData((AppUser? user) {
       if (user != null && !user.isEmailVerified && mounted) {
-        // User is logged in but email not verified - go to verification step
         setState(() {
           _emailController.text = user.email ?? '';
           _currentStep = SignupStep.emailVerification;
@@ -118,117 +117,88 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     _confirmPasswordError = null;
   }
 
-  /// TODO: check if email exists.
   Future<bool> _checkEmailExists(String email) async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
     return false;
   }
 
   // --- Step Handlers ---
-
   Future<void> _onContinueStep1() async {
     _clearErrors();
-
     _emailError = Validators.validateEmail(_emailController.text);
     setState(() {});
-
     if (_emailError != null) return;
 
-    setState(() => _isLoading = true);
-
+    setState(() => _isSignupLoading = true);
     try {
       final bool exists = await _checkEmailExists(_emailController.text.trim());
       if (exists) {
         setState(() {
           _emailError = 'An account with this email already exists';
-          _isLoading = false;
+          _isSignupLoading = false;
         });
         return;
       }
-
       setState(() {
         _currentStep = SignupStep.profile;
-        _isLoading = false;
+        _isSignupLoading = false;
       });
     } catch (e) {
       setState(() {
         _emailError = e.toString();
-        _isLoading = false;
+        _isSignupLoading = false;
       });
     }
   }
 
   void _onContinueStep2() {
     _clearErrors();
-
     _usernameError = Validators.validateUsername(_usernameController.text);
     _firstNameError = Validators.validateFirstName(_firstNameController.text);
     _lastNameError = Validators.validateLastName(_lastNameController.text);
-
     setState(() {});
-
-    if (_usernameError != null || _firstNameError != null || _lastNameError != null) {
-      return;
-    }
+    if (_usernameError != null || _firstNameError != null || _lastNameError != null) return;
 
     _savedUsername = _usernameController.text.trim();
     _savedFirstName = _firstNameController.text.trim();
     _savedLastName = _lastNameController.text.trim();
-
     setState(() => _currentStep = SignupStep.password);
   }
 
   Future<void> _onContinueStep3() async {
     _clearErrors();
-
     _passwordError = Validators.validatePassword(_passwordController.text);
     _confirmPasswordError = Validators.validateConfirmPassword(
       _confirmPasswordController.text,
       _passwordController.text,
     );
-
     setState(() {});
-
-    if (_passwordError != null || _confirmPasswordError != null) {
-      return;
-    }
-
+    if (_passwordError != null || _confirmPasswordError != null) return;
     await _signUp();
   }
 
   Future<void> _signUp() async {
-    setState(() => _isLoading = true);
-
+    setState(() => _isSignupLoading = true);
     try {
-      // Step 1: Create Firebase user
       await ref
           .read(authRepositoryProvider)
           .createUserWithEmailAndPassword(
             _emailController.text.trim(),
             _passwordController.text.trim(),
           );
-
-      // Step 2: Get Firebase ID token
       final String? idToken = await ref.read(authRepositoryProvider).getIdToken();
-      if (idToken == null) {
-        throw Exception('Failed to get Firebase ID token');
-      }
+      if (idToken == null) throw Exception('Failed to get Firebase ID token');
 
-      // Step 3: Register user in backend with Firebase ID token
       final Map<String, dynamic> registerResponse = await ref
           .read(userRepositoryProvider)
           .register(idToken: idToken);
 
-      // Step 4: Extract user ID from register response
       final Map<String, dynamic>? user = registerResponse['user'] as Map<String, dynamic>?;
       final String? userId = user?['id'] as String?;
       _savedUserId = userId;
 
       if (userId != null) {
-        // Step 5: Force refresh the token to ensure it's valid for the next request
         await ref.read(authRepositoryProvider).getIdToken(forceRefresh: true);
-
-        // Step 6: Update user profile with provided information
         await ref
             .read(userRepositoryProvider)
             .updateUserProfile(
@@ -237,71 +207,54 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               firstName: _savedFirstName,
               lastName: _savedLastName,
             );
-
-        // Note: Don't invalidate appUserProvider here - wait until email is verified
-        // Otherwise main.dart will rebuild and navigate away from verification screen
       }
-
-      // Step 6: Send email verification
       await ref.read(authRepositoryProvider).sendEmailVerification();
-
       if (mounted) {
         setState(() {
           _currentStep = SignupStep.emailVerification;
-          _isLoading = false;
+          _isSignupLoading = false;
         });
       }
     } catch (e) {
       if (mounted) showErrorSnackBar(context, e.toString());
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isSignupLoading = false);
     }
   }
 
   Future<void> _resendVerificationEmail() async {
-    setState(() => _isLoading = true);
-
+    setState(() => _isSignupLoading = true);
     try {
       await ref.read(authRepositoryProvider).sendEmailVerification();
-      if (mounted) {
-        showSuccessSnackBar(context, t.auth.signup.emailResent);
-      }
+      if (mounted) showSuccessSnackBar(context, Translations.of(context).auth.signup.emailResent);
     } catch (e) {
       if (mounted) showErrorSnackBar(context, e.toString());
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isSignupLoading = false);
     }
   }
 
   Future<void> _checkEmailVerification() async {
-    setState(() => _isLoading = true);
-
+    setState(() => _isSignupLoading = true);
     try {
       final bool isVerified = await ref.read(authRepositoryProvider).isEmailVerified();
-
       if (isVerified && mounted) {
-        // Update email verification status in backend
         if (_savedUserId != null) {
           await ref
               .read(userRepositoryProvider)
               .updateUserProfile(userId: _savedUserId!, isEmailVerified: true);
         }
-
         if (!mounted) return;
-
-        // Invalidate the auth provider to refresh the user state
-        // This ensures main.dart sees the updated emailVerified status
         ref.invalidate(appUserProvider);
-
         Navigator.of(
           context,
         ).pushReplacement(MaterialPageRoute<void>(builder: (_) => const AuthTestScreen()));
       } else if (mounted) {
-        showErrorSnackBar(context, t.auth.signup.emailNotVerified);
+        showErrorSnackBar(context, Translations.of(context).auth.signup.emailNotVerified);
       }
     } catch (e) {
       if (mounted) showErrorSnackBar(context, e.toString());
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isSignupLoading = false);
     }
   }
 
@@ -310,15 +263,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       ref: ref,
       context: context,
       onLoadingChanged: (bool isLoading) {
-        if (mounted) setState(() => _isLoading = isLoading);
+        if (mounted) setState(() => _isGoogleLoading = isLoading);
       },
     );
-  }
-
-  void _navigateToLogin() {
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute<void>(builder: (_) => const LoginScreen()));
   }
 
   void _goBack() {
@@ -332,32 +279,51 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         case SignupStep.password:
           _currentStep = SignupStep.profile;
         case SignupStep.emailVerification:
-          break; // Cannot go back
+          break;
       }
     });
   }
 
-  // --- Build Methods ---
-
   @override
   Widget build(BuildContext context) {
-    // Watch for locale changes and get the correct translations
-    final Translations t = Translations.of(context);
-
-    // Explicitly watch locale provider to ensure rebuilds (belt and suspenders)
+    // Watch locale provider
     ref.watch(localeProvider);
+    final Translations t = Translations.of(context);
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final bool isSmallScreen = screenHeight < 700;
 
-    return AuthScreenLayout(
-      showLogo: _currentStep != SignupStep.emailVerification,
-      title: _currentStep != SignupStep.emailVerification ? t.auth.login.createTripHeadline : null,
-      bottomText: t.auth.login.alreadyHaveAccountQuestion,
-      bottomButtonText: t.auth.login.alreadyHaveAccountAction,
-      onBottomButtonPressed: _navigateToLogin,
-      child: Column(children: _buildCurrentStep(context)),
+    return Column(
+      children: AnimationConfiguration.toStaggeredList(
+        duration: const Duration(milliseconds: 375),
+        childAnimationBuilder: (Widget widget) {
+          return SlideAnimation(verticalOffset: 50.0, child: FadeInAnimation(child: widget));
+        },
+        children: <Widget>[
+          // Title (Only if NOT verifying email)
+          if (_currentStep != SignupStep.emailVerification) ...<Widget>[
+            Text(
+              t.auth.login.createTripHeadline,
+              textAlign: TextAlign.center,
+              style: textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
+                fontSize: isSmallScreen ? 22 : null,
+              ),
+            ),
+            SizedBox(height: isSmallScreen ? 24 : 48),
+          ],
+
+          // Form Content
+          ..._buildCurrentStep(context),
+        ],
+      ),
     );
   }
 
   List<Widget> _buildCurrentStep(BuildContext context) {
+    if (_currentStep == SignupStep.emailVerification) return _buildEmailVerificationStep(context);
     switch (_currentStep) {
       case SignupStep.email:
         return _buildEmailStep(context);
@@ -365,13 +331,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         return _buildProfileStep(context);
       case SignupStep.password:
         return _buildPasswordStep(context);
-      case SignupStep.emailVerification:
-        return _buildEmailVerificationStep(context);
+      default:
+        return <Widget>[];
     }
   }
-
-  // Helper method moved/removed during refactor if unused, but we keep the logic intact
-  // Note: logic for showing logo/title is now in AuthScreenLayout params.
 
   List<Widget> _buildEmailStep(BuildContext context) {
     final Translations t = Translations.of(context);
@@ -381,27 +344,27 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         labelText: t.auth.login.emailAddress,
         errorText: _emailError,
         keyboardType: TextInputType.emailAddress,
+        enabled: !_anyLoading,
       ),
       const SizedBox(height: 24),
       AuthPrimaryButton(
         text: t.common.continueButton,
-        onPressed: _onContinueStep1,
-        isLoading: _isLoading,
+        onPressed: _anyLoading ? null : _onContinueStep1,
+        isLoading: _isSignupLoading,
       ),
       const SizedBox(height: 24),
       const OrDivider(),
       const SizedBox(height: 24),
       AuthGoogleButton(
         text: t.auth.login.google,
-        onPressed: _signInWithGoogle,
-        isLoading: _isLoading,
+        onPressed: _anyLoading ? null : _signInWithGoogle,
+        isLoading: _isGoogleLoading,
       ),
     ];
   }
 
   List<Widget> _buildProfileStep(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
     return <Widget>[
       _buildBackButton(_emailController.text, colorScheme),
       const SizedBox(height: 16),
@@ -412,7 +375,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         usernameError: _usernameError,
         firstNameError: _firstNameError,
         lastNameError: _lastNameError,
-        isLoading: _isLoading,
+        isLoading: _isSignupLoading,
         onContinue: _onContinueStep2,
       ),
     ];
@@ -421,7 +384,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   List<Widget> _buildPasswordStep(BuildContext context) {
     final Translations t = Translations.of(context);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
     return <Widget>[
       _buildBackButton(t.auth.signup.stepProfile, colorScheme),
       const SizedBox(height: 16),
@@ -431,6 +393,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         errorText: _passwordError,
         obscureText: true,
         onChanged: (String value) => setState(() => _currentPassword = value),
+        enabled: !_anyLoading,
       ),
       const SizedBox(height: 8),
       PasswordRequirements(password: _currentPassword),
@@ -440,12 +403,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         labelText: t.auth.signup.confirmPassword,
         errorText: _confirmPasswordError,
         obscureText: true,
+        enabled: !_anyLoading,
       ),
       const SizedBox(height: 24),
       AuthPrimaryButton(
         text: t.common.continueButton,
-        onPressed: _onContinueStep3,
-        isLoading: _isLoading,
+        onPressed: _anyLoading ? null : _onContinueStep3,
+        isLoading: _isSignupLoading,
       ),
     ];
   }
@@ -454,7 +418,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final Translations t = Translations.of(context);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
-
     return <Widget>[
       Icon(Icons.mark_email_read_outlined, size: 80, color: colorScheme.primary),
       const SizedBox(height: 24),
@@ -476,11 +439,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       AuthPrimaryButton(
         text: t.auth.signup.checkVerification,
         onPressed: _checkEmailVerification,
-        isLoading: _isLoading,
+        isLoading: _isSignupLoading,
       ),
       const SizedBox(height: 16),
       TextButton(
-        onPressed: _isLoading ? null : _resendVerificationEmail,
+        onPressed: _isSignupLoading ? null : _resendVerificationEmail,
         child: Text(t.auth.signup.resendEmail, style: TextStyle(color: colorScheme.primary)),
       ),
     ];
@@ -490,7 +453,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     return Align(
       alignment: Alignment.centerLeft,
       child: TextButton.icon(
-        onPressed: _isLoading ? null : _goBack,
+        onPressed: _anyLoading ? null : _goBack,
         icon: const Icon(Icons.arrow_back, size: 18),
         label: Text(label),
         style: TextButton.styleFrom(foregroundColor: colorScheme.onSurfaceVariant),

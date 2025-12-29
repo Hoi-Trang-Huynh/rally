@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Data class for profile tab items.
 class ProfileTabData {
@@ -48,10 +49,15 @@ class ProfileTabBar extends StatelessWidget {
           final ProfileTabData tab = tabs[index];
           final bool isSelected = tab.id == selectedId;
 
-          return GestureDetector(
-            onTap: () => onTabSelected(tab.id),
-            child: Container(
-              padding: const EdgeInsets.only(bottom: 8),
+          return InkWell(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              onTabSelected(tab.id);
+            },
+            borderRadius: BorderRadius.circular(4),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.only(bottom: 8, left: 4, right: 4),
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
@@ -60,12 +66,13 @@ class ProfileTabBar extends StatelessWidget {
                   ),
                 ),
               ),
-              child: Text(
-                tab.label,
-                style: textTheme.bodyMedium?.copyWith(
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: (textTheme.bodyMedium ?? const TextStyle()).copyWith(
                   color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
+                child: Text(tab.label),
               ),
             ),
           );

@@ -13,6 +13,7 @@ class AuthTextField extends StatefulWidget {
     this.obscureText = false,
     this.keyboardType,
     this.onChanged,
+    this.enabled = true,
   });
 
   /// The text editing controller.
@@ -33,6 +34,9 @@ class AuthTextField extends StatefulWidget {
   /// Callback when text changes.
   final ValueChanged<String>? onChanged;
 
+  /// Whether the field is enabled.
+  final bool enabled;
+
   @override
   State<AuthTextField> createState() => _AuthTextFieldState();
 }
@@ -49,6 +53,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
       obscureText: widget.obscureText && _obscured,
       keyboardType: widget.keyboardType,
       onChanged: widget.onChanged,
+      enabled: widget.enabled,
       decoration: InputDecoration(
         labelText: widget.labelText,
         border: const OutlineInputBorder(),

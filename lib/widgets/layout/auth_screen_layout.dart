@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:rally/widgets/auth_header_row.dart';
 
 /// A shared layout widget for authentication screens (Login and Signup).
@@ -6,6 +8,8 @@ import 'package:rally/widgets/auth_header_row.dart';
 /// This widget provides a consistent structure with a header, scrollable content area,
 /// and an optional bottom action button (e.g., "Don't have an account? Sign up").
 /// It handles responsiveness for smaller screens by adjusting padding and sizing.
+///
+/// Includes Staggered Animations for content (provided by child) and Hero transition for logo.
 class AuthScreenLayout extends StatelessWidget {
   /// The main content of the screen (form fields, buttons, etc.).
   final Widget child;
@@ -52,17 +56,24 @@ class AuthScreenLayout extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: <Widget>[
+            // Static Top Bar (Language/Theme)
             const AuthHeaderRow(),
+
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
+                    // Static Header Elements (Logo, Title, Subtitle)
+                    // These do NOT slide in on every screen switch
                     if (showLogo) ...<Widget>[
-                      Image.asset(
-                        'assets/images/rally_logo_transparent.png',
-                        height: isSmallScreen ? 70 : 100,
+                      Hero(
+                        tag: 'app_logo',
+                        child: Image.asset(
+                          'assets/images/rally_logo_transparent.png',
+                          height: isSmallScreen ? 70 : 100,
+                        ),
                       ),
                       SizedBox(height: isSmallScreen ? 16 : 24),
                     ],
@@ -76,7 +87,7 @@ class AuthScreenLayout extends StatelessWidget {
                           fontSize: isSmallScreen ? 22 : null,
                         ),
                       ),
-                      SizedBox(height: isSmallScreen ? 24 : 48), // Increased spacing
+                      SizedBox(height: isSmallScreen ? 24 : 48),
                     ],
                     if (subtitle != null) ...<Widget>[
                       Text(
@@ -84,18 +95,27 @@ class AuthScreenLayout extends StatelessWidget {
                         style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 48), // Increased spacing between subtitle and form
+                      const SizedBox(height: 48),
                     ],
-                    child,
+
+                    // Animated Form Content
+                    // Wrapped in AnimationLimiter so the staggered list inside 'child' functions correctly
+                    AnimationLimiter(child: child),
                   ],
                 ),
               ),
             ),
+
             if (bottomText != null && bottomButtonText != null)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
                 child: TextButton(
-                  onPressed: onBottomButtonPressed,
+                  onPressed: () {
+                    if (onBottomButtonPressed != null) {
+                      HapticFeedback.lightImpact();
+                      onBottomButtonPressed!();
+                    }
+                  },
                   child: Text.rich(
                     TextSpan(
                       text: '$bottomText ',

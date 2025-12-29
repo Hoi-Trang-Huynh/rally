@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/app_user.dart';
@@ -37,7 +39,10 @@ class SettingsScreen extends ConsumerWidget {
             ),
             title: Text(
               t.settings.title,
-              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
+              ),
             ),
             centerTitle: true,
             actions: <Widget>[
@@ -49,75 +54,89 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
-          body: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                // Profile section
-                _buildProfileSection(context, user, t),
-
-                const Divider(height: 32),
-
-                // Menu items
-                _buildMenuItem(
-                  context,
-                  icon: Icons.account_circle_outlined,
-                  label: t.settings.account,
-                  onTap: () {},
-                ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.shield_outlined,
-                  label: t.settings.privacy,
-                  onTap: () {},
-                ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.language,
-                  label: t.settings.language,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (BuildContext context) => const LanguageScreen(),
-                      ),
+          body: AnimationLimiter(
+            child: SingleChildScrollView(
+              child: Column(
+                children: AnimationConfiguration.toStaggeredList(
+                  duration: const Duration(milliseconds: 375),
+                  childAnimationBuilder: (Widget widget) {
+                    return SlideAnimation(
+                      verticalOffset: 50.0,
+                      child: FadeInAnimation(child: widget),
                     );
                   },
-                  trailing: Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
-                ),
-                // Theme toggle
-                _buildThemeToggle(context, themeState, themeNotifier, t),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.help_outline,
-                  label: t.settings.helpFeedback,
-                  onTap: () {},
-                ),
+                  children: <Widget>[
+                    // Profile section
+                    _buildProfileSection(context, user, t),
 
-                const SizedBox(height: 32),
+                    const Divider(height: 32),
 
-                // Logout button
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () async {
-                        await ref.read(authRepositoryProvider).signOut();
-                        if (context.mounted) {
-                          Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
-                        }
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: colorScheme.surfaceContainerHighest,
-                        foregroundColor: colorScheme.onSurface,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: Text(t.settings.logout),
+                    // Menu items
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.account_circle_outlined,
+                      label: t.settings.account,
+                      onTap: () {},
                     ),
-                  ),
-                ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.shield_outlined,
+                      label: t.settings.privacy,
+                      onTap: () {},
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.language,
+                      label: t.settings.language,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) => const LanguageScreen(),
+                          ),
+                        );
+                      },
+                      trailing: Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
+                    ),
+                    // Theme toggle
+                    _buildThemeToggle(context, themeState, themeNotifier, t),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.help_outline,
+                      label: t.settings.helpFeedback,
+                      onTap: () {},
+                    ),
 
-                const SizedBox(height: 32),
-              ],
+                    const SizedBox(height: 32),
+
+                    // Logout button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: () async {
+                            HapticFeedback.mediumImpact();
+                            await ref.read(authRepositoryProvider).signOut();
+                            if (context.mounted) {
+                              Navigator.of(
+                                context,
+                              ).popUntil((Route<dynamic> route) => route.isFirst);
+                            }
+                          },
+                          style: FilledButton.styleFrom(
+                            backgroundColor: colorScheme.surfaceContainerHighest,
+                            foregroundColor: colorScheme.onSurface,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          child: Text(t.settings.logout),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+                  ],
+                ),
+              ),
             ),
           ),
         );
@@ -161,6 +180,7 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 OutlinedButton(
                   onPressed: () {
+                    HapticFeedback.lightImpact();
                     // TODO: Navigate to edit profile
                   },
                   style: OutlinedButton.styleFrom(
@@ -177,7 +197,9 @@ class SettingsScreen extends ConsumerWidget {
           // More options
           IconButton(
             icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
-            onPressed: () {},
+            onPressed: () {
+              HapticFeedback.lightImpact();
+            },
           ),
         ],
       ),
@@ -197,6 +219,7 @@ class SettingsScreen extends ConsumerWidget {
 
     return InkWell(
       onTap: () {
+        HapticFeedback.lightImpact();
         // Toggle between light and dark
         if (isDarkMode) {
           themeNotifier.setThemeMode(AppThemeMode.light);
@@ -275,7 +298,10 @@ class SettingsScreen extends ConsumerWidget {
       leading: Icon(icon, color: colorScheme.onSurfaceVariant),
       title: Text(label, style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface)),
       trailing: trailing,
-      onTap: onTap,
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
     );
   }

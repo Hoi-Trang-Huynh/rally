@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../models/nav_item_data.dart';
 
@@ -7,6 +8,8 @@ import '../../models/nav_item_data.dart';
 /// Displays an icon above a text label, with different styling
 /// for selected (active) and unselected (inactive) states.
 /// Uses M3 theme colors for consistent theming.
+///
+/// Includes haptic feedback and bounce animation.
 class NavBarItem extends StatelessWidget {
   /// Creates a new [NavBarItem].
   const NavBarItem({super.key, required this.item, required this.isSelected, required this.onTap});
@@ -20,6 +23,11 @@ class NavBarItem extends StatelessWidget {
   /// Callback when this item is tapped.
   final VoidCallback onTap;
 
+  void _handleTap() {
+    HapticFeedback.lightImpact();
+    onTap();
+  }
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -30,31 +38,49 @@ class NavBarItem extends StatelessWidget {
 
     return Expanded(
       child: InkWell(
-        onTap: onTap,
+        onTap: _handleTap,
         borderRadius: BorderRadius.circular(12),
+        splashColor: activeColor.withValues(alpha: 0.1),
+        highlightColor: activeColor.withValues(alpha: 0.05),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              AnimatedSwitcher(
+              // Bounce animation for icon
+              AnimatedScale(
+                scale: isSelected ? 1.2 : 1.0,
                 duration: const Duration(milliseconds: 200),
-                child: Icon(
-                  isSelected ? item.activeIcon : item.icon,
-                  key: ValueKey<bool>(isSelected),
-                  color: isSelected ? activeColor : inactiveColor,
-                  size: 24,
+                curve: Curves.easeOutBack,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+                  child: Icon(
+                    isSelected ? item.activeIcon : item.icon,
+                    key: ValueKey<bool>(isSelected),
+                    color: isSelected ? activeColor : inactiveColor,
+                    size: 24,
+                  ),
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                item.label,
-                style: textTheme.labelSmall?.copyWith(
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: (textTheme.labelSmall ?? const TextStyle()).copyWith(
                   color: isSelected ? activeColor : inactiveColor,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                child: Text(item.label, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+              // Optional: Small dot indicator
+              const SizedBox(height: 4),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                height: 4,
+                width: isSelected ? 4 : 0,
+                decoration: BoxDecoration(color: activeColor, shape: BoxShape.circle),
               ),
             ],
           ),

@@ -30,7 +30,10 @@ class LanguageScreen extends ConsumerWidget {
         ),
         title: Text(
           t.settings.language,
-          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          style: textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+          ),
         ),
         centerTitle: true,
       ),
