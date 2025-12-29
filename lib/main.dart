@@ -13,9 +13,9 @@ import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/providers/theme_provider.dart';
 import 'package:rally/screens/auth/profile_completion_screen.dart';
 import 'package:rally/screens/auth/signup_screen.dart';
+import 'package:rally/screens/home/main_shell.dart';
 import 'package:rally/screens/loading/app_loading.dart';
 import 'package:rally/screens/onboarding/onboarding_screen.dart';
-import 'package:rally/screens/playground/auth_test.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:rally/themes/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -108,7 +108,7 @@ class RallyApp extends ConsumerWidget {
           }
 
           // Fully authenticated and verified - show home
-          return const AuthTestScreen();
+          return const MainShell();
         },
         loading: () => const AppLoadingScreen(),
         error:
