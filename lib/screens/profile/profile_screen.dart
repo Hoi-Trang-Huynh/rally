@@ -109,7 +109,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           );
                         },
                         children: <Widget>[
-                          const SizedBox(height: 100), // Spacing for extended app bar
+                          const SizedBox(height: 24), // Standard spacing
                           // Avatar with online indicator
                           ProfileAvatar(
                             avatarUrl: user.avatarUrl,

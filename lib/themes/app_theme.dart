@@ -78,16 +78,16 @@ abstract class AppTheme {
     return base.copyWith(
       colorScheme: colorScheme,
       textTheme: AppTextStyles.m3TextTheme
-          .apply(
-            fontFamily: 'Inclusive Sans',
-            displayColor: colorScheme.onSurface,
-            bodyColor: colorScheme.onSurface,
-          )
           .copyWith(
             // Mobile optimizations
             headlineMedium: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             titleMedium: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             bodyMedium: const TextStyle(fontSize: 16), // Readable body text
+          )
+          .apply(
+            fontFamily: 'Inclusive Sans',
+            displayColor: colorScheme.onSurface,
+            bodyColor: colorScheme.onSurface,
           ),
       filledButtonTheme: filledButtonTheme,
       extensions: <ThemeExtension<dynamic>>[
@@ -168,16 +168,16 @@ abstract class AppTheme {
     return base.copyWith(
       colorScheme: colorScheme,
       textTheme: AppTextStyles.m3TextTheme
-          .apply(
-            fontFamily: 'Inclusive Sans',
-            displayColor: colorScheme.onSurface,
-            bodyColor: colorScheme.onSurface,
-          )
           .copyWith(
             // Mobile optimizations
             headlineMedium: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             titleMedium: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             bodyMedium: const TextStyle(fontSize: 16),
+          )
+          .apply(
+            fontFamily: 'Inclusive Sans',
+            displayColor: colorScheme.onSurface,
+            bodyColor: colorScheme.onSurface,
           ),
       filledButtonTheme: filledButtonTheme,
       extensions: <ThemeExtension<dynamic>>[
