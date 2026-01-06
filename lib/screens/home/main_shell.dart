@@ -7,7 +7,7 @@ import '../profile/profile_screen.dart';
 
 /// Placeholder screen widget for tabs not yet implemented.
 class _PlaceholderScreen extends StatefulWidget {
-  const _PlaceholderScreen({required this.title, required this.icon});
+  const _PlaceholderScreen({super.key, required this.title, required this.icon});
 
   final String title;
   final IconData icon;
@@ -105,6 +105,7 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
+  int _previousIndex = 0;
 
   /// Build navigation items with translations.
   List<NavItemData> _buildNavItems(Translations t) {
@@ -121,7 +122,9 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _onTabSelected(int index) {
+    if (index == _currentIndex) return;
     setState(() {
+      _previousIndex = _currentIndex;
       _currentIndex = index;
     });
   }
@@ -137,22 +140,70 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  Widget _buildScreen(int index, Translations t) {
+    switch (index) {
+      case 0:
+        return _PlaceholderScreen(
+          key: const ValueKey<int>(0),
+          title: t.nav.home,
+          icon: Icons.cottage,
+        );
+      case 1:
+        return _PlaceholderScreen(
+          key: const ValueKey<int>(1),
+          title: t.nav.chat,
+          icon: Icons.forum,
+        );
+      case 2:
+        return _PlaceholderScreen(
+          key: const ValueKey<int>(2),
+          title: t.nav.explore,
+          icon: Icons.explore,
+        );
+      case 3:
+        return const ProfileScreen(key: ValueKey<int>(3));
+      default:
+        return _PlaceholderScreen(
+          key: const ValueKey<int>(0),
+          title: t.nav.home,
+          icon: Icons.cottage,
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Translations t = Translations.of(context);
     final List<NavItemData> navItems = _buildNavItems(t);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
+    // Determine slide direction based on navigation
+    final bool slidingRight = _currentIndex > _previousIndex;
+
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: <Widget>[
-          _PlaceholderScreen(title: t.nav.home, icon: Icons.cottage),
-          _PlaceholderScreen(title: t.nav.chat, icon: Icons.forum),
-          _PlaceholderScreen(title: t.nav.explore, icon: Icons.explore),
-          const ProfileScreen(),
-        ],
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          // Fade + subtle slide transition
+          final bool isEntering = child.key == ValueKey<int>(_currentIndex);
+          final double slideOffset =
+              isEntering ? (slidingRight ? 0.05 : -0.05) : (slidingRight ? -0.05 : 0.05);
+
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: Offset(slideOffset, 0),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
+            ),
+          );
+        },
+        child: _buildScreen(_currentIndex, t),
       ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _currentIndex,
