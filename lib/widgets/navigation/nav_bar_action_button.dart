@@ -32,8 +32,8 @@ class NavBarActionButton extends StatelessWidget {
           color: colorScheme.primary,
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: colorScheme.primary.withValues(alpha: 0.4),
-              blurRadius: 12,
+              color: colorScheme.shadow.withValues(alpha: 0.25),
+              blurRadius: 8,
               offset: const Offset(0, 4),
             ),
           ],

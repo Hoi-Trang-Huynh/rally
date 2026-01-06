@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 /// See design documentation for intended usage and hex values.
 abstract class AppColors {
   /// Seed color for generating the color scheme.
-  static const Color seedColor = Color(0xFFFF6060);
+  static const Color seedColor = Color(0xFFC04444);
 
   /// Success colors: Used for success states, confirmations, etc.
   /// 50 - #F0FDF4

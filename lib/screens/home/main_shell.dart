@@ -6,10 +6,37 @@ import '../../widgets/navigation/app_bottom_nav_bar.dart';
 import '../profile/profile_screen.dart';
 
 /// Placeholder screen widget for tabs not yet implemented.
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.title});
+class _PlaceholderScreen extends StatefulWidget {
+  const _PlaceholderScreen({required this.title, required this.icon});
 
   final String title;
+  final IconData icon;
+
+  @override
+  State<_PlaceholderScreen> createState() => _PlaceholderScreenState();
+}
+
+class _PlaceholderScreenState extends State<_PlaceholderScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this)
+      ..repeat(reverse: true);
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,13 +48,42 @@ class _PlaceholderScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Icon(Icons.construction_outlined, size: 64, color: colorScheme.onSurfaceVariant),
-          const SizedBox(height: 16),
-          Text(title, style: textTheme.headlineSmall?.copyWith(color: colorScheme.onSurface)),
-          const SizedBox(height: 8),
+          // Animated icon with subtle pulse
+          AnimatedBuilder(
+            animation: _scaleAnimation,
+            builder: (BuildContext context, Widget? child) {
+              return Transform.scale(
+                scale: _scaleAnimation.value,
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(widget.icon, size: 48, color: colorScheme.primary),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
           Text(
-            t.nav.comingSoon,
-            style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+            widget.title,
+            style: textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              t.nav.comingSoon,
+              style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+            ),
           ),
         ],
       ),
@@ -85,14 +141,16 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     final Translations t = Translations.of(context);
     final List<NavItemData> navItems = _buildNavItems(t);
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       body: IndexedStack(
         index: _currentIndex,
         children: <Widget>[
-          _PlaceholderScreen(title: t.nav.home),
-          _PlaceholderScreen(title: t.nav.chat),
-          _PlaceholderScreen(title: t.nav.explore),
+          _PlaceholderScreen(title: t.nav.home, icon: Icons.cottage),
+          _PlaceholderScreen(title: t.nav.chat, icon: Icons.forum),
+          _PlaceholderScreen(title: t.nav.explore, icon: Icons.explore),
           const ProfileScreen(),
         ],
       ),

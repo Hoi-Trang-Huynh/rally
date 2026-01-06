@@ -23,6 +23,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   late bool _isLogin;
+  bool _hideLogoForVerification = false;
 
   @override
   void initState() {
@@ -35,6 +36,13 @@ class _AuthScreenState extends State<AuthScreen> {
     HapticFeedback.lightImpact();
     setState(() {
       _isLogin = !_isLogin;
+      _hideLogoForVerification = false;
+    });
+  }
+
+  void _onVerificationStepChanged(bool isVerifying) {
+    setState(() {
+      _hideLogoForVerification = isVerifying;
     });
   }
 
@@ -47,6 +55,7 @@ class _AuthScreenState extends State<AuthScreen> {
     final bool isSmallScreen = screenHeight < 700;
 
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: <Widget>[
@@ -60,14 +69,17 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Hero(
-                      tag: 'app_logo',
-                      child: Image.asset(
-                        'assets/images/rally_logo_transparent.png',
-                        height: isSmallScreen ? 70 : 100,
+                    // Only show logo if not in verification step
+                    if (!_hideLogoForVerification) ...<Widget>[
+                      Hero(
+                        tag: 'app_logo',
+                        child: Image.asset(
+                          'assets/images/rally_logo_transparent.png',
+                          height: isSmallScreen ? 70 : 100,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: isSmallScreen ? 16 : 24),
+                      SizedBox(height: isSmallScreen ? 16 : 24),
+                    ],
 
                     // Animated Switcher for Form Content
                     AnimatedSwitcher(
@@ -84,6 +96,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               : _SignupFormWrapper(
                                 key: const ValueKey<String>('Signup'),
                                 onLoginClicked: _toggleAuthMode,
+                                onVerificationStepChanged: _onVerificationStepChanged,
                               ),
                     ),
                   ],
@@ -91,34 +104,35 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
             ),
 
-            // 3. Static Bottom Link (Footer)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              child: TextButton(
-                onPressed: _toggleAuthMode,
-                child: Text.rich(
-                  TextSpan(
-                    text:
-                        _isLogin
-                            ? '${t.auth.login.needAccountQuestion} '
-                            : '${t.auth.login.alreadyHaveAccountQuestion} ',
-                    style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-                    children: <InlineSpan>[
-                      TextSpan(
-                        text:
-                            _isLogin
-                                ? t.auth.login.needAccountAction
-                                : t.auth.login.alreadyHaveAccountAction,
-                        style: textTheme.titleMedium?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.bold,
+            // 3. Static Bottom Link (Footer) - hide during verification
+            if (!_hideLogoForVerification)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                child: TextButton(
+                  onPressed: _toggleAuthMode,
+                  child: Text.rich(
+                    TextSpan(
+                      text:
+                          _isLogin
+                              ? '${t.auth.login.needAccountQuestion} '
+                              : '${t.auth.login.alreadyHaveAccountQuestion} ',
+                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                      children: <InlineSpan>[
+                        TextSpan(
+                          text:
+                              _isLogin
+                                  ? t.auth.login.needAccountAction
+                                  : t.auth.login.alreadyHaveAccountAction,
+                          style: textTheme.titleMedium?.copyWith(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),
@@ -138,10 +152,18 @@ class _LoginFormWrapper extends StatelessWidget {
 
 class _SignupFormWrapper extends StatelessWidget {
   final VoidCallback onLoginClicked;
-  const _SignupFormWrapper({super.key, required this.onLoginClicked});
+  final ValueChanged<bool> onVerificationStepChanged;
+  const _SignupFormWrapper({
+    super.key,
+    required this.onLoginClicked,
+    required this.onVerificationStepChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SignupScreen(onLoginClicked: onLoginClicked);
+    return SignupScreen(
+      onLoginClicked: onLoginClicked,
+      onVerificationStepChanged: onVerificationStepChanged,
+    );
   }
 }

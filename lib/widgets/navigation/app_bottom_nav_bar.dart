@@ -39,7 +39,7 @@ class AppBottomNavBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLowest,
+        color: colorScheme.surfaceContainer,
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: colorScheme.shadow.withValues(alpha: 0.1),

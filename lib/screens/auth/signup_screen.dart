@@ -39,8 +39,11 @@ class SignupScreen extends ConsumerStatefulWidget {
   /// Callback to switch to login mode.
   final VoidCallback onLoginClicked;
 
+  /// Callback when entering/exiting the email verification step.
+  final ValueChanged<bool>? onVerificationStepChanged;
+
   /// Creates a new [SignupScreen].
-  const SignupScreen({super.key, required this.onLoginClicked});
+  const SignupScreen({super.key, required this.onLoginClicked, this.onVerificationStepChanged});
 
   @override
   ConsumerState<SignupScreen> createState() => _SignupScreenState();
@@ -93,6 +96,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           _emailController.text = user.email ?? '';
           _currentStep = SignupStep.emailVerification;
         });
+        widget.onVerificationStepChanged?.call(true);
       }
     });
   }
@@ -214,6 +218,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           _currentStep = SignupStep.emailVerification;
           _isSignupLoading = false;
         });
+        widget.onVerificationStepChanged?.call(true);
       }
     } catch (e) {
       if (mounted) showErrorSnackBar(context, e.toString());
@@ -419,6 +424,17 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
     return <Widget>[
+      // Back button at the top
+      Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton.icon(
+          onPressed: _anyLoading ? null : _cancelVerificationAndGoBack,
+          icon: const Icon(Icons.arrow_back, size: 18),
+          label: const Text('Back'),
+          style: TextButton.styleFrom(foregroundColor: colorScheme.onSurfaceVariant),
+        ),
+      ),
+      const SizedBox(height: 16),
       Icon(Icons.mark_email_read_outlined, size: 80, color: colorScheme.primary),
       const SizedBox(height: 24),
       Text(
@@ -447,6 +463,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         child: Text(t.auth.signup.resendEmail, style: TextStyle(color: colorScheme.primary)),
       ),
     ];
+  }
+
+  Future<void> _cancelVerificationAndGoBack() async {
+    // Sign out the unverified user and return to signup
+    await ref.read(authRepositoryProvider).signOut();
+    widget.onVerificationStepChanged?.call(false);
+    setState(() {
+      _currentStep = SignupStep.email;
+      _clearErrors();
+    });
   }
 
   Widget _buildBackButton(String label, ColorScheme colorScheme) {

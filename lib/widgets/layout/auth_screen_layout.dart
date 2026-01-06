@@ -53,6 +53,7 @@ class AuthScreenLayout extends StatelessWidget {
     final bool isSmallScreen = screenHeight < 700;
 
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: <Widget>[

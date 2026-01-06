@@ -69,24 +69,41 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 },
                 itemCount: pages.length,
                 itemBuilder: (BuildContext context, int index) {
+                  // Different icons for each page
+                  final List<IconData> pageIcons = <IconData>[
+                    Icons.group_rounded,
+                    Icons.route_rounded,
+                    Icons.celebration_rounded,
+                  ];
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 32.0),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        // Placeholder Image
+                        // Gradient accent container with icon
                         Container(
-                          height: 250,
-                          width: double.infinity,
+                          height: 220,
+                          width: 220,
                           decoration: BoxDecoration(
-                            color: colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(20),
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: <Color>[
+                                colorScheme.primary,
+                                colorScheme.primary.withValues(alpha: 0.7),
+                              ],
+                            ),
+                            shape: BoxShape.circle,
+                            boxShadow: <BoxShadow>[
+                              BoxShadow(
+                                color: colorScheme.primary.withValues(alpha: 0.3),
+                                blurRadius: 30,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
                           ),
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 80,
-                            color: colorScheme.onPrimaryContainer,
-                          ),
+                          child: Icon(pageIcons[index], size: 80, color: colorScheme.onPrimary),
                         ),
                         const SizedBox(height: 64),
                         Text(

@@ -79,8 +79,6 @@ class _AuthPrimaryButtonState extends State<AuthPrimaryButton> with SingleTicker
         child: FilledButton(
           onPressed: widget.isLoading ? null : () {}, // Handled by GestureDetector
           style: FilledButton.styleFrom(
-            backgroundColor: const Color(0xFFC04444),
-            foregroundColor: Colors.white,
             // Disable default splash to avoid conflict with scale anim if desired,
             // but keeping it adds to the effect.
           ).copyWith(
