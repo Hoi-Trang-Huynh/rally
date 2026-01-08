@@ -23,6 +23,7 @@ class Validators {
 
   /// Validates a username.
   /// Returns error message if invalid, null if valid.
+  /// Username must only contain letters, numbers, and underscores
   static String? validateUsername(String value) {
     final String username = value.trim();
 
@@ -36,6 +37,10 @@ class Validators {
 
     if (username.length > UsernameValidation.maxLength) {
       return t.validation.username.tooLong(maxLength: UsernameValidation.maxLength);
+    }
+
+    if (!UsernameValidation.hasValidCharacters(username)) {
+      return t.validation.username.invalidFormat;
     }
 
     return null;

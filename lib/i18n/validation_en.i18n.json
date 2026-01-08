@@ -3,7 +3,8 @@
   "emailInvalid": "Please enter a valid email address",
   "username": {
     "tooShort": "Username must be at least $minLength characters",
-    "tooLong": "Username must be at most $maxLength characters"
+    "tooLong": "Username must be at most $maxLength characters",
+    "invalidFormat": "Can only contain letters, numbers, and underscores"
   },
   "name": {
     "tooShort": "Must be at least $minLength characters",

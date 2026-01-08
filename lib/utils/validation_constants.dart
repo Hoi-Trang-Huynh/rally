@@ -11,6 +11,21 @@ class UsernameValidation {
 
   /// Maximum length for username.
   static const int maxLength = 15;
+
+  /// Regex pattern for valid username format.
+  /// Only allows letters (a-z, A-Z), numbers (0-9), and underscores (_).
+  /// Must start with a letter.
+  static final RegExp usernameRegex = RegExp(r'^[a-zA-Z][a-zA-Z0-9_]*$');
+
+  /// Check if username contains only valid characters (letters, numbers, underscores).
+  static bool hasValidCharacters(String username) => usernameRegex.hasMatch(username);
+
+  /// Check if username meets length requirements.
+  static bool hasValidLength(String username) =>
+      username.length >= minLength && username.length <= maxLength;
+
+  /// Check if username meets all requirements.
+  static bool isValid(String username) => hasValidLength(username) && hasValidCharacters(username);
 }
 
 /// First name validation constants.

@@ -3,7 +3,8 @@
   "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ",
   "username": {
     "tooShort": "Tên người dùng phải có ít nhất $minLength ký tự",
-    "tooLong": "Tên người dùng tối đa $maxLength ký tự"
+    "tooLong": "Tên người dùng tối đa $maxLength ký tự",
+    "invalidFormat": "Chỉ được chứa chữ cái, số và dấu gạch dưới"
   },
   "name": {
     "tooShort": "Phải có ít nhất $minLength ký tự",
