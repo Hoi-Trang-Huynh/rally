@@ -39,6 +39,28 @@ class UserRepository {
     return response as Map<String, dynamic>;
   }
 
+  /// Checks if an email is available for registration.
+  ///
+  /// Returns `true` if the email is available, `false` if already taken.
+  Future<bool> checkEmailAvailability(String email) async {
+    final dynamic response = await _apiClient.get(
+      '/api/v1/auth/check-email',
+      queryParams: <String, String>{'email': email},
+    );
+    return (response as Map<String, dynamic>)['available'] as bool;
+  }
+
+  /// Checks if a username is available for registration.
+  ///
+  /// Returns `true` if the username is available, `false` if already taken.
+  Future<bool> checkUsernameAvailability(String username) async {
+    final dynamic response = await _apiClient.get(
+      '/api/v1/auth/check-username',
+      queryParams: <String, String>{'username': username},
+    );
+    return (response as Map<String, dynamic>)['available'] as bool;
+  }
+
   // ============================================
   // User Profile Endpoints
   // ============================================

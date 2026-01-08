@@ -122,8 +122,15 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   Future<bool> _checkEmailExists(String email) async {
-    await Future<void>.delayed(const Duration(milliseconds: 500));
-    return false;
+    final bool available = await ref.read(userRepositoryProvider).checkEmailAvailability(email);
+    return !available; // returns true if email EXISTS (not available)
+  }
+
+  Future<bool> _checkUsernameExists(String username) async {
+    final bool available = await ref
+        .read(userRepositoryProvider)
+        .checkUsernameAvailability(username);
+    return !available; // returns true if username EXISTS (not available)
   }
 
   // --- Step Handlers ---
@@ -138,7 +145,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       final bool exists = await _checkEmailExists(_emailController.text.trim());
       if (exists) {
         setState(() {
-          _emailError = 'An account with this email already exists';
+          _emailError = t.validation.email.taken;
           _isSignupLoading = false;
         });
         return;
@@ -155,7 +162,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     }
   }
 
-  void _onContinueStep2() {
+  Future<void> _onContinueStep2() async {
     _clearErrors();
     _usernameError = Validators.validateUsername(_usernameController.text);
     _firstNameError = Validators.validateFirstName(_firstNameController.text);
@@ -163,10 +170,29 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     setState(() {});
     if (_usernameError != null || _firstNameError != null || _lastNameError != null) return;
 
-    _savedUsername = _usernameController.text.trim();
-    _savedFirstName = _firstNameController.text.trim();
-    _savedLastName = _lastNameController.text.trim();
-    setState(() => _currentStep = SignupStep.password);
+    setState(() => _isSignupLoading = true);
+    try {
+      final bool exists = await _checkUsernameExists(_usernameController.text.trim());
+      if (exists) {
+        setState(() {
+          _usernameError = t.validation.username.taken;
+          _isSignupLoading = false;
+        });
+        return;
+      }
+      _savedUsername = _usernameController.text.trim();
+      _savedFirstName = _firstNameController.text.trim();
+      _savedLastName = _lastNameController.text.trim();
+      setState(() {
+        _currentStep = SignupStep.password;
+        _isSignupLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _usernameError = e.toString();
+        _isSignupLoading = false;
+      });
+    }
   }
 
   Future<void> _onContinueStep3() async {

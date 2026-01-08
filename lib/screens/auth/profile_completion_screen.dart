@@ -63,6 +63,18 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
     setState(() => _isLoading = true);
 
     try {
+      // Check if username is available
+      final bool available = await ref
+          .read(userRepositoryProvider)
+          .checkUsernameAvailability(_usernameController.text.trim());
+      if (!available) {
+        setState(() {
+          _usernameError = t.validation.username.taken;
+          _isLoading = false;
+        });
+        return;
+      }
+
       // Get current user ID
       final AppUser? user = ref.read(appUserProvider).valueOrNull;
       if (user?.id == null) {
