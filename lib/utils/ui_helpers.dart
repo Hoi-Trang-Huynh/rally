@@ -19,3 +19,12 @@ void showSuccessSnackBar(BuildContext context, String message) {
     context,
   ).showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.green));
 }
+
+/// Shows an info snackbar with the given message.
+void showInfoSnackBar(BuildContext context, String message) {
+  if (!context.mounted) return;
+
+  ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.blueGrey));
+}

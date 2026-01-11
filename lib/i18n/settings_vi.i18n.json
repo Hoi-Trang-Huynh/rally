@@ -6,5 +6,11 @@
   "mode": "Chế độ",
   "helpFeedback": "Trợ giúp & Phản hồi",
   "logout": "Đăng xuất",
-  "edit": "Chỉnh sửa"
+  "edit": "Chỉnh sửa",
+  "editProfile": "Chỉnh sửa hồ sơ",
+  "saveChanges": "Lưu thay đổi",
+  "changePhoto": "Đổi ảnh",
+  "chooseFromGallery": "Chọn từ thư viện",
+  "takePhoto": "Chụp ảnh",
+  "comingSoon": "Sắp ra mắt"
 }

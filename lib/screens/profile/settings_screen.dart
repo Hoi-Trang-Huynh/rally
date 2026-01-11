@@ -7,6 +7,7 @@ import '../../i18n/generated/translations.g.dart';
 import '../../models/app_user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
+import 'edit_profile_screen.dart';
 import 'language_screen.dart';
 import 'widgets/profile_avatar.dart';
 
@@ -181,7 +182,11 @@ class SettingsScreen extends ConsumerWidget {
                 OutlinedButton(
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    // TODO: Navigate to edit profile
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) => const EditProfileScreen(),
+                      ),
+                    );
                   },
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

@@ -6,5 +6,11 @@
   "mode": "Mode",
   "helpFeedback": "Help & Feedback",
   "logout": "Log out",
-  "edit": "Edit"
+  "edit": "Edit",
+  "editProfile": "Edit Profile",
+  "saveChanges": "Save Changes",
+  "changePhoto": "Change Photo",
+  "chooseFromGallery": "Choose from Gallery",
+  "takePhoto": "Take Photo",
+  "comingSoon": "Coming soon"
 }
