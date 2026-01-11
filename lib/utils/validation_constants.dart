@@ -46,6 +46,12 @@ class LastNameValidation {
   static const int maxLength = 15;
 }
 
+/// Bio validation constants.
+class BioValidation {
+  /// Maximum length for bio.
+  static const int maxLength = 50;
+}
+
 /// Password validation constants and rules.
 class PasswordValidation {
   /// Minimum length for password.

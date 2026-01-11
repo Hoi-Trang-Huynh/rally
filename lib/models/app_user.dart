@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:rally/models/responses/profile_response.dart';
 
 /// Represents a user in the application.
 ///
@@ -91,6 +92,27 @@ class AppUser {
       avatarUrl: profileData['avatarUrl'] as String?,
       isEmailVerified: profileData['isEmailVerified'] as bool? ?? false,
       isOnboarding: profileData['isOnboarding'] as bool? ?? true,
+    );
+  }
+
+  /// Factory constructor to create an [AppUser] from a [ProfileResponse].
+  ///
+  /// [firebaseUid] is required as the backend doesn't return the Firebase UID.
+  /// [profile] is the typed profile response from the backend.
+  factory AppUser.fromProfileResponse({
+    required String firebaseUid,
+    required ProfileResponse profile,
+  }) {
+    return AppUser(
+      uid: firebaseUid,
+      id: profile.id,
+      email: profile.email,
+      username: profile.username,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      avatarUrl: profile.avatarUrl,
+      isEmailVerified: profile.isEmailVerified,
+      isOnboarding: profile.isOnboarding,
     );
   }
 

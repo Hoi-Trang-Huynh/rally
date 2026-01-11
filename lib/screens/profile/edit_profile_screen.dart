@@ -154,10 +154,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
       // Check username availability only if it changed
       if (newUsername != _originalUsername) {
-        final bool available = await ref
+        final response = await ref
             .read(userRepositoryProvider)
             .checkUsernameAvailability(newUsername);
-        if (!available) {
+        if (!response.available) {
           setState(() {
             _usernameError = t.validation.username.taken;
             _isLoading = false;

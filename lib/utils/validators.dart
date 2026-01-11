@@ -86,6 +86,15 @@ class Validators {
     return null;
   }
 
+  /// Validates a bio.
+  /// Returns error message if invalid, null if valid.
+  static String? validateBio(String value) {
+    if (value.length > BioValidation.maxLength) {
+      return t.validation.name.tooLong(maxLength: BioValidation.maxLength);
+    }
+    return null;
+  }
+
   /// Validates a password.
   /// Returns error message if invalid, null if valid.
   static String? validatePassword(String value) {

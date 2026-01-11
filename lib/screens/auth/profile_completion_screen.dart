@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/models/app_user.dart';
+import 'package:rally/models/responses/availability_response.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
@@ -64,10 +65,10 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
 
     try {
       // Check if username is available
-      final bool available = await ref
+      final AvailabilityResponse response = await ref
           .read(userRepositoryProvider)
           .checkUsernameAvailability(_usernameController.text.trim());
-      if (!available) {
+      if (!response.available) {
         setState(() {
           _usernameError = t.validation.username.taken;
           _isLoading = false;

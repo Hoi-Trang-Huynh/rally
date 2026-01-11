@@ -5,6 +5,9 @@
   "next": "Next",
   "getStarted": "Get Started",
   "skip": "Skip",
+  "save": "Save",
+  "saved": "Saved",
+  "cancel": "Cancel",
   "language": {
     "english": "English",
     "vietnamese": "Vietnamese",

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/models/app_user.dart';
+import 'package:rally/models/responses/availability_response.dart';
+import 'package:rally/models/responses/register_response.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
@@ -122,15 +124,17 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   Future<bool> _checkEmailExists(String email) async {
-    final bool available = await ref.read(userRepositoryProvider).checkEmailAvailability(email);
-    return !available; // returns true if email EXISTS (not available)
+    final AvailabilityResponse response = await ref
+        .read(userRepositoryProvider)
+        .checkEmailAvailability(email);
+    return !response.available; // returns true if email EXISTS (not available)
   }
 
   Future<bool> _checkUsernameExists(String username) async {
-    final bool available = await ref
+    final AvailabilityResponse response = await ref
         .read(userRepositoryProvider)
         .checkUsernameAvailability(username);
-    return !available; // returns true if username EXISTS (not available)
+    return !response.available; // returns true if username EXISTS (not available)
   }
 
   // --- Step Handlers ---
@@ -219,12 +223,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       final String? idToken = await ref.read(authRepositoryProvider).getIdToken();
       if (idToken == null) throw Exception('Failed to get Firebase ID token');
 
-      final Map<String, dynamic> registerResponse = await ref
+      final RegisterResponse registerResponse = await ref
           .read(userRepositoryProvider)
           .register(idToken: idToken);
 
-      final Map<String, dynamic>? user = registerResponse['user'] as Map<String, dynamic>?;
-      final String? userId = user?['id'] as String?;
+      final String? userId = registerResponse.user.id;
       _savedUserId = userId;
 
       if (userId != null) {
