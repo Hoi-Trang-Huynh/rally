@@ -4,6 +4,8 @@ import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/screens/auth/login_screen.dart';
 import 'package:rally/screens/auth/signup_screen.dart';
 import 'package:rally/widgets/auth_header_row.dart';
+import 'package:rally/widgets/visuals/animated_background.dart';
+import 'package:rally/widgets/visuals/glass_container.dart';
 
 /// A wrapper screen that holds the static header and switches between Login and Signup forms.
 ///
@@ -55,86 +57,155 @@ class _AuthScreenState extends State<AuthScreen> {
     final bool isSmallScreen = screenHeight < 700;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            // 1. Static Top Bar
-            const AuthHeaderRow(),
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        children: <Widget>[
+          // 0. Dynamic Background
+          const AnimatedBackground(),
 
-            // 2. Static Content (Logo & Title) + Animated Form
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    // Only show logo if not in verification step
-                    if (!_hideLogoForVerification) ...<Widget>[
-                      Hero(
-                        tag: 'app_logo',
-                        child: Image.asset(
-                          'assets/images/rally_logo_transparent.png',
-                          height: isSmallScreen ? 70 : 100,
-                        ),
-                      ),
-                      SizedBox(height: isSmallScreen ? 16 : 24),
-                    ],
+          SafeArea(
+            child: Column(
+              children: <Widget>[
+                // 1. Static Top Bar
+                const AuthHeaderRow(),
 
-                    // Animated Switcher for Form Content
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      transitionBuilder: (Widget child, Animation<double> animation) {
-                        return FadeTransition(opacity: animation, child: child);
-                      },
-                      child:
-                          _isLogin
-                              ? _LoginFormWrapper(
-                                key: const ValueKey<String>('Login'),
-                                onRegisterClicked: _toggleAuthMode,
-                              )
-                              : _SignupFormWrapper(
-                                key: const ValueKey<String>('Signup'),
-                                onLoginClicked: _toggleAuthMode,
-                                onVerificationStepChanged: _onVerificationStepChanged,
+                // 2. Center Content with Glass Effect
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          // Only show logo if not in verification step
+                          if (!_hideLogoForVerification) ...<Widget>[
+                            Hero(
+                              tag: 'app_logo',
+                              child: Image.asset(
+                                'assets/images/rally_logo_transparent.png',
+                                height: isSmallScreen ? 70 : 100,
                               ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                            ),
+                            SizedBox(height: isSmallScreen ? 16 : 32),
+                          ],
 
-            // 3. Static Bottom Link (Footer) - hide during verification
-            if (!_hideLogoForVerification)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                child: TextButton(
-                  onPressed: _toggleAuthMode,
-                  child: Text.rich(
-                    TextSpan(
-                      text:
-                          _isLogin
-                              ? '${t.auth.login.needAccountQuestion} '
-                              : '${t.auth.login.alreadyHaveAccountQuestion} ',
-                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-                      children: <InlineSpan>[
-                        TextSpan(
-                          text:
-                              _isLogin
-                                  ? t.auth.login.needAccountAction
-                                  : t.auth.login.alreadyHaveAccountAction,
-                          style: textTheme.titleMedium?.copyWith(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.bold,
+                          // Glass Container for Form
+                          GlassContainer(
+                            // Lower opacity in Light mode to blend better, higher in Dark for contrast
+                            opacity: Theme.of(context).brightness == Brightness.light ? 0.3 : 0.6,
+                            shadows: <BoxShadow>[
+                              BoxShadow(
+                                color: colorScheme.shadow.withValues(alpha: 0.1),
+                                blurRadius: 24,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                            child: AnimatedSize(
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeOutBack,
+                              child: Padding(
+                                padding: const EdgeInsets.all(24.0),
+                                child: AnimatedSwitcher(
+                                  layoutBuilder: (
+                                    Widget? currentChild,
+                                    List<Widget> previousChildren,
+                                  ) {
+                                    return Stack(
+                                      alignment: Alignment.center,
+                                      children: <Widget>[
+                                        ...previousChildren,
+                                        if (currentChild != null) currentChild,
+                                      ],
+                                    );
+                                  },
+                                  duration: const Duration(milliseconds: 500),
+                                  switchInCurve: Curves.easeOutBack,
+                                  switchOutCurve: Curves.easeInBack,
+                                  transitionBuilder: (Widget child, Animation<double> animation) {
+                                    final bool isEntering =
+                                        child.key ==
+                                        ValueKey<String>(_isLogin ? 'Login' : 'Signup');
+
+                                    // Slide direction depends on mode (Login <-> Signup)
+                                    final Offset beginOffset =
+                                        isEntering
+                                            ? (_isLogin
+                                                ? const Offset(-0.1, 0)
+                                                : const Offset(0.1, 0))
+                                            : (_isLogin
+                                                ? const Offset(0.1, 0)
+                                                : const Offset(-0.1, 0));
+
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: beginOffset,
+                                          end: Offset.zero,
+                                        ).animate(animation),
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  child:
+                                      _isLogin
+                                          ? _LoginFormWrapper(
+                                            key: const ValueKey<String>('Login'),
+                                            onRegisterClicked: _toggleAuthMode,
+                                          )
+                                          : _SignupFormWrapper(
+                                            key: const ValueKey<String>('Signup'),
+                                            onLoginClicked: _toggleAuthMode,
+                                            onVerificationStepChanged: _onVerificationStepChanged,
+                                          ),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
-        ),
+
+                // 3. Static Bottom Link (Footer) - hide during verification
+                if (!_hideLogoForVerification)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                    child: TextButton(
+                      onPressed: _toggleAuthMode,
+                      child: Text.rich(
+                        TextSpan(
+                          text:
+                              _isLogin
+                                  ? '${t.auth.login.needAccountQuestion} '
+                                  : '${t.auth.login.alreadyHaveAccountQuestion} ',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          children: <InlineSpan>[
+                            TextSpan(
+                              text:
+                                  _isLogin
+                                      ? t.auth.login.needAccountAction
+                                      : t.auth.login.alreadyHaveAccountAction,
+                              style: textTheme.titleMedium?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                                decorationColor: colorScheme.primary.withValues(alpha: 0.5),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

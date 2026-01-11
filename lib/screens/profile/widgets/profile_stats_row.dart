@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rally/widgets/visuals/animated_count.dart';
 
 /// A widget displaying a single stat with count and label.
 ///
@@ -29,8 +30,8 @@ class ProfileStatItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text(
-              count,
+            AnimatedCount(
+              count: count,
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colorScheme.onSurface,

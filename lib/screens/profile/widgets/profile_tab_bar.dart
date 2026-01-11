@@ -39,44 +39,45 @@ class ProfileTabBar extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: tabs.length,
-        separatorBuilder: (BuildContext context, int index) => const SizedBox(width: 24),
-        itemBuilder: (BuildContext context, int index) {
-          final ProfileTabData tab = tabs[index];
-          final bool isSelected = tab.id == selectedId;
-
-          return InkWell(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              onTabSelected(tab.id);
-            },
-            borderRadius: BorderRadius.circular(4),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.only(bottom: 8, left: 4, right: 4),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: isSelected ? colorScheme.primary : Colors.transparent,
-                    width: 2,
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5), width: 1),
+        ),
+      ),
+      child: Row(
+        children:
+            tabs.map((ProfileTabData tab) {
+              final bool isSelected = tab.id == selectedId;
+              return Expanded(
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    onTabSelected(tab.id);
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected ? colorScheme.primary : Colors.transparent,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    alignment: Alignment.center, // Ensure alignment is center
+                    child: AnimatedDefaultTextStyle(
+                      duration: const Duration(milliseconds: 200),
+                      style: (textTheme.titleSmall ?? const TextStyle()).copyWith(
+                        color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontSize: 15,
+                      ),
+                      child: Text(tab.label),
+                    ),
                   ),
                 ),
-              ),
-              child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: (textTheme.bodyMedium ?? const TextStyle()).copyWith(
-                  color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
-                child: Text(tab.label),
-              ),
-            ),
-          );
-        },
+              );
+            }).toList(),
       ),
     );
   }

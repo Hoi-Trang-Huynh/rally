@@ -1,14 +1,14 @@
 {
   "page1": {
-    "title": "Our Tech in your hand",
-    "subtitle": "You probably own a portable device, such as a smartphone or tablet."
+    "title": "Planning Trip",
+    "subtitle": "Lorem ipsum dolor sit amet consectetur. Tempor consequat egestas augue est."
   },
   "page2": {
-    "title": "All Control in your screen",
-    "subtitle": "This represents a great opportunity for your business to generate sales."
+    "title": "Scouting all interesting Area",
+    "subtitle": "Lorem ipsum dolor sit amet consectetur. Tempor consequat egestas augue est."
   },
   "page3": {
-    "title": "Understand the real benefits",
-    "subtitle": "Our portable technology gives your customers knowledge about you."
+    "title": "Add friend & see their location",
+    "subtitle": "Lorem ipsum dolor sit amet consectetur. Tempor consequat egestas augue est."
   }
 }

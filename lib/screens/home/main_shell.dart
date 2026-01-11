@@ -4,6 +4,7 @@ import '../../i18n/generated/translations.g.dart';
 import '../../models/nav_item_data.dart';
 import '../../widgets/navigation/app_bottom_nav_bar.dart';
 import '../profile/profile_screen.dart';
+import 'home_screen.dart';
 
 /// Placeholder screen widget for tabs not yet implemented.
 class _PlaceholderScreen extends StatefulWidget {
@@ -105,7 +106,6 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
-  int _previousIndex = 0;
 
   /// Build navigation items with translations.
   List<NavItemData> _buildNavItems(Translations t) {
@@ -124,7 +124,6 @@ class _MainShellState extends State<MainShell> {
   void _onTabSelected(int index) {
     if (index == _currentIndex) return;
     setState(() {
-      _previousIndex = _currentIndex;
       _currentIndex = index;
     });
   }
@@ -143,11 +142,7 @@ class _MainShellState extends State<MainShell> {
   Widget _buildScreen(int index, Translations t) {
     switch (index) {
       case 0:
-        return _PlaceholderScreen(
-          key: const ValueKey<int>(0),
-          title: t.nav.home,
-          icon: Icons.cottage,
-        );
+        return const HomeScreen(key: ValueKey<int>(0));
       case 1:
         return _PlaceholderScreen(
           key: const ValueKey<int>(1),
@@ -177,28 +172,24 @@ class _MainShellState extends State<MainShell> {
     final List<NavItemData> navItems = _buildNavItems(t);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    // Determine slide direction based on navigation
-    final bool slidingRight = _currentIndex > _previousIndex;
-
     return Scaffold(
       backgroundColor: colorScheme.surface,
+      extendBody: true, // Content flows behind floating nav bar
       body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
+        duration: const Duration(milliseconds: 400),
+        switchInCurve: Curves.easeOutQuart,
+        switchOutCurve: Curves.easeInQuart,
         transitionBuilder: (Widget child, Animation<double> animation) {
-          // Fade + subtle slide transition
           final bool isEntering = child.key == ValueKey<int>(_currentIndex);
-          final double slideOffset =
-              isEntering ? (slidingRight ? 0.05 : -0.05) : (slidingRight ? -0.05 : 0.05);
 
+          // Subtle scale and fade transition
           return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: Offset(slideOffset, 0),
-                end: Offset.zero,
-              ).animate(animation),
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: const Interval(0.2, 1.0), // Delay fade in slightly
+            ),
+            child: ScaleTransition(
+              scale: Tween<double>(begin: isEntering ? 0.95 : 1.05, end: 1.0).animate(animation),
               child: child,
             ),
           );

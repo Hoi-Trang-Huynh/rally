@@ -10,6 +10,12 @@ abstract class AppColors {
   /// Seed color for generating the color scheme.
   static const Color seedColor = Color(0xFFC04444);
 
+  /// Brand Gradient Start - #FF551D (Vivid Orange)
+  static const Color brandGradientStart = Color(0xFFFF551D);
+
+  /// Brand Gradient End - #FF6A9F (Hot Pink)
+  static const Color brandGradientEnd = Color(0xFFFF6A9F);
+
   /// Success colors: Used for success states, confirmations, etc.
   /// 50 - #F0FDF4
   static const Color success50 = Color(0xFFF0FDF4);

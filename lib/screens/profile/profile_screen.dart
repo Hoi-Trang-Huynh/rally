@@ -12,6 +12,9 @@ import '../../models/app_user.dart';
 import '../../providers/api_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/ui_helpers.dart';
+import '../../widgets/visuals/empty_state.dart';
+import '../../widgets/visuals/scale_button.dart';
+import '../../widgets/visuals/shimmer_loading.dart';
 import 'settings_screen.dart';
 import 'widgets/profile_avatar.dart';
 import 'widgets/profile_stats_row.dart';
@@ -237,20 +240,45 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
         return Scaffold(
           backgroundColor: colorScheme.surface,
-          extendBodyBehindAppBar: true, // Required for glassmorphism
+          extendBodyBehindAppBar: true,
           body: AnimationLimiter(
             child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
               slivers: <Widget>[
-                // Glassmorphism App Bar
+                // Parallax App Bar
                 SliverAppBar(
-                  backgroundColor: colorScheme.surface.withValues(alpha: 0.7),
-                  elevation: 0,
+                  backgroundColor: colorScheme.surface.withValues(alpha: 0.8),
+                  expandedHeight: 90, // Reduced height per feedback
                   pinned: true,
+                  stretch: true, // Enable stretch parallax
                   centerTitle: true,
-                  flexibleSpace: ClipRRect(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(color: Colors.transparent),
+                  flexibleSpace: FlexibleSpaceBar(
+                    stretchModes: const <StretchMode>[
+                      StretchMode.zoomBackground,
+                      StretchMode.blurBackground,
+                    ],
+                    background: Stack(
+                      fit: StackFit.expand,
+                      children: <Widget>[
+                        // Gradient Background
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: <Color>[
+                                colorScheme.primary.withValues(alpha: 0.2),
+                                colorScheme.surface.withValues(alpha: 0.0),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Glass blur
+                        BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(color: Colors.transparent),
+                        ),
+                      ],
                     ),
                   ),
                   title: Row(
@@ -281,32 +309,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ],
                 ),
 
-                // Profile Content with Staggered Animation
+                // Profile Content
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       children: AnimationConfiguration.toStaggeredList(
                         duration: const Duration(milliseconds: 375),
-                        childAnimationBuilder: (Widget widget) {
-                          return SlideAnimation(
-                            verticalOffset: 50.0,
-                            child: FadeInAnimation(child: widget),
-                          );
-                        },
+                        childAnimationBuilder:
+                            (Widget widget) => SlideAnimation(
+                              verticalOffset: 50.0,
+                              child: FadeInAnimation(child: widget),
+                            ),
                         children: <Widget>[
-                          const SizedBox(height: 24), // Standard spacing
-                          // Avatar with online indicator
+                          const SizedBox(height: 8),
                           ProfileAvatar(
                             avatarUrl: user.avatarUrl,
                             size: 100,
                             showOnlineIndicator: true,
                             isOnline: true,
                           ),
-
                           const SizedBox(height: 16),
-
-                          // @username
                           Text(
                             '@${user.username ?? 'username'}',
                             style: textTheme.titleLarge?.copyWith(
@@ -314,10 +337,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               color: colorScheme.onSurface,
                             ),
                           ),
-
                           const SizedBox(height: 16),
-
-                          // Stats row
                           ProfileStatsRow(
                             followersCount: '03',
                             followingCount: '03',
@@ -330,34 +350,50 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
 
-                // Bio section - completely separate sliver to avoid animation conflicts
+                // Bio section
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       children: <Widget>[
                         const SizedBox(height: 16),
-                        const SizedBox(height: 16),
                         _buildBioSection(colorScheme, textTheme, t, user),
-                        const SizedBox(height: 24),
-                        const SizedBox(height: 24),
-                        // Modular Tab Bar
-                        ProfileTabBar(
-                          tabs: _buildTabs(t),
-                          selectedId: _selectedTabId,
-                          onTabSelected: (String id) {
-                            setState(() {
-                              _selectedTabId = id;
-                            });
-                          },
-                        ),
+                        const SizedBox(height: 32),
                       ],
                     ),
                   ),
                 ),
 
-                // Tab content
-                _buildTabContent(colorScheme),
+                // Sticky Tab Bar
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _StickyTabBarDelegate(
+                    child: Container(
+                      color: colorScheme.surface, // Opaque background for sticky state
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: ProfileTabBar(
+                        tabs: _buildTabs(t),
+                        selectedId: _selectedTabId,
+                        onTabSelected: (String id) {
+                          setState(() {
+                            _selectedTabId = id;
+                          });
+                        },
+                      ),
+                    ),
+                    maxHeight: 68, // Height of tab bar + padding
+                    minHeight: 68,
+                  ),
+                ),
+
+                // Tab content (with padding to separate from tabs)
+                SliverPadding(
+                  padding: const EdgeInsets.only(top: 16),
+                  sliver: _buildTabContent(colorScheme),
+                ),
+
+                // Bottom padding for nav bar
+                const SliverToBoxAdapter(child: SizedBox(height: 100)),
               ],
             ),
           ),
@@ -377,16 +413,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     AppUser user,
   ) {
     if (_isLoadingBio) {
-      return SizedBox(
-        height: 20,
-        width: 20,
-        child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.primary),
-      );
+      return const ShimmerLoading(width: 120, height: 20);
     }
 
     // Display mode - tap to edit
     final bool hasBio = _bioText != null && _bioText!.isNotEmpty;
-    return GestureDetector(
+    // Using ScaleButton instead of GestureDetector
+    return ScaleButton(
       onTap: () => _showEditBioBottomSheet(user),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -424,19 +457,58 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildTabContent(ColorScheme colorScheme) {
     switch (_selectedTabId) {
       case 'achievements':
-        return _buildPlaceholderGrid(colorScheme, 6);
+        // Keep grid for achievements to show loading state example, or replaced if empty
+        return _buildEmptyState(
+          icon: Icons.emoji_events_outlined,
+          title: 'No Achievements Yet',
+          subtitle: 'Join rallies to earn badges!',
+        );
       case 'posts':
-        return _buildPlaceholderGrid(colorScheme, 9);
+        return _buildEmptyState(
+          icon: Icons.format_quote_outlined,
+          title: 'No Posts Yet',
+          subtitle: 'Share your rally experiences with the community.',
+        );
       case 'rallies':
-        return _buildPlaceholderGrid(colorScheme, 3);
+        return _buildEmptyState(
+          icon: Icons.map_outlined,
+          title: 'No Upcoming Rallies',
+          subtitle: 'Find a rally nearby and join the fun!',
+          actionLabel: 'Explore Rallies',
+          onAction: () {
+            // TODO: Navigate to Explore
+          },
+        );
       default:
         return _buildPlaceholderGrid(colorScheme, 6);
     }
   }
 
+  Widget _buildEmptyState({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 100), // Account for nav bar
+        child: EmptyState(
+          icon: icon,
+          title: title,
+          subtitle: subtitle,
+          actionLabel: actionLabel,
+          onAction: onAction,
+        ),
+      ),
+    );
+  }
+
   Widget _buildPlaceholderGrid(ColorScheme colorScheme, int count) {
     return SliverPadding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       sliver: SliverGrid(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
@@ -448,22 +520,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             position: index,
             duration: const Duration(milliseconds: 375),
             columnCount: 3,
-            child: ScaleAnimation(
+            child: const ScaleAnimation(
               child: FadeInAnimation(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        color: colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                child: ShimmerLoading(
+                  width: double.infinity,
+                  height: double.infinity,
+                  borderRadius: 8,
                 ),
               ),
             ),
@@ -471,5 +533,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         }, childCount: count),
       ),
     );
+  }
+}
+
+/// Helper delegate for sticky tab bar.
+class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  final double maxHeight;
+  final double minHeight;
+
+  _StickyTabBarDelegate({required this.child, required this.maxHeight, required this.minHeight});
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return SizedBox.expand(child: child);
+  }
+
+  @override
+  double get maxExtent => maxHeight;
+
+  @override
+  double get minExtent => minHeight;
+
+  @override
+  bool shouldRebuild(_StickyTabBarDelegate oldDelegate) {
+    return maxHeight != oldDelegate.maxExtent ||
+        minHeight != oldDelegate.minExtent ||
+        child != oldDelegate.child;
   }
 }

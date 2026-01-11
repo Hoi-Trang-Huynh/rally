@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import 'visuals/scale_button.dart';
 
 /// An outlined button for Google sign-in used in auth screens.
 ///
@@ -26,93 +27,53 @@ class AuthGoogleButton extends StatefulWidget {
   State<AuthGoogleButton> createState() => _AuthGoogleButtonState();
 }
 
-class _AuthGoogleButtonState extends State<AuthGoogleButton> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-      lowerBound: 0.0,
-      upperBound: 0.05,
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onTapDown(TapDownDetails details) {
-    if (widget.isLoading || widget.onPressed == null) return;
-    HapticFeedback.lightImpact();
-    _controller.forward();
-  }
-
-  void _onTapUp(TapUpDetails details) {
-    if (widget.isLoading || widget.onPressed == null) return;
-    _controller.reverse();
-    widget.onPressed?.call();
-  }
-
-  void _onTapCancel() {
-    if (widget.isLoading || widget.onPressed == null) return;
-    _controller.reverse();
-  }
-
+class _AuthGoogleButtonState extends State<AuthGoogleButton> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (BuildContext context, Widget? child) {
-        return Transform.scale(scale: 1.0 - _controller.value, child: child);
-      },
+    if (widget.isLoading) {
+      return const SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: OutlinedButton(
+          onPressed: null,
+          child: SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+        ),
+      );
+    }
+
+    return ScaleButton(
+      onTap: widget.onPressed,
       child: SizedBox(
         width: double.infinity,
         height: 48,
         child: OutlinedButton(
-          onPressed: widget.isLoading ? null : () {}, // Handled by GestureDetector
+          onPressed: null, // Let ScaleButton handle taps
           style: OutlinedButton.styleFrom(
             foregroundColor: colorScheme.onSurface,
             side: BorderSide(color: colorScheme.outline),
+            disabledForegroundColor: colorScheme.onSurface, // Keep text valid
+          ).copyWith(
+            side: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              return BorderSide(color: colorScheme.outline);
+            }),
           ),
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTapDown: _onTapDown,
-            onTapUp: _onTapUp,
-            onTapCancel: _onTapCancel,
-            child: Center(
-              child:
-                  widget.isLoading
-                      ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                      : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          // Improved Google Icon (colored) or keep simple? Keeping simple for now but using FontAwesome usually better.
-                          // Using simple 'G' text or just icon for now.
-                          Image.asset(
-                            'assets/images/google_logo.png',
-                            height: 24,
-                            width: 24,
-                            errorBuilder:
-                                (BuildContext context, Object error, StackTrace? stackTrace) =>
-                                    const Icon(Icons.g_mobiledata, size: 28),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(widget.text),
-                        ],
-                      ),
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Image.asset(
+                'assets/images/google_logo.png',
+                height: 24,
+                width: 24,
+                errorBuilder:
+                    (BuildContext context, Object error, StackTrace? stackTrace) =>
+                        const Icon(Icons.g_mobiledata, size: 28),
+              ),
+              const SizedBox(width: 8),
+              Text(widget.text),
+            ],
           ),
         ),
       ),

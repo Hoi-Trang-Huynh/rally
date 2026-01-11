@@ -126,6 +126,19 @@ class AppUser {
       (firstName == null || firstName!.isEmpty) ||
       (lastName == null || lastName!.isEmpty);
 
+  /// Returns the display name for the user.
+  ///
+  /// Prefers [firstName], falls back to [username], then 'User'.
+  String get displayName {
+    if (firstName != null && firstName!.isNotEmpty) {
+      return firstName!;
+    }
+    if (username != null && username!.isNotEmpty) {
+      return username!;
+    }
+    return 'User';
+  }
+
   @override
   String toString() {
     return 'AppUser(uid: $uid, id: $id, email: $email, username: $username)';

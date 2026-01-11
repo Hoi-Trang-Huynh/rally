@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import 'visuals/scale_button.dart';
 
 /// A primary filled button used in auth screens.
 ///
@@ -27,83 +28,43 @@ class AuthPrimaryButton extends StatefulWidget {
   State<AuthPrimaryButton> createState() => _AuthPrimaryButtonState();
 }
 
-class _AuthPrimaryButtonState extends State<AuthPrimaryButton> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-      lowerBound: 0.0,
-      upperBound: 0.05,
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onTapDown(TapDownDetails details) {
-    if (widget.isLoading || widget.onPressed == null) return;
-    HapticFeedback.lightImpact();
-    _controller.forward();
-  }
-
-  void _onTapUp(TapUpDetails details) {
-    if (widget.isLoading || widget.onPressed == null) return;
-    _controller.reverse();
-    widget.onPressed?.call();
-  }
-
-  void _onTapCancel() {
-    if (widget.isLoading || widget.onPressed == null) return;
-    _controller.reverse();
-  }
-
+class _AuthPrimaryButtonState extends State<AuthPrimaryButton> {
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    if (widget.isLoading) {
+      return SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: FilledButton(
+          onPressed: null,
+          child: SizedBox(
+            height: 24,
+            width: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+            ),
+          ),
+        ),
+      );
+    }
 
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (BuildContext context, Widget? child) {
-        return Transform.scale(scale: 1.0 - _controller.value, child: child);
-      },
+    return ScaleButton(
+      onTap: widget.onPressed,
       child: SizedBox(
         width: double.infinity,
         height: 48,
         child: FilledButton(
-          onPressed: widget.isLoading ? null : () {}, // Handled by GestureDetector
+          // We disable the button's internal tap to let ScaleButton handle it,
+          // but we keep the visual style.
+          onPressed: null,
           style: FilledButton.styleFrom(
-            // Disable default splash to avoid conflict with scale anim if desired,
-            // but keeping it adds to the effect.
-          ).copyWith(
-            // OverlayColor hack to disable internal inkwell if we rely purely on our gesture
-            // overlayColor: MaterialStateProperty.all(Colors.transparent),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            disabledBackgroundColor: Theme.of(context).colorScheme.primary,
+            disabledForegroundColor: Theme.of(context).colorScheme.onPrimary,
           ),
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTapDown: _onTapDown,
-            onTapUp: _onTapUp,
-            onTapCancel: _onTapCancel,
-            child: Center(
-              child:
-                  widget.isLoading
-                      ? SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: colorScheme.onPrimary,
-                        ),
-                      )
-                      : Text(widget.text),
-            ),
-          ),
+          child: Text(widget.text),
         ),
       ),
     );

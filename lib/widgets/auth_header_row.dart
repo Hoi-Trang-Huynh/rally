@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/providers/theme_provider.dart';
 import 'package:rally/widgets/language_selector.dart';
 
+import '../screens/onboarding/onboarding_screen.dart';
+
 /// A reusable header row widget for auth screens.
 ///
 /// Contains a language picker on the left and a theme toggle on the right.
@@ -25,13 +27,33 @@ class AuthHeaderRow extends ConsumerWidget {
           // Language selector (top-left) - new pill design
           const LanguageSelector(),
           // Theme toggle (top-right)
-          IconButton(
-            icon: Icon(themeState.mode == AppThemeMode.dark ? Icons.light_mode : Icons.dark_mode),
-            onPressed: () {
-              final AppThemeMode next =
-                  themeState.mode == AppThemeMode.light ? AppThemeMode.dark : AppThemeMode.light;
-              themeNotifier.setThemeMode(next);
-            },
+          // Theme toggle (top-right)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              IconButton(
+                icon: Icon(Icons.info_outline, color: Theme.of(context).colorScheme.onSurface),
+                tooltip: 'App Intro',
+                onPressed: () {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute<void>(builder: (_) => const OnboardingScreen()),
+                  );
+                },
+              ),
+              IconButton(
+                icon: Icon(
+                  themeState.mode == AppThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                onPressed: () {
+                  final AppThemeMode next =
+                      themeState.mode == AppThemeMode.light
+                          ? AppThemeMode.dark
+                          : AppThemeMode.light;
+                  themeNotifier.setThemeMode(next);
+                },
+              ),
+            ],
           ),
         ],
       ),
