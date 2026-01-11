@@ -6,6 +6,8 @@
   "support": "Support",
   "language": "Language",
   "mode": "Mode",
+  "darkMode": "Dark Mode",
+  "lightMode": "Light Mode",
   "helpFeedback": "Help & Feedback",
   "logout": "Log out",
   "edit": "Edit",

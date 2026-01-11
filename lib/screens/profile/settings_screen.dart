@@ -252,7 +252,7 @@ class SettingsScreen extends ConsumerWidget {
     return ModernSettingsTile(
       icon: isDarkMode ? Icons.dark_mode : Icons.light_mode,
       title: t.settings.mode,
-      subtitle: isDarkMode ? 'Dark Mode' : 'Light Mode',
+      subtitle: isDarkMode ? t.settings.darkMode : t.settings.lightMode,
       trailing: Container(
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainerHigh,
