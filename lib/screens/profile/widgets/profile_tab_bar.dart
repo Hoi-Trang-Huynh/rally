@@ -39,45 +39,48 @@ class ProfileTabBar extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5), width: 1),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Container(
+        height: 48,
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(24),
         ),
-      ),
-      child: Row(
-        children:
-            tabs.map((ProfileTabData tab) {
-              final bool isSelected = tab.id == selectedId;
-              return Expanded(
-                child: InkWell(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    onTabSelected(tab.id);
-                  },
-                  borderRadius: BorderRadius.circular(20),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected ? colorScheme.primary : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    alignment: Alignment.center, // Ensure alignment is center
-                    child: AnimatedDefaultTextStyle(
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          children:
+              tabs.map((ProfileTabData tab) {
+                final bool isSelected = tab.id == selectedId;
+                return Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      onTabSelected(tab.id);
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      style: (textTheme.titleSmall ?? const TextStyle()).copyWith(
-                        color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                        fontSize: 15,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected ? colorScheme.primary : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(tab.label),
+                      alignment: Alignment.center, // Ensure alignment is center
+                      child: AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 200),
+                        style: (textTheme.titleSmall ?? const TextStyle()).copyWith(
+                          color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          fontSize: 15,
+                        ),
+                        child: Text(tab.label),
+                      ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
+        ),
       ),
     );
   }

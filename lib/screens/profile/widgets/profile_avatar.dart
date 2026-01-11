@@ -5,15 +5,6 @@ import 'package:flutter/material.dart';
 /// Displays a circular avatar with the user's image or a fallback icon.
 /// Can show a green online status indicator dot.
 class ProfileAvatar extends StatelessWidget {
-  /// Creates a new [ProfileAvatar].
-  const ProfileAvatar({
-    super.key,
-    this.avatarUrl,
-    this.size = 100,
-    this.showOnlineIndicator = false,
-    this.isOnline = false,
-  });
-
   /// The URL of the avatar image.
   final String? avatarUrl;
 
@@ -26,6 +17,23 @@ class ProfileAvatar extends StatelessWidget {
   /// Whether the user is online.
   final bool isOnline;
 
+  /// Width of the border around the avatar.
+  final double? borderWidth;
+
+  /// Color of the border around the avatar.
+  final Color? borderColor;
+
+  /// Creates a new [ProfileAvatar].
+  const ProfileAvatar({
+    super.key,
+    this.avatarUrl,
+    this.size = 100,
+    this.showOnlineIndicator = false,
+    this.isOnline = false,
+    this.borderWidth,
+    this.borderColor,
+  });
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -35,7 +43,14 @@ class ProfileAvatar extends StatelessWidget {
         Container(
           width: size,
           height: size,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: colorScheme.primaryContainer),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: colorScheme.primaryContainer,
+            border:
+                borderWidth != null
+                    ? Border.all(color: borderColor ?? colorScheme.outline, width: borderWidth!)
+                    : null,
+          ),
           child: ClipOval(
             child:
                 avatarUrl != null && avatarUrl!.isNotEmpty

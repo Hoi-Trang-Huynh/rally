@@ -1,7 +1,9 @@
 {
-  "title": "Setting",
+  "title": "Settings",
   "account": "Account",
   "privacy": "Privacy",
+  "preferences": "Preferences",
+  "support": "Support",
   "language": "Language",
   "mode": "Mode",
   "helpFeedback": "Help & Feedback",

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
@@ -267,16 +265,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: <Color>[
-                                colorScheme.primary.withValues(alpha: 0.2),
+                                colorScheme.primary.withValues(alpha: 0.1),
                                 colorScheme.surface.withValues(alpha: 0.0),
                               ],
                             ),
                           ),
-                        ),
-                        // Glass blur
-                        BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(color: Colors.transparent),
                         ),
                       ],
                     ),
