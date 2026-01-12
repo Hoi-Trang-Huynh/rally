@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/visuals/empty_state.dart';
+import 'empty_state.dart';
 
 /// A reusable widget to display an error state.
 ///

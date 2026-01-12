@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/screens/auth/widgets/auth_primary_button.dart';
+import 'package:rally/screens/auth/widgets/auth_text_field.dart';
 import 'package:rally/utils/responsive.dart';
-import 'package:rally/widgets/auth_primary_button.dart';
-import 'package:rally/widgets/auth_text_field.dart';
 
 /// A reusable form widget for collecting user profile fields.
 ///

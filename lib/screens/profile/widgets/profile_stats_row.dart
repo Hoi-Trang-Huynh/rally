@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rally/utils/responsive.dart';
-import 'package:rally/widgets/visuals/animated_count.dart';
+import 'package:rally/widgets/common/animated_count.dart';
 
 /// A widget displaying a single stat with count and label.
 ///

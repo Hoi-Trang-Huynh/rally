@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/screens/auth/login_screen.dart';
 import 'package:rally/screens/auth/signup_screen.dart';
+import 'package:rally/screens/auth/widgets/auth_header_row.dart';
 import 'package:rally/utils/responsive.dart';
-import 'package:rally/widgets/auth_header_row.dart';
-import 'package:rally/widgets/visuals/animated_background.dart';
-import 'package:rally/widgets/visuals/glass_container.dart';
+import 'package:rally/widgets/common/animated_background.dart';
+import 'package:rally/widgets/common/glass_container.dart';
 
 /// A wrapper screen that holds the static header and switches between Login and Signup forms.
 ///

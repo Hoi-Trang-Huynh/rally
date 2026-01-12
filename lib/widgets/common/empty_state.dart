@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rally/utils/responsive.dart';
-import 'package:rally/widgets/visuals/scale_button.dart';
+import 'package:rally/widgets/common/scale_button.dart';
 
 /// A reusable widget to display an empty state.
 ///

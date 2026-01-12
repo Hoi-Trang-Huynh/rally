@@ -8,17 +8,17 @@ import 'package:rally/models/responses/register_response.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
+import 'package:rally/screens/auth/widgets/auth_google_button.dart';
+import 'package:rally/screens/auth/widgets/auth_primary_button.dart';
+import 'package:rally/screens/auth/widgets/auth_text_field.dart';
+import 'package:rally/screens/auth/widgets/or_divider.dart';
+import 'package:rally/screens/auth/widgets/password_requirements.dart';
+import 'package:rally/screens/auth/widgets/profile_fields_form.dart';
 import 'package:rally/screens/playground/auth_test.dart';
 import 'package:rally/utils/auth_helpers.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/utils/ui_helpers.dart';
 import 'package:rally/utils/validators.dart';
-import 'package:rally/widgets/auth_google_button.dart';
-import 'package:rally/widgets/auth_primary_button.dart';
-import 'package:rally/widgets/auth_text_field.dart';
-import 'package:rally/widgets/or_divider.dart';
-import 'package:rally/widgets/password_requirements.dart';
-import 'package:rally/widgets/profile_fields_form.dart';
 
 /// Signup steps enum for clarity.
 enum SignupStep {

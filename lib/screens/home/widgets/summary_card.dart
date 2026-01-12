@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rally/utils/responsive.dart';
-import 'package:rally/widgets/visuals/glass_container.dart';
+import 'package:rally/widgets/common/glass_container.dart';
 
 class SummaryCard extends StatelessWidget {
   final String title;

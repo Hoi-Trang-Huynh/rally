@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../utils/responsive.dart';
-import 'visuals/scale_button.dart';
+import 'package:rally/utils/responsive.dart';
+import 'package:rally/widgets/common/scale_button.dart';
 
 /// A primary filled button used in auth screens.
 ///

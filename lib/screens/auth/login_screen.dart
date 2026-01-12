@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/providers/auth_provider.dart';
+import 'package:rally/screens/auth/widgets/auth_google_button.dart';
+import 'package:rally/screens/auth/widgets/auth_primary_button.dart';
+import 'package:rally/screens/auth/widgets/auth_text_field.dart';
+import 'package:rally/screens/auth/widgets/or_divider.dart';
 import 'package:rally/utils/auth_helpers.dart';
 import 'package:rally/utils/responsive.dart';
-import 'package:rally/widgets/auth_google_button.dart';
-import 'package:rally/widgets/auth_primary_button.dart';
-import 'package:rally/widgets/auth_text_field.dart';
-import 'package:rally/widgets/or_divider.dart';
 
 /// Form content for Login.
 ///

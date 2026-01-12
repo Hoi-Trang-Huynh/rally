@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../utils/responsive.dart';
+import 'package:rally/utils/responsive.dart';
 
 /// A standardized text field used in auth screens.
 ///

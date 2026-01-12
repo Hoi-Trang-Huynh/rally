@@ -7,7 +7,7 @@ import 'package:rally/screens/auth/auth_screen.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:rally/themes/app_colors.dart';
 import 'package:rally/utils/responsive.dart';
-import 'package:rally/widgets/visuals/animated_background.dart';
+import 'package:rally/widgets/common/animated_background.dart';
 
 /// A screen that introduces the user to the application's features.
 ///

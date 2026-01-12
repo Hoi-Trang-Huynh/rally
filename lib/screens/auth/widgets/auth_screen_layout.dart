@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:rally/screens/auth/widgets/auth_header_row.dart';
 import 'package:rally/utils/responsive.dart';
-import 'package:rally/widgets/auth_header_row.dart';
 
 /// A shared layout widget for authentication screens (Login and Signup).
 ///

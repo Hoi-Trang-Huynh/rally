@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/providers/theme_provider.dart';
-import 'package:rally/widgets/language_selector.dart';
-
-import '../screens/onboarding/onboarding_screen.dart';
+import 'package:rally/screens/auth/widgets/language_selector.dart';
+import 'package:rally/screens/onboarding/onboarding_screen.dart';
 
 /// A reusable header row widget for auth screens.
 ///

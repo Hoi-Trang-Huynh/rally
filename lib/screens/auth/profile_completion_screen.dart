@@ -6,12 +6,12 @@ import 'package:rally/models/responses/availability_response.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
+import 'package:rally/screens/auth/widgets/auth_primary_button.dart';
+import 'package:rally/screens/auth/widgets/auth_screen_layout.dart';
+import 'package:rally/screens/auth/widgets/auth_text_field.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/utils/ui_helpers.dart';
 import 'package:rally/utils/validators.dart';
-import 'package:rally/widgets/auth_primary_button.dart';
-import 'package:rally/widgets/auth_text_field.dart';
-import 'package:rally/widgets/layout/auth_screen_layout.dart';
 
 /// Screen for completing user profile after Google Sign-In.
 ///

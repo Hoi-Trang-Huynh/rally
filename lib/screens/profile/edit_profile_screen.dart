@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/models/responses/availability_response.dart';
+import 'package:rally/screens/auth/widgets/auth_text_field.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/app_user.dart';
@@ -10,7 +11,6 @@ import '../../providers/auth_provider.dart';
 import '../../utils/responsive.dart';
 import '../../utils/ui_helpers.dart';
 import '../../utils/validators.dart';
-import '../../widgets/auth_text_field.dart';
 import 'widgets/profile_avatar.dart';
 
 /// Screen for editing user profile.
