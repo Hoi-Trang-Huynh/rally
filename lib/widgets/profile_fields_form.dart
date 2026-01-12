@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/auth_primary_button.dart';
 import 'package:rally/widgets/auth_text_field.dart';
 
@@ -55,7 +56,7 @@ class ProfileFieldsForm extends StatelessWidget {
           labelText: t.auth.signup.username,
           errorText: usernameError,
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: Responsive.h(context, 16)),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -66,7 +67,7 @@ class ProfileFieldsForm extends StatelessWidget {
                 errorText: firstNameError,
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: Responsive.w(context, 16)),
             Expanded(
               child: AuthTextField(
                 controller: lastNameController,
@@ -76,7 +77,7 @@ class ProfileFieldsForm extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: Responsive.h(context, 24)),
         AuthPrimaryButton(
           text: t.common.continueButton,
           onPressed: onContinue,

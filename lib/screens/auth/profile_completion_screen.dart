@@ -6,6 +6,7 @@ import 'package:rally/models/responses/availability_response.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
+import 'package:rally/utils/responsive.dart';
 import 'package:rally/utils/ui_helpers.dart';
 import 'package:rally/utils/validators.dart';
 import 'package:rally/widgets/auth_primary_button.dart';
@@ -114,7 +115,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
             labelText: t.auth.signup.username,
             errorText: _usernameError,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: Responsive.h(context, 16)),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -125,7 +126,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
                   errorText: _firstNameError,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: Responsive.w(context, 16)),
               Expanded(
                 child: AuthTextField(
                   controller: _lastNameController,
@@ -135,7 +136,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: Responsive.h(context, 24)),
           AuthPrimaryButton(
             text: t.common.continueButton,
             onPressed: _onSubmit,

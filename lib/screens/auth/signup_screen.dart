@@ -10,6 +10,7 @@ import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/screens/playground/auth_test.dart';
 import 'package:rally/utils/auth_helpers.dart';
+import 'package:rally/utils/responsive.dart';
 import 'package:rally/utils/ui_helpers.dart';
 import 'package:rally/utils/validators.dart';
 import 'package:rally/widgets/auth_google_button.dart';
@@ -325,8 +326,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final Translations t = Translations.of(context);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final bool isSmallScreen = screenHeight < 700;
 
     return Column(
       children: AnimationConfiguration.toStaggeredList(
@@ -343,10 +342,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               style: textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colorScheme.onSurface,
-                fontSize: isSmallScreen ? 22 : null,
               ),
             ),
-            SizedBox(height: isSmallScreen ? 24 : 48),
+            SizedBox(height: Responsive.h(context, 36)),
           ],
 
           // Form Content
@@ -380,15 +378,15 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         keyboardType: TextInputType.emailAddress,
         enabled: !_anyLoading,
       ),
-      const SizedBox(height: 24),
+      SizedBox(height: Responsive.h(context, 24)),
       AuthPrimaryButton(
         text: t.common.continueButton,
         onPressed: _anyLoading ? null : _onContinueStep1,
         isLoading: _isSignupLoading,
       ),
-      const SizedBox(height: 24),
+      SizedBox(height: Responsive.h(context, 24)),
       const OrDivider(),
-      const SizedBox(height: 24),
+      SizedBox(height: Responsive.h(context, 24)),
       AuthGoogleButton(
         text: t.auth.login.google,
         onPressed: _anyLoading ? null : _signInWithGoogle,
@@ -401,7 +399,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return <Widget>[
       _buildBackButton(_emailController.text, colorScheme),
-      const SizedBox(height: 16),
+      SizedBox(height: Responsive.h(context, 16)),
       ProfileFieldsForm(
         usernameController: _usernameController,
         firstNameController: _firstNameController,
@@ -420,7 +418,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return <Widget>[
       _buildBackButton(t.auth.signup.stepProfile, colorScheme),
-      const SizedBox(height: 16),
+      SizedBox(height: Responsive.h(context, 16)),
       AuthTextField(
         controller: _passwordController,
         labelText: t.auth.login.password,
@@ -429,9 +427,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         onChanged: (String value) => setState(() => _currentPassword = value),
         enabled: !_anyLoading,
       ),
-      const SizedBox(height: 8),
+      SizedBox(height: Responsive.h(context, 8)),
       PasswordRequirements(password: _currentPassword),
-      const SizedBox(height: 16),
+      SizedBox(height: Responsive.h(context, 16)),
       AuthTextField(
         controller: _confirmPasswordController,
         labelText: t.auth.signup.confirmPassword,
@@ -439,7 +437,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         obscureText: true,
         enabled: !_anyLoading,
       ),
-      const SizedBox(height: 24),
+      SizedBox(height: Responsive.h(context, 24)),
       AuthPrimaryButton(
         text: t.common.continueButton,
         onPressed: _anyLoading ? null : _onContinueStep3,
@@ -458,14 +456,18 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         alignment: Alignment.centerLeft,
         child: TextButton.icon(
           onPressed: _anyLoading ? null : _cancelVerificationAndGoBack,
-          icon: const Icon(Icons.arrow_back, size: 18),
+          icon: Icon(Icons.arrow_back, size: Responsive.w(context, 18)),
           label: const Text('Back'),
           style: TextButton.styleFrom(foregroundColor: colorScheme.onSurfaceVariant),
         ),
       ),
-      const SizedBox(height: 16),
-      Icon(Icons.mark_email_read_outlined, size: 80, color: colorScheme.primary),
-      const SizedBox(height: 24),
+      SizedBox(height: Responsive.h(context, 16)),
+      Icon(
+        Icons.mark_email_read_outlined,
+        size: Responsive.w(context, 80),
+        color: colorScheme.primary,
+      ),
+      SizedBox(height: Responsive.h(context, 24)),
       Text(
         t.auth.signup.verifyEmail,
         style: textTheme.headlineSmall?.copyWith(
@@ -474,22 +476,25 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         ),
         textAlign: TextAlign.center,
       ),
-      const SizedBox(height: 12),
+      SizedBox(height: Responsive.h(context, 12)),
       Text(
         t.auth.signup.verifyEmailSubtitle(email: _emailController.text.trim()),
         style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
         textAlign: TextAlign.center,
       ),
-      const SizedBox(height: 32),
+      SizedBox(height: Responsive.h(context, 32)),
       AuthPrimaryButton(
         text: t.auth.signup.checkVerification,
         onPressed: _checkEmailVerification,
         isLoading: _isSignupLoading,
       ),
-      const SizedBox(height: 16),
+      SizedBox(height: Responsive.h(context, 16)),
       TextButton(
         onPressed: _isSignupLoading ? null : _resendVerificationEmail,
-        child: Text(t.auth.signup.resendEmail, style: TextStyle(color: colorScheme.primary)),
+        child: Text(
+          t.auth.signup.resendEmail,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
+        ),
       ),
     ];
   }
@@ -509,7 +514,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       alignment: Alignment.centerLeft,
       child: TextButton.icon(
         onPressed: _anyLoading ? null : _goBack,
-        icon: const Icon(Icons.arrow_back, size: 18),
+        icon: Icon(Icons.arrow_back, size: Responsive.w(context, 18)),
         label: Text(label),
         style: TextButton.styleFrom(foregroundColor: colorScheme.onSurfaceVariant),
       ),

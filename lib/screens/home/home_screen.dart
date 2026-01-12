@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:rally/screens/home/widgets/home_header.dart';
 import 'package:rally/screens/home/widgets/summary_card.dart';
+import 'package:rally/utils/responsive.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -21,10 +22,10 @@ class HomeScreen extends StatelessWidget {
             // 2. Summary Cards Grid
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 160,
+                height: Responsive.h(context, 160),
                 child: AnimationLimiter(
                   child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 16)),
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
                     children: AnimationConfiguration.toStaggeredList(
@@ -35,36 +36,36 @@ class HomeScreen extends StatelessWidget {
                             child: FadeInAnimation(child: widget),
                           ),
                       children: <Widget>[
-                        const SizedBox(
-                          width: 140,
-                          child: SummaryCard(
+                        SizedBox(
+                          width: Responsive.w(context, 140),
+                          child: const SummaryCard(
                             title: 'Active Rallies',
                             value: '3',
                             icon: Icons.flag_rounded,
                             color: Colors.orange,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        const SizedBox(
-                          width: 140,
-                          child: SummaryCard(
+                        SizedBox(width: Responsive.w(context, 12)),
+                        SizedBox(
+                          width: Responsive.w(context, 140),
+                          child: const SummaryCard(
                             title: 'Places Visited',
                             value: '12',
                             icon: Icons.map_rounded,
                             color: Colors.blue,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        const SizedBox(
-                          width: 140,
-                          child: SummaryCard(
+                        SizedBox(width: Responsive.w(context, 12)),
+                        SizedBox(
+                          width: Responsive.w(context, 140),
+                          child: const SummaryCard(
                             title: 'New Friends',
                             value: '5',
                             icon: Icons.people_rounded,
                             color: Colors.purple,
                           ),
                         ),
-                        const SizedBox(width: 24), // Spacing for end
+                        SizedBox(width: Responsive.w(context, 24)), // Spacing for end
                       ],
                     ),
                   ),
@@ -72,12 +73,12 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+            SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 32))),
 
             // 3. Section Title
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
                 child: Text(
                   'Recent Activity',
                   style: Theme.of(
@@ -87,35 +88,38 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 16))),
 
             // 4. Placeholder List (Mock Data)
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Responsive.w(context, 24),
+                      vertical: Responsive.h(context, 8),
+                    ),
                     child: Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(Responsive.w(context, 16)),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surfaceContainer,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(Responsive.w(context, 16)),
                       ),
                       child: Row(
                         children: <Widget>[
                           Container(
-                            height: 48,
-                            width: 48,
+                            height: Responsive.w(context, 48),
+                            width: Responsive.w(context, 48),
                             decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.tertiaryContainer,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
                             ),
                             child: Icon(
                               Icons.photo_camera_rounded,
                               color: Theme.of(context).colorScheme.onTertiaryContainer,
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          SizedBox(width: Responsive.w(context, 16)),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +149,7 @@ class HomeScreen extends StatelessWidget {
             ),
 
             // Bottom padding for floating nav bar
-            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 100))),
           ],
         ),
       ),

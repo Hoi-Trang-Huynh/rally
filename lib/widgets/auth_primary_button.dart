@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../utils/responsive.dart';
 import 'visuals/scale_button.dart';
 
 /// A primary filled button used in auth screens.
@@ -31,15 +32,18 @@ class AuthPrimaryButton extends StatefulWidget {
 class _AuthPrimaryButtonState extends State<AuthPrimaryButton> {
   @override
   Widget build(BuildContext context) {
+    final double buttonHeight = Responsive.h(context, 48);
+    final double spinnerSize = Responsive.w(context, 24);
+
     if (widget.isLoading) {
       return SizedBox(
         width: double.infinity,
-        height: 48,
+        height: buttonHeight,
         child: FilledButton(
           onPressed: null,
           child: SizedBox(
-            height: 24,
-            width: 24,
+            height: spinnerSize,
+            width: spinnerSize,
             child: CircularProgressIndicator(
               strokeWidth: 2,
               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
@@ -53,7 +57,7 @@ class _AuthPrimaryButtonState extends State<AuthPrimaryButton> {
       onTap: widget.onPressed,
       child: SizedBox(
         width: double.infinity,
-        height: 48,
+        height: buttonHeight,
         child: FilledButton(
           // We disable the button's internal tap to let ScaleButton handle it,
           // but we keep the visual style.

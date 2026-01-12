@@ -4,6 +4,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/utils/auth_helpers.dart';
+import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/auth_google_button.dart';
 import 'package:rally/widgets/auth_primary_button.dart';
 import 'package:rally/widgets/auth_text_field.dart';
@@ -78,9 +79,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final bool anyLoading = _isSignInLoading || _isGoogleLoading;
 
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final bool isSmallScreen = screenHeight < 700;
-
     return Column(
       children: AnimationConfiguration.toStaggeredList(
         duration: const Duration(milliseconds: 375),
@@ -95,19 +93,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             style: textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: colorScheme.onSurface,
-              fontSize: isSmallScreen ? 22 : null,
             ),
           ),
-          SizedBox(height: isSmallScreen ? 24 : 48),
+          SizedBox(height: Responsive.h(context, 36)),
 
           // Error Message
           if (_errorMessage != null) ...<Widget>[
             Text(
               _errorMessage!,
-              style: TextStyle(color: colorScheme.error),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colorScheme.error),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: Responsive.h(context, 16)),
           ],
 
           // Email Field
@@ -117,7 +114,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             keyboardType: TextInputType.emailAddress,
             enabled: !anyLoading,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: Responsive.h(context, 16)),
 
           // Password Field
           AuthTextField(
@@ -126,17 +123,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             obscureText: true,
             enabled: !anyLoading,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: Responsive.h(context, 24)),
 
           AuthPrimaryButton(
             text: t.common.continueButton,
             onPressed: anyLoading ? null : _signIn,
             isLoading: _isSignInLoading,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: Responsive.h(context, 24)),
 
           const OrDivider(),
-          const SizedBox(height: 24),
+          SizedBox(height: Responsive.h(context, 24)),
 
           // Google Button
           AuthGoogleButton(

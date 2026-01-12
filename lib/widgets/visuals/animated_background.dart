@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:rally/utils/responsive.dart';
 
 /// A background widget that renders animated gradient orbs.
 class AnimatedBackground extends StatefulWidget {
@@ -52,21 +53,21 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
             Positioned(
               top: -100 + (50 * sin(t * 2 * pi)),
               left: -50 + (30 * cos(t * 2 * pi)),
-              child: _Blob(color: primaryBlob, size: 400),
+              child: _Blob(color: primaryBlob, size: Responsive.w(context, 400)),
             ),
 
             // Blob 2 (Center Right moving left/up)
             Positioned(
               top: MediaQuery.of(context).size.height * 0.4 + (40 * cos(t * 2 * pi)),
               right: -100 + (40 * sin(t * 2 * pi)),
-              child: _Blob(color: secondaryBlob, size: 350),
+              child: _Blob(color: secondaryBlob, size: Responsive.w(context, 350)),
             ),
 
             // Blob 3 (Bottom Left moving up)
             Positioned(
               bottom: -50 + (60 * sin(t * 2 * pi)),
               left: 20 + (30 * cos(t * 2 * pi)),
-              child: _Blob(color: tertiaryBlob, size: 300),
+              child: _Blob(color: tertiaryBlob, size: Responsive.w(context, 300)),
             ),
           ],
         );

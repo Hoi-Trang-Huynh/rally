@@ -6,6 +6,7 @@ import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/screens/auth/auth_screen.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:rally/themes/app_colors.dart';
+import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/visuals/animated_background.dart';
 
 /// A screen that introduces the user to the application's features.
@@ -57,7 +58,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           SafeArea(
             child: Column(
               children: <Widget>[
-                const SizedBox(height: 16),
+                SizedBox(height: Responsive.h(context, 16)),
                 // 2. Top Logo
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -66,11 +67,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       tag: 'app_logo',
                       child: Image.asset(
                         'assets/images/rally_logo_transparent.png',
-                        height: 32,
+                        height: Responsive.h(context, 32),
                         // Removed color to show original gradient
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: Responsive.w(context, 8)),
                     ShaderMask(
                       shaderCallback:
                           (Rect bounds) => const LinearGradient(
@@ -91,7 +92,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 32),
+                SizedBox(height: Responsive.h(context, 32)),
 
                 // 3. Center Content (PageView)
                 Expanded(
@@ -105,7 +106,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     itemCount: pages.length,
                     itemBuilder: (BuildContext context, int index) {
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                        padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 32)),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: AnimationConfiguration.toStaggeredList(
@@ -118,7 +119,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             children: <Widget>[
                               // Placeholder Image
                               Container(
-                                height: 300,
+                                height: Responsive.h(context, 300),
                                 width: double.infinity,
                                 decoration: BoxDecoration(
                                   color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
@@ -133,10 +134,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                     children: <Widget>[
                                       Icon(
                                         Icons.image_outlined,
-                                        size: 64,
+                                        size: Responsive.w(context, 64),
                                         color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                                       ),
-                                      const SizedBox(height: 16),
+                                      SizedBox(height: Responsive.h(context, 16)),
                                       Text(
                                         'Illustration Placeholder',
                                         style: textTheme.bodyMedium?.copyWith(
@@ -149,7 +150,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 48),
+                              SizedBox(height: Responsive.h(context, 48)),
 
                               // Title
                               Text(
@@ -160,7 +161,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   color: colorScheme.onSurface,
                                 ),
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: Responsive.h(context, 16)),
 
                               // Subtitle
                               Text(
@@ -168,7 +169,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 textAlign: TextAlign.center,
                                 style: textTheme.bodyLarge?.copyWith(
                                   color: colorScheme.onSurfaceVariant,
-                                  height: 1.5,
+                                  height: Responsive.h(context, 1.5),
                                 ),
                               ),
                             ],
@@ -181,13 +182,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
                 // 4. Bottom Navigation Area
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+                  padding: EdgeInsets.fromLTRB(
+                    Responsive.w(context, 24),
+                    Responsive.h(context, 16),
+                    Responsive.w(context, 24),
+                    Responsive.h(context, 32),
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       // Left Button (Skip or Back)
                       SizedBox(
-                        width: 80,
+                        width: Responsive.w(context, 80),
                         child: FilledButton(
                           onPressed: () {
                             if (isFirstPage) {
@@ -202,7 +208,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           style: FilledButton.styleFrom(
                             backgroundColor: colorScheme.surfaceContainerHighest,
                             foregroundColor: colorScheme.onSurface,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 16)),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                             elevation: 0,
                           ),
@@ -220,8 +226,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           pages.length,
                           (int index) => AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            height: 6,
+                            margin: EdgeInsets.symmetric(horizontal: Responsive.w(context, 4)),
+                            height: Responsive.h(context, 6),
                             width: _currentPage == index ? 24 : 6,
                             decoration: BoxDecoration(
                               color:
@@ -236,7 +242,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
                       // Right Button (Next or Get Started)
                       SizedBox(
-                        width: 80,
+                        width: Responsive.w(context, 80),
                         child: FilledButton(
                           onPressed: () {
                             if (isLastPage) {
@@ -250,12 +256,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           },
                           style: FilledButton.styleFrom(
                             backgroundColor: colorScheme.primary,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 12)),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                             elevation: 0,
                           ),
                           child: Text(
-                            isLastPage ? 'Start' : t.common.next,
+                            isLastPage ? t.common.getStarted : t.common.next,
                             style: textTheme.labelLarge?.copyWith(
                               color: colorScheme.onPrimary,
                               fontWeight: FontWeight.bold,

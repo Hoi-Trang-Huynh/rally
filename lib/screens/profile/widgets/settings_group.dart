@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rally/utils/responsive.dart';
 
 class SettingsGroup extends StatelessWidget {
   final String? title;
@@ -16,7 +17,11 @@ class SettingsGroup extends StatelessWidget {
       children: <Widget>[
         if (title != null)
           Padding(
-            padding: const EdgeInsets.only(left: 20, bottom: 8, top: 4),
+            padding: EdgeInsets.only(
+              left: Responsive.w(context, 20),
+              bottom: Responsive.h(context, 8),
+              top: Responsive.h(context, 4),
+            ),
             child: Text(
               title!,
               style: textTheme.labelLarge?.copyWith(
@@ -26,11 +31,11 @@ class SettingsGroup extends StatelessWidget {
             ),
           ),
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
+          margin: EdgeInsets.symmetric(horizontal: Responsive.w(context, 16)),
           decoration: BoxDecoration(
             color: colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.4)),
+            border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.4)),
           ),
           child: Column(
             children:
@@ -47,7 +52,7 @@ class SettingsGroup extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 72, right: 16),
                           child: Divider(
                             height: 1,
-                            color: colorScheme.outlineVariant.withOpacity(0.5),
+                            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
                           ),
                         ),
                     ],

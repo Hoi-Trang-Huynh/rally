@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/models/app_user.dart';
 import 'package:rally/providers/auth_provider.dart';
+import 'package:rally/utils/responsive.dart';
 
 class HomeHeader extends ConsumerWidget {
   const HomeHeader({super.key});
@@ -24,7 +25,10 @@ class HomeHeader extends ConsumerWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: Responsive.w(context, 24),
+        vertical: Responsive.h(context, 16),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -35,7 +39,7 @@ class HomeHeader extends ConsumerWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: Responsive.h(context, 4)),
           userAsync.when(
             data: (AppUser? user) {
               final String name = user?.displayName ?? user?.username ?? 'Traveler';
@@ -49,12 +53,12 @@ class HomeHeader extends ConsumerWidget {
             },
             loading:
                 () => SizedBox(
-                  width: 150,
-                  height: 32,
+                  width: Responsive.w(context, 150),
+                  height: Responsive.h(context, 32),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(Responsive.w(context, 8)),
                     ),
                   ),
                 ),

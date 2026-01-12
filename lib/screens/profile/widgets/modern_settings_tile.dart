@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rally/utils/responsive.dart';
 
 class ModernSettingsTile extends StatelessWidget {
   final IconData icon;
@@ -33,28 +34,31 @@ class ModernSettingsTile extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.symmetric(
+            horizontal: Responsive.w(context, 16),
+            vertical: Responsive.h(context, 12),
+          ),
           child: Row(
             children: <Widget>[
               // Icon container
               Container(
-                width: 40,
-                height: 40,
+                width: Responsive.w(context, 40),
+                height: Responsive.w(context, 40),
                 decoration: BoxDecoration(
                   color:
                       iconBackgroundColor ??
                       (isDestructive
-                          ? colorScheme.errorContainer.withOpacity(0.4)
+                          ? colorScheme.errorContainer.withValues(alpha: 0.4)
                           : colorScheme.surfaceContainerHigh),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   icon,
                   color: iconColor ?? (isDestructive ? colorScheme.error : colorScheme.primary),
-                  size: 22,
+                  size: Responsive.w(context, 22),
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: Responsive.w(context, 16)),
 
               // Title and Subtitle
               Expanded(
@@ -69,7 +73,7 @@ class ModernSettingsTile extends StatelessWidget {
                       ),
                     ),
                     if (subtitle != null) ...<Widget>[
-                      const SizedBox(height: 2),
+                      SizedBox(height: Responsive.h(context, 2)),
                       Text(
                         subtitle!,
                         style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
@@ -83,7 +87,11 @@ class ModernSettingsTile extends StatelessWidget {
               if (trailing != null)
                 trailing!
               else if (onTap != null)
-                Icon(Icons.chevron_right, size: 20, color: colorScheme.outline),
+                Icon(
+                  Icons.chevron_right,
+                  size: Responsive.w(context, 20),
+                  color: colorScheme.outline,
+                ),
             ],
           ),
         ),

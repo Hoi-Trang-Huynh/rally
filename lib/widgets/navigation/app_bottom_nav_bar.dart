@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../models/nav_item_data.dart';
+import '../../utils/responsive.dart';
 import 'nav_bar_action_button.dart';
 import 'nav_bar_item.dart';
 
@@ -38,37 +39,50 @@ class AppBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final double borderRadius = Responsive.w(context, 32);
+    final double blurSigma = Responsive.w(context, 12);
 
     assert(items.length == 4, 'AppBottomNavBar requires exactly 4 items');
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+      padding: EdgeInsets.fromLTRB(
+        Responsive.w(context, 12),
+        0,
+        Responsive.w(context, 12),
+        Responsive.h(context, 16),
+      ),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(borderRadius),
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: colorScheme.shadow.withValues(alpha: 0.15),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
+              blurRadius: Responsive.w(context, 16),
+              offset: Offset(0, Responsive.h(context, 4)),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(borderRadius),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
             child: Container(
               decoration: BoxDecoration(
                 color: colorScheme.surfaceContainer.withValues(alpha: 0.85),
-                borderRadius: BorderRadius.circular(32),
-                border: Border.all(color: colorScheme.outline.withValues(alpha: 0.1), width: 1),
+                borderRadius: BorderRadius.circular(borderRadius),
+                border: Border.all(
+                  color: colorScheme.outline.withValues(alpha: 0.1),
+                  width: Responsive.w(context, 1),
+                ),
               ),
               child: SafeArea(
                 top: false,
                 bottom: false,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Responsive.w(context, 8),
+                    vertical: Responsive.h(context, 12),
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
@@ -91,7 +105,7 @@ class AppBottomNavBar extends StatelessWidget {
                       ),
                       // Center action button with spacing
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 8)),
                         child: NavBarActionButton(
                           onTap: () {
                             HapticFeedback.lightImpact();

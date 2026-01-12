@@ -39,7 +39,7 @@ abstract class AppTheme {
       surface: const Color(0xfffafafa), // Clean white
       onSurface: const Color(0xff1a1a1a),
       onSurfaceVariant: const Color(0xff6b6b6b),
-      outline: const Color(0xffd4d4d4),
+      outline: const Color(0xff858585),
       outlineVariant: const Color(0xffe5e5e5),
       shadow: const Color(0xff000000),
       scrim: const Color(0xff000000),
@@ -60,10 +60,10 @@ abstract class AppTheme {
       surfaceDim: const Color(0xffe5e5e5),
       surfaceBright: const Color(0xffffffff),
       surfaceContainerLowest: const Color(0xffffffff),
-      surfaceContainerLow: const Color(0xfffafafa),
-      surfaceContainer: const Color(0xfff5f5f5), // Clean light gray
-      surfaceContainerHigh: const Color(0xffefefef),
-      surfaceContainerHighest: const Color(0xffe5e5e5),
+      surfaceContainerLow: const Color(0xfff2f2f2), // Slightly darker than surface
+      surfaceContainer: const Color(0xffebebeb), // Distinct gray for navbar
+      surfaceContainerHigh: const Color(0xffe6e6e6), // Darker for emphasis
+      surfaceContainerHighest: const Color(0xffdfdfdf), // Darkest container
     );
 
     // Common Button Style for consistency
@@ -151,8 +151,8 @@ abstract class AppTheme {
       surfaceBright: const Color(0xff2a2a2a),
       surfaceContainerLowest: const Color(0xff0a0a0a),
       surfaceContainerLow: const Color(0xff1a1a1a),
-      surfaceContainer: const Color(0xff1e1e1e), // Nav bar - soft dark gray
-      surfaceContainerHigh: const Color(0xff262626),
+      surfaceContainer: const Color(0xff212121), // Nav bar - soft dark gray
+      surfaceContainerHigh: const Color(0xff2b2b2b),
       surfaceContainerHighest: const Color(0xff363636),
     );
 

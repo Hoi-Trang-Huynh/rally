@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../utils/responsive.dart';
+
 /// Data class for profile tab items.
 class ProfileTabData {
   /// Creates a new [ProfileTabData].
@@ -38,14 +40,17 @@ class ProfileTabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
+    final double containerHeight = Responsive.h(context, 44);
+    final double containerRadius = Responsive.w(context, 22);
+    final double innerRadius = Responsive.w(context, 19);
 
     return Container(
-      height: 44, // Reduced from 48
+      height: containerHeight,
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(22), // Adjusted radius
+        borderRadius: BorderRadius.circular(containerRadius),
       ),
-      padding: const EdgeInsets.all(3), // Reduced from 4
+      padding: EdgeInsets.all(Responsive.w(context, 3)),
       child: Row(
         children:
             tabs.map((ProfileTabData tab) {
@@ -56,16 +61,16 @@ class ProfileTabBar extends StatelessWidget {
                     HapticFeedback.lightImpact();
                     onTabSelected(tab.id);
                   },
-                  borderRadius: BorderRadius.circular(19),
+                  borderRadius: BorderRadius.circular(innerRadius),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 6,
-                    ), // Reduced padding
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Responsive.w(context, 8),
+                      vertical: Responsive.h(context, 6),
+                    ),
                     decoration: BoxDecoration(
                       color: isSelected ? colorScheme.primary : Colors.transparent,
-                      borderRadius: BorderRadius.circular(19),
+                      borderRadius: BorderRadius.circular(innerRadius),
                     ),
                     alignment: Alignment.center,
                     child: AnimatedDefaultTextStyle(
@@ -73,7 +78,6 @@ class ProfileTabBar extends StatelessWidget {
                       style: (textTheme.titleSmall ?? const TextStyle()).copyWith(
                         color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                        fontSize: 14, // Reduced from 15
                       ),
                       child: Text(tab.label, maxLines: 1, overflow: TextOverflow.ellipsis),
                     ),

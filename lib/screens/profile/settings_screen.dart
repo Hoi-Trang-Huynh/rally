@@ -8,6 +8,7 @@ import '../../models/app_user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../utils/responsive.dart';
 import 'edit_profile_screen.dart';
 import 'language_screen.dart';
 import 'widgets/modern_settings_tile.dart';
@@ -52,11 +53,14 @@ class SettingsScreen extends ConsumerWidget {
             backgroundColor: colorScheme.surface,
             surfaceTintColor: Colors.transparent,
             centerTitle: true,
-            title: Text(t.settings.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+            title: Text(
+              t.settings.title,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+            ),
           ),
           body: AnimationLimiter(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 32),
+              padding: EdgeInsets.only(bottom: Responsive.h(context, 32)),
               child: Column(
                 children: AnimationConfiguration.toStaggeredList(
                   duration: const Duration(milliseconds: 375),
@@ -70,7 +74,7 @@ class SettingsScreen extends ConsumerWidget {
                     // 1. Profile section
                     _buildProfileSection(context, user, t),
 
-                    const Divider(height: 32),
+                    Divider(height: Responsive.h(context, 32)),
 
                     // 2. Account Settings
                     SettingsGroup(
@@ -84,7 +88,7 @@ class SettingsScreen extends ConsumerWidget {
                       ],
                     ),
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: Responsive.h(context, 24)),
 
                     // 3. Preferences (Language & Theme)
                     SettingsGroup(
@@ -106,7 +110,7 @@ class SettingsScreen extends ConsumerWidget {
                       ],
                     ),
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: Responsive.h(context, 24)),
 
                     // 4. Support
                     SettingsGroup(
@@ -120,11 +124,11 @@ class SettingsScreen extends ConsumerWidget {
                       ],
                     ),
 
-                    const SizedBox(height: 32),
+                    SizedBox(height: Responsive.h(context, 32)),
 
                     // 5. Logout
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
                       child: Column(
                         children: <Widget>[
                           TextButton(
@@ -139,21 +143,26 @@ class SettingsScreen extends ConsumerWidget {
                             },
                             style: TextButton.styleFrom(
                               foregroundColor: colorScheme.primary,
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                              padding: EdgeInsets.symmetric(
+                                vertical: Responsive.h(context, 12),
+                                horizontal: Responsive.w(context, 24),
+                              ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
-                                const Icon(Icons.logout, size: 20),
-                                const SizedBox(width: 8),
+                                Icon(Icons.logout, size: Responsive.w(context, 20)),
+                                SizedBox(width: Responsive.w(context, 8)),
                                 Text(
                                   t.settings.logout,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: Responsive.h(context, 8)),
                           Text(
                             'Version 1.0.0', // TODO: Get actual version
                             style: Theme.of(
@@ -181,18 +190,21 @@ class SettingsScreen extends ConsumerWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: EdgeInsets.symmetric(
+        horizontal: Responsive.w(context, 24),
+        vertical: Responsive.h(context, 16),
+      ),
       child: Row(
         children: <Widget>[
           // Avatar with online indicator
           ProfileAvatar(
             avatarUrl: user?.avatarUrl,
-            size: 56,
+            baseSize: 56,
             showOnlineIndicator: true,
             isOnline: true,
           ),
 
-          const SizedBox(width: 16),
+          SizedBox(width: Responsive.w(context, 16)),
 
           // Username and Edit button
           Expanded(
@@ -206,7 +218,7 @@ class SettingsScreen extends ConsumerWidget {
                     color: colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: Responsive.h(context, 8)),
                 OutlinedButton(
                   onPressed: () {
                     HapticFeedback.lightImpact();
@@ -217,7 +229,10 @@ class SettingsScreen extends ConsumerWidget {
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Responsive.w(context, 16),
+                      vertical: Responsive.h(context, 4),
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     side: BorderSide(color: colorScheme.outline),

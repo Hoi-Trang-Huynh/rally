@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rally/utils/responsive.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/nav_item_data.dart';
@@ -56,17 +57,21 @@ class _PlaceholderScreenState extends State<_PlaceholderScreen>
               return Transform.scale(
                 scale: _scaleAnimation.value,
                 child: Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(Responsive.w(context, 24)),
                   decoration: BoxDecoration(
                     color: colorScheme.primaryContainer.withValues(alpha: 0.3),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(widget.icon, size: 48, color: colorScheme.primary),
+                  child: Icon(
+                    widget.icon,
+                    size: Responsive.w(context, 48),
+                    color: colorScheme.primary,
+                  ),
                 ),
               );
             },
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: Responsive.h(context, 24)),
           Text(
             widget.title,
             style: textTheme.headlineSmall?.copyWith(
@@ -74,12 +79,15 @@ class _PlaceholderScreenState extends State<_PlaceholderScreen>
               color: colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: Responsive.h(context, 8)),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.symmetric(
+              horizontal: Responsive.w(context, 16),
+              vertical: Responsive.h(context, 8),
+            ),
             decoration: BoxDecoration(
               color: colorScheme.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(Responsive.w(context, 20)),
             ),
             child: Text(
               t.nav.comingSoon,

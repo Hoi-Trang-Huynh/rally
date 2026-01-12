@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rally/utils/responsive.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../providers/locale_provider.dart';
@@ -74,7 +75,7 @@ class LanguageScreen extends ConsumerWidget {
 
     return ListTile(
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+      contentPadding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
       title: Text(
         name,
         style: textTheme.bodyLarge?.copyWith(

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rally/models/responses/availability_response.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/app_user.dart';
 import '../../providers/api_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/responsive.dart';
 import '../../utils/ui_helpers.dart';
 import '../../utils/validators.dart';
 import '../../widgets/auth_text_field.dart';
@@ -76,9 +78,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
+                  width: Responsive.w(context, 40),
+                  height: Responsive.h(context, 4),
+                  margin: EdgeInsets.only(bottom: Responsive.h(context, 16)),
                   decoration: BoxDecoration(
                     color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(2),
@@ -91,7 +93,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     color: colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: Responsive.h(context, 16)),
                 ListTile(
                   leading: Icon(
                     Icons.photo_library_outlined,
@@ -99,7 +101,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   ),
                   title: Text(
                     t.settings.chooseFromGallery,
-                    style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5)),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -113,7 +117,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   ),
                   title: Text(
                     t.settings.takePhoto,
-                    style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5)),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -154,7 +160,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
       // Check username availability only if it changed
       if (newUsername != _originalUsername) {
-        final response = await ref
+        final AvailabilityResponse response = await ref
             .read(userRepositoryProvider)
             .checkUsernameAvailability(newUsername);
         if (!response.available) {
@@ -223,7 +229,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       body: userAsync.when(
         data:
             (AppUser? user) => SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(Responsive.w(context, 24)),
               child: Column(
                 children: <Widget>[
                   // Avatar with camera button
@@ -234,7 +240,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     },
                     child: Stack(
                       children: <Widget>[
-                        ProfileAvatar(avatarUrl: user?.avatarUrl, size: 100),
+                        ProfileAvatar(avatarUrl: user?.avatarUrl, baseSize: 100),
                         Positioned(
                           right: 0,
                           bottom: 0,
@@ -243,16 +249,23 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             decoration: BoxDecoration(
                               color: colorScheme.primary,
                               shape: BoxShape.circle,
-                              border: Border.all(color: colorScheme.surface, width: 2),
+                              border: Border.all(
+                                color: colorScheme.surface,
+                                width: Responsive.w(context, 2),
+                              ),
                             ),
-                            child: Icon(Icons.camera_alt, size: 18, color: colorScheme.onPrimary),
+                            child: Icon(
+                              Icons.camera_alt,
+                              size: Responsive.w(context, 18),
+                              color: colorScheme.onPrimary,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 32),
+                  SizedBox(height: Responsive.h(context, 32)),
 
                   // Username field
                   AuthTextField(
@@ -262,7 +275,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     enabled: !_isLoading,
                   ),
 
-                  const SizedBox(height: 16),
+                  SizedBox(height: Responsive.h(context, 16)),
 
                   // First and Last name row
                   Row(
@@ -276,7 +289,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           enabled: !_isLoading,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: Responsive.w(context, 16)),
                       Expanded(
                         child: AuthTextField(
                           controller: _lastNameController,
@@ -288,7 +301,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     ],
                   ),
 
-                  const SizedBox(height: 32),
+                  SizedBox(height: Responsive.h(context, 32)),
 
                   // Save button
                   SizedBox(
@@ -301,8 +314,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       child:
                           _isLoading
                               ? SizedBox(
-                                height: 20,
-                                width: 20,
+                                height: Responsive.w(context, 20),
+                                width: Responsive.w(context, 20),
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   color: colorScheme.onPrimary,

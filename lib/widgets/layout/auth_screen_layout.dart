@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/auth_header_row.dart';
 
 /// A shared layout widget for authentication screens (Login and Signup).
@@ -49,8 +50,6 @@ class AuthScreenLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final bool isSmallScreen = screenHeight < 700;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -62,7 +61,7 @@ class AuthScreenLayout extends StatelessWidget {
 
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -73,10 +72,10 @@ class AuthScreenLayout extends StatelessWidget {
                         tag: 'app_logo',
                         child: Image.asset(
                           'assets/images/rally_logo_transparent.png',
-                          height: isSmallScreen ? 70 : 100,
+                          height: Responsive.h(context, 100),
                         ),
                       ),
-                      SizedBox(height: isSmallScreen ? 16 : 24),
+                      SizedBox(height: Responsive.h(context, 24)),
                     ],
                     if (title != null) ...<Widget>[
                       Text(
@@ -85,10 +84,9 @@ class AuthScreenLayout extends StatelessWidget {
                         style: textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: colorScheme.onSurface,
-                          fontSize: isSmallScreen ? 22 : null,
                         ),
                       ),
-                      SizedBox(height: isSmallScreen ? 24 : 48),
+                      SizedBox(height: Responsive.h(context, 48)),
                     ],
                     if (subtitle != null) ...<Widget>[
                       Text(
@@ -96,7 +94,7 @@ class AuthScreenLayout extends StatelessWidget {
                         style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 48),
+                      SizedBox(height: Responsive.h(context, 48)),
                     ],
 
                     // Animated Form Content
@@ -109,7 +107,10 @@ class AuthScreenLayout extends StatelessWidget {
 
             if (bottomText != null && bottomButtonText != null)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                padding: EdgeInsets.symmetric(
+                  horizontal: Responsive.w(context, 24),
+                  vertical: Responsive.h(context, 16),
+                ),
                 child: TextButton(
                   onPressed: () {
                     if (onBottomButtonPressed != null) {

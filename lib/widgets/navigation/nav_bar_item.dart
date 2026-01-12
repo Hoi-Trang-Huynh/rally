@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../models/nav_item_data.dart';
+import '../../utils/responsive.dart';
 
 /// A single navigation bar item widget with icon and label.
 ///
@@ -39,11 +40,11 @@ class NavBarItem extends StatelessWidget {
     return Expanded(
       child: InkWell(
         onTap: _handleTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
         splashColor: activeColor.withValues(alpha: 0.1),
         highlightColor: activeColor.withValues(alpha: 0.05),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 8)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -61,11 +62,11 @@ class NavBarItem extends StatelessWidget {
                     isSelected ? item.activeIcon : item.icon,
                     key: ValueKey<bool>(isSelected),
                     color: isSelected ? activeColor : inactiveColor,
-                    size: 24,
+                    size: Responsive.w(context, 24),
                   ),
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: Responsive.h(context, 4)),
               AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 200),
                 style: (textTheme.labelSmall ?? const TextStyle()).copyWith(
@@ -75,11 +76,11 @@ class NavBarItem extends StatelessWidget {
                 child: Text(item.label, maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
               // Optional: Small dot indicator
-              const SizedBox(height: 4),
+              SizedBox(height: Responsive.h(context, 4)),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                height: 4,
-                width: isSelected ? 4 : 0,
+                height: Responsive.w(context, 4),
+                width: isSelected ? Responsive.w(context, 4) : 0,
                 decoration: BoxDecoration(color: activeColor, shape: BoxShape.circle),
               ),
             ],

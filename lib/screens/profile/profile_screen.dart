@@ -9,6 +9,7 @@ import '../../i18n/generated/translations.g.dart';
 import '../../models/app_user.dart';
 import '../../providers/api_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/responsive.dart';
 import '../../utils/ui_helpers.dart';
 import '../../widgets/visuals/empty_state.dart';
 import '../../widgets/visuals/scale_button.dart';
@@ -129,26 +130,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         return Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 24,
-            right: 24,
-            top: 24,
+            left: Responsive.w(context, 24),
+            right: Responsive.w(context, 24),
+            top: Responsive.h(context, 24),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               // Sheet Handle
               Container(
-                width: 40,
-                height: 4,
+                width: Responsive.w(context, 40),
+                height: Responsive.h(context, 4),
                 decoration: BoxDecoration(
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.4),
-                  borderRadius: BorderRadius.circular(2),
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(Responsive.w(context, 2)),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: Responsive.h(context, 24)),
               // Avatar
-              ProfileAvatar(avatarUrl: user.avatarUrl, size: 80, showOnlineIndicator: false),
-              const SizedBox(height: 16),
+              ProfileAvatar(avatarUrl: user.avatarUrl, baseSize: 80, showOnlineIndicator: false),
+              SizedBox(height: Responsive.h(context, 16)),
               // Username handle
               Text(
                 '@${user.username}',
@@ -157,7 +158,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   color: colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: Responsive.h(context, 24)),
               // Edit Field
               TextField(
                 controller: _bioController,
@@ -168,12 +169,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 decoration: InputDecoration(
                   labelText: t.profile.bioPlaceholder,
                   alignLabelWithHint: true,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+                  ),
                   filled: true,
-                  fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: Responsive.h(context, 24)),
               // Buttons
               Row(
                 children: <Widget>[
@@ -187,15 +190,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       child: Text(t.common.cancel),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: Responsive.w(context, 16)),
                   Expanded(
                     child: FilledButton(
                       onPressed: _isSavingBio ? null : () => _saveBio(_bioController.text.trim()),
                       child:
                           _isSavingBio
                               ? SizedBox(
-                                height: 20,
-                                width: 20,
+                                height: Responsive.w(context, 20),
+                                width: Responsive.w(context, 20),
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   color: colorScheme.onPrimary,
@@ -206,7 +209,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: Responsive.h(context, 32)),
             ],
           ),
         );
@@ -246,7 +249,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 // Parallax App Bar
                 SliverAppBar(
                   backgroundColor: colorScheme.surface.withValues(alpha: 0.8),
-                  expandedHeight: 90, // Reduced height per feedback
+                  expandedHeight: Responsive.h(context, 90), // Reduced height per feedback
                   pinned: true,
                   stretch: true, // Enable stretch parallax
                   centerTitle: true,
@@ -284,8 +287,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           color: colorScheme.onSurface,
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.keyboard_arrow_down, color: colorScheme.onSurface, size: 20),
+                      SizedBox(width: Responsive.w(context, 4)),
+                      Icon(
+                        Icons.keyboard_arrow_down,
+                        color: colorScheme.onSurface,
+                        size: Responsive.w(context, 20),
+                      ),
                     ],
                   ),
                   actions: <Widget>[
@@ -305,7 +312,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 // Profile Content
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
                     child: Column(
                       children: AnimationConfiguration.toStaggeredList(
                         duration: const Duration(milliseconds: 375),
@@ -315,14 +322,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               child: FadeInAnimation(child: widget),
                             ),
                         children: <Widget>[
-                          const SizedBox(height: 8),
+                          SizedBox(height: Responsive.h(context, 8)),
                           ProfileAvatar(
                             avatarUrl: user.avatarUrl,
-                            size: 100,
+                            baseSize: 100,
                             showOnlineIndicator: true,
                             isOnline: true,
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: Responsive.h(context, 16)),
                           Text(
                             '@${user.username ?? 'username'}',
                             style: textTheme.titleLarge?.copyWith(
@@ -330,7 +337,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               color: colorScheme.onSurface,
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: Responsive.h(context, 16)),
                           ProfileStatsRow(
                             followersCount: '03',
                             followingCount: '03',
@@ -346,12 +353,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 // Bio section
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
                     child: Column(
                       children: <Widget>[
-                        const SizedBox(height: 16),
+                        SizedBox(height: Responsive.h(context, 16)),
                         _buildBioSection(colorScheme, textTheme, t, user),
-                        const SizedBox(height: 32),
+                        SizedBox(height: Responsive.h(context, 32)),
                       ],
                     ),
                   ),
@@ -363,7 +370,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   delegate: _StickyTabBarDelegate(
                     child: Container(
                       color: colorScheme.surface, // Opaque background for sticky state
-                      padding: const EdgeInsets.only(bottom: 16),
+                      padding: EdgeInsets.only(bottom: Responsive.h(context, 16)),
                       child: ProfileTabBar(
                         tabs: _buildTabs(t),
                         selectedId: _selectedTabId,
@@ -374,19 +381,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         },
                       ),
                     ),
-                    maxHeight: 60,
-                    minHeight: 60,
+                    maxHeight: Responsive.h(context, 60),
+                    minHeight: Responsive.h(context, 60),
                   ),
                 ),
 
                 // Tab content (with padding to separate from tabs)
                 SliverPadding(
-                  padding: const EdgeInsets.only(top: 16),
+                  padding: EdgeInsets.only(top: Responsive.h(context, 16)),
                   sliver: _buildTabContent(colorScheme),
                 ),
 
                 // Bottom padding for nav bar
-                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 100))),
               ],
             ),
           ),
@@ -406,7 +413,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     AppUser user,
   ) {
     if (_isLoadingBio) {
-      return const ShimmerLoading(width: 120, height: 20);
+      return ShimmerLoading(width: Responsive.w(context, 120), height: Responsive.h(context, 20));
     }
 
     // Display mode - tap to edit
@@ -415,9 +422,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return ScaleButton(
       onTap: () => _showEditBioBottomSheet(user),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: Responsive.w(context, 16),
+          vertical: Responsive.h(context, 8),
+        ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(Responsive.w(context, 8)),
           color: Colors.transparent,
         ),
         child: Row(
@@ -435,10 +445,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 textAlign: TextAlign.center,
               ),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: Responsive.w(context, 4)),
             Icon(
               Icons.edit_outlined,
-              size: 14,
+              size: Responsive.w(context, 14),
               color: colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ],
@@ -487,7 +497,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return SliverFillRemaining(
       hasScrollBody: false,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 100), // Account for nav bar
+        padding: EdgeInsets.only(bottom: Responsive.h(context, 100)), // Account for nav bar
         child: EmptyState(
           icon: icon,
           title: title,
@@ -501,7 +511,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildPlaceholderGrid(ColorScheme colorScheme, int count) {
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 16)),
       sliver: SliverGrid(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,

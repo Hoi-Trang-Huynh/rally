@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/visuals/glass_container.dart';
 
 class SummaryCard extends StatelessWidget {
@@ -27,23 +28,23 @@ class SummaryCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       child: GlassContainer(
         opacity: 0.05,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Responsive.w(context, 20)),
         borderColor: colorScheme.outline.withValues(alpha: 0.1),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(Responsive.w(context, 16)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(Responsive.w(context, 8)),
                 decoration: BoxDecoration(
                   color: itemColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: itemColor, size: 20),
+                child: Icon(icon, color: itemColor, size: Responsive.w(context, 20)),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: Responsive.h(context, 12)),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -54,7 +55,7 @@ class SummaryCard extends StatelessWidget {
                       color: colorScheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: Responsive.h(context, 4)),
                   Text(
                     title,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(

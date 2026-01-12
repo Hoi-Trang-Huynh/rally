@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/screens/auth/login_screen.dart';
 import 'package:rally/screens/auth/signup_screen.dart';
+import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/auth_header_row.dart';
 import 'package:rally/widgets/visuals/animated_background.dart';
 import 'package:rally/widgets/visuals/glass_container.dart';
@@ -73,7 +74,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 Expanded(
                   child: Center(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
@@ -83,10 +84,18 @@ class _AuthScreenState extends State<AuthScreen> {
                               tag: 'app_logo',
                               child: Image.asset(
                                 'assets/images/rally_logo_transparent.png',
-                                height: isSmallScreen ? 70 : 100,
+                                height:
+                                    isSmallScreen
+                                        ? Responsive.h(context, 70)
+                                        : Responsive.h(context, 100),
                               ),
                             ),
-                            SizedBox(height: isSmallScreen ? 16 : 32),
+                            SizedBox(
+                              height:
+                                  isSmallScreen
+                                      ? Responsive.h(context, 16)
+                                      : Responsive.h(context, 32),
+                            ),
                           ],
 
                           // Glass Container for Form
@@ -96,15 +105,15 @@ class _AuthScreenState extends State<AuthScreen> {
                             shadows: <BoxShadow>[
                               BoxShadow(
                                 color: colorScheme.shadow.withValues(alpha: 0.1),
-                                blurRadius: 24,
-                                offset: const Offset(0, 8),
+                                blurRadius: Responsive.w(context, 24),
+                                offset: Offset(0, Responsive.h(context, 8)),
                               ),
                             ],
                             child: AnimatedSize(
                               duration: const Duration(milliseconds: 500),
                               curve: Curves.easeOutBack,
                               child: Padding(
-                                padding: const EdgeInsets.all(24.0),
+                                padding: EdgeInsets.all(Responsive.w(context, 24)),
                                 child: AnimatedSwitcher(
                                   layoutBuilder: (
                                     Widget? currentChild,
@@ -171,7 +180,10 @@ class _AuthScreenState extends State<AuthScreen> {
                 // 3. Static Bottom Link (Footer) - hide during verification
                 if (!_hideLogoForVerification)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Responsive.w(context, 24),
+                      vertical: Responsive.h(context, 16),
+                    ),
                     child: TextButton(
                       onPressed: _toggleAuthMode,
                       child: Text.rich(

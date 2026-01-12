@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/visuals/scale_button.dart';
 
 /// A reusable widget to display an empty state.
@@ -39,29 +40,30 @@ class EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
+    final double bubbleSize = Responsive.w(context, 120);
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: EdgeInsets.all(Responsive.w(context, 32)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             // Icon Bubble
             Container(
-              height: 120,
-              width: 120,
+              height: bubbleSize,
+              width: bubbleSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
               ),
               child: Icon(
                 icon ?? Icons.inbox_outlined,
-                size: 48,
-                color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+                size: Responsive.w(context, 48),
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: Responsive.h(context, 24)),
 
             // Title
             Text(
@@ -73,20 +75,20 @@ class EmptyState extends StatelessWidget {
               ),
             ),
             if (subtitle != null) ...<Widget>[
-              const SizedBox(height: 8),
+              SizedBox(height: Responsive.h(context, 8)),
               // Subtitle
               Text(
                 subtitle!,
                 textAlign: TextAlign.center,
                 style: textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
-                  height: 1.5,
+                  height: Responsive.h(context, 1.5),
                 ),
               ),
             ],
 
             if (actionLabel != null && onAction != null) ...<Widget>[
-              const SizedBox(height: 32),
+              SizedBox(height: Responsive.h(context, 32)),
               // Action Button
               ScaleButton(
                 onTap: () {

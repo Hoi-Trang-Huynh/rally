@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/responsive.dart';
+
 /// A standardized text field used in auth screens.
 ///
 /// Supports password visibility toggle when [obscureText] is true.
@@ -47,6 +49,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final double borderRadius = Responsive.w(context, 12);
 
     return TextField(
       controller: widget.controller,
@@ -59,22 +62,25 @@ class _AuthTextFieldState extends State<AuthTextField> {
         filled: true,
         fillColor: colorScheme.surfaceContainerHigh.withValues(alpha: 0.5),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           borderSide: BorderSide(color: colorScheme.outline.withValues(alpha: 0.3)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           borderSide: BorderSide(color: colorScheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           borderSide: BorderSide(color: colorScheme.error),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: Responsive.w(context, 16),
+          vertical: Responsive.h(context, 16),
+        ),
         errorText: widget.errorText,
         suffixIcon:
             widget.obscureText

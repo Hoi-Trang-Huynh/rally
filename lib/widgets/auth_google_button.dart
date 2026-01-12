@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../utils/responsive.dart';
 import 'visuals/scale_button.dart';
 
 /// An outlined button for Google sign-in used in auth screens.
@@ -31,14 +32,20 @@ class _AuthGoogleButtonState extends State<AuthGoogleButton> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final double buttonHeight = Responsive.h(context, 48);
+    final double iconSize = Responsive.w(context, 24);
 
     if (widget.isLoading) {
-      return const SizedBox(
+      return SizedBox(
         width: double.infinity,
-        height: 48,
+        height: buttonHeight,
         child: OutlinedButton(
           onPressed: null,
-          child: SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+          child: SizedBox(
+            height: iconSize,
+            width: iconSize,
+            child: const CircularProgressIndicator(strokeWidth: 2),
+          ),
         ),
       );
     }
@@ -47,7 +54,7 @@ class _AuthGoogleButtonState extends State<AuthGoogleButton> {
       onTap: widget.onPressed,
       child: SizedBox(
         width: double.infinity,
-        height: 48,
+        height: buttonHeight,
         child: OutlinedButton(
           onPressed: null, // Let ScaleButton handle taps
           style: OutlinedButton.styleFrom(
@@ -65,13 +72,13 @@ class _AuthGoogleButtonState extends State<AuthGoogleButton> {
             children: <Widget>[
               Image.asset(
                 'assets/images/google_logo.png',
-                height: 24,
-                width: 24,
+                height: iconSize,
+                width: iconSize,
                 errorBuilder:
                     (BuildContext context, Object error, StackTrace? stackTrace) =>
-                        const Icon(Icons.g_mobiledata, size: 28),
+                        Icon(Icons.g_mobiledata, size: Responsive.w(context, 28)),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: Responsive.w(context, 8)),
               Text(widget.text),
             ],
           ),

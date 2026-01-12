@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/visuals/animated_count.dart';
 
 /// A widget displaying a single stat with count and label.
@@ -24,9 +25,12 @@ class ProfileStatItem extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(Responsive.w(context, 8)),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        padding: EdgeInsets.symmetric(
+          horizontal: Responsive.w(context, 12),
+          vertical: Responsive.h(context, 4),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -37,7 +41,7 @@ class ProfileStatItem extends StatelessWidget {
                 color: colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: Responsive.h(context, 2)),
             Text(label, style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
           ],
         ),
@@ -83,7 +87,7 @@ class ProfileStatsRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         ProfileStatItem(count: followersCount, label: followersLabel, onTap: onFollowersTap),
-        const SizedBox(width: 16),
+        SizedBox(width: Responsive.w(context, 16)),
         ProfileStatItem(count: followingCount, label: followingLabel, onTap: onFollowingTap),
       ],
     );

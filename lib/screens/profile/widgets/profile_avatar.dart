@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../utils/responsive.dart';
+
 /// Reusable profile avatar widget with optional online indicator.
 ///
 /// Displays a circular avatar with the user's image or a fallback icon.
@@ -8,8 +10,8 @@ class ProfileAvatar extends StatelessWidget {
   /// The URL of the avatar image.
   final String? avatarUrl;
 
-  /// The size of the avatar. Defaults to 100.
-  final double size;
+  /// The base size of the avatar (before responsive scaling). Defaults to 100.
+  final double baseSize;
 
   /// Whether to show the online indicator.
   final bool showOnlineIndicator;
@@ -27,7 +29,7 @@ class ProfileAvatar extends StatelessWidget {
   const ProfileAvatar({
     super.key,
     this.avatarUrl,
-    this.size = 100,
+    this.baseSize = 100,
     this.showOnlineIndicator = false,
     this.isOnline = false,
     this.borderWidth,
@@ -37,6 +39,7 @@ class ProfileAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final double size = Responsive.w(context, baseSize);
 
     return Stack(
       children: <Widget>[
@@ -78,7 +81,7 @@ class ProfileAvatar extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isOnline ? const Color(0xFF22C55E) : colorScheme.outline,
-                border: Border.all(color: colorScheme.surface, width: 2),
+                border: Border.all(color: colorScheme.surface, width: Responsive.w(context, 2)),
               ),
             ),
           ),
