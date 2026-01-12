@@ -374,8 +374,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         },
                       ),
                     ),
-                    maxHeight: 68, // Height of tab bar + padding
-                    minHeight: 68,
+                    maxHeight: 60,
+                    minHeight: 60,
                   ),
                 ),
 

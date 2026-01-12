@@ -42,7 +42,7 @@ class AppBottomNavBar extends StatelessWidget {
     assert(items.length == 4, 'AppBottomNavBar requires exactly 4 items');
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(32),
@@ -68,7 +68,7 @@ class AppBottomNavBar extends StatelessWidget {
                 top: false,
                 bottom: false,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[

@@ -39,48 +39,48 @@ class ProfileTabBar extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        padding: const EdgeInsets.all(4),
-        child: Row(
-          children:
-              tabs.map((ProfileTabData tab) {
-                final bool isSelected = tab.id == selectedId;
-                return Expanded(
-                  child: InkWell(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      onTabSelected(tab.id);
-                    },
-                    borderRadius: BorderRadius.circular(20),
-                    child: AnimatedContainer(
+    return Container(
+      height: 44, // Reduced from 48
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(22), // Adjusted radius
+      ),
+      padding: const EdgeInsets.all(3), // Reduced from 4
+      child: Row(
+        children:
+            tabs.map((ProfileTabData tab) {
+              final bool isSelected = tab.id == selectedId;
+              return Expanded(
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    onTabSelected(tab.id);
+                  },
+                  borderRadius: BorderRadius.circular(19),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ), // Reduced padding
+                    decoration: BoxDecoration(
+                      color: isSelected ? colorScheme.primary : Colors.transparent,
+                      borderRadius: BorderRadius.circular(19),
+                    ),
+                    alignment: Alignment.center,
+                    child: AnimatedDefaultTextStyle(
                       duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isSelected ? colorScheme.primary : Colors.transparent,
-                        borderRadius: BorderRadius.circular(20),
+                      style: (textTheme.titleSmall ?? const TextStyle()).copyWith(
+                        color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontSize: 14, // Reduced from 15
                       ),
-                      alignment: Alignment.center, // Ensure alignment is center
-                      child: AnimatedDefaultTextStyle(
-                        duration: const Duration(milliseconds: 200),
-                        style: (textTheme.titleSmall ?? const TextStyle()).copyWith(
-                          color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                          fontSize: 15,
-                        ),
-                        child: Text(tab.label),
-                      ),
+                      child: Text(tab.label, maxLines: 1, overflow: TextOverflow.ellipsis),
                     ),
                   ),
-                );
-              }).toList(),
-        ),
+                ),
+              );
+            }).toList(),
       ),
     );
   }
