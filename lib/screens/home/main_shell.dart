@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rally/screens/profile/settings_screen.dart';
 import 'package:rally/utils/responsive.dart';
-import 'package:rally/widgets/navigation/app_header.dart';
+import 'package:rally/widgets/navigation/sliver_app_header.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/nav_item_data.dart';
@@ -120,7 +120,7 @@ class _MainShellState extends State<MainShell> {
   /// Build navigation items with translations.
   List<NavItemData> _buildNavItems(Translations t) {
     return <NavItemData>[
-      NavItemData(icon: Icons.cottage_outlined, activeIcon: Icons.cottage, label: t.nav.home),
+      NavItemData(icon: Icons.home_outlined, activeIcon: Icons.home_rounded, label: t.nav.home),
       NavItemData(icon: Icons.forum_outlined, activeIcon: Icons.forum, label: t.nav.chat),
       NavItemData(icon: Icons.map_outlined, activeIcon: Icons.map, label: t.nav.explore),
       NavItemData(
@@ -222,31 +222,39 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       extendBody: true, // Content flows behind floating nav bar
-      appBar: AppHeader(
-        title: _getScreenTitle(_currentIndex, t),
-        parentTitle: 'Rally',
-        actions: _buildHeaderActions(_currentIndex),
-      ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 400),
-        switchInCurve: Curves.easeOutQuart,
-        switchOutCurve: Curves.easeInQuart,
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          final bool isEntering = child.key == ValueKey<int>(_currentIndex);
-
-          // Subtle scale and fade transition
-          return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: const Interval(0.2, 1.0), // Delay fade in slightly
+      extendBodyBehindAppBar: true,
+      body: NestedScrollView(
+        floatHeaderSlivers: true,
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          return <Widget>[
+            SliverAppHeader(
+              title: _getScreenTitle(_currentIndex, t),
+              parentTitle: 'Rally',
+              actions: _buildHeaderActions(_currentIndex),
             ),
-            child: ScaleTransition(
-              scale: Tween<double>(begin: isEntering ? 0.95 : 1.05, end: 1.0).animate(animation),
-              child: child,
-            ),
-          );
+          ];
         },
-        child: _buildScreen(_currentIndex, t),
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 400),
+          switchInCurve: Curves.easeOutQuart,
+          switchOutCurve: Curves.easeInQuart,
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            final bool isEntering = child.key == ValueKey<int>(_currentIndex);
+
+            // Subtle scale and fade transition
+            return FadeTransition(
+              opacity: CurvedAnimation(
+                parent: animation,
+                curve: const Interval(0.2, 1.0), // Delay fade in slightly
+              ),
+              child: ScaleTransition(
+                scale: Tween<double>(begin: isEntering ? 0.95 : 1.05, end: 1.0).animate(animation),
+                child: child,
+              ),
+            );
+          },
+          child: _buildScreen(_currentIndex, t),
+        ),
       ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _currentIndex,

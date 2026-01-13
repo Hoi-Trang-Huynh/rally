@@ -9,13 +9,16 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent, // Let background shine through if we add one later
-      body: SafeArea(
-        bottom: false, // Let content scroll behind nav bar
-        child: CustomScrollView(
+    // Use Builder to access the NestedScrollView's inner scroll controller
+    return Builder(
+      builder: (BuildContext context) {
+        return CustomScrollView(
+          // Use the primary scroll controller from NestedScrollView
+          controller: PrimaryScrollController.of(context),
           physics: const BouncingScrollPhysics(),
           slivers: <Widget>[
+            // Top padding to account for header space (will be pushed down by NestedScrollView)
+            SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 16))),
             // 1. Header
             const SliverToBoxAdapter(child: HomeHeader()),
 
@@ -136,6 +139,20 @@ class HomeScreen extends StatelessWidget {
                                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
+                                Row(
+                                  children: <Widget>[
+                                    Icon(
+                                      Icons.location_on_rounded,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
+                                    Text(
+                                      'San Francisco, CA',
+                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
@@ -144,15 +161,15 @@ class HomeScreen extends StatelessWidget {
                     ),
                   );
                 },
-                childCount: 5, // Mock 5 items
+                childCount: 10, // Mock 5 items
               ),
             ),
 
             // Bottom padding for floating nav bar
             SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 100))),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 }

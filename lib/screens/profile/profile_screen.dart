@@ -4,6 +4,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:rally/models/responses/profile_details_response.dart';
 import 'package:rally/utils/validation_constants.dart';
 import 'package:rally/utils/validators.dart';
+import 'package:rally/widgets/common/app_bottom_sheet.dart';
 import 'package:rally/widgets/common/empty_state.dart';
 import 'package:rally/widgets/common/scale_button.dart';
 import 'package:rally/widgets/common/shimmer_loading.dart';
@@ -118,34 +119,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    showModalBottomSheet<void>(
+    showAppBottomSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: Responsive.w(context, 24),
-            right: Responsive.w(context, 24),
-            top: Responsive.h(context, 24),
-          ),
+      sheet: AppBottomSheet.fixed(
+        title: t.profile.editBio,
+        showDivider: false,
+        body: Padding(
+          padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              // Sheet Handle
-              Container(
-                width: Responsive.w(context, 40),
-                height: Responsive.h(context, 4),
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(Responsive.w(context, 2)),
-                ),
-              ),
-              SizedBox(height: Responsive.h(context, 24)),
               // Avatar
               ProfileAvatar(avatarUrl: user.avatarUrl, baseSize: 80, showOnlineIndicator: false),
               SizedBox(height: Responsive.h(context, 16)),
@@ -208,11 +191,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: Responsive.h(context, 32)),
+              SizedBox(height: Responsive.h(context, 16)),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -238,114 +221,114 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           return Center(child: Text(t.profile.notLoggedIn));
         }
 
-        return Scaffold(
-          backgroundColor: colorScheme.surface,
-          body: AnimationLimiter(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: <Widget>[
-                // Profile Content
-                SliverToBoxAdapter(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: <Color>[
-                          colorScheme.primary.withValues(alpha: 0.1),
-                          colorScheme.surface.withValues(alpha: 0.0),
-                        ],
-                      ),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
-                      child: Column(
-                        children: AnimationConfiguration.toStaggeredList(
-                          duration: const Duration(milliseconds: 375),
-                          childAnimationBuilder:
-                              (Widget widget) => SlideAnimation(
-                                verticalOffset: 50.0,
-                                child: FadeInAnimation(child: widget),
-                              ),
-                          children: <Widget>[
-                            SizedBox(height: Responsive.h(context, 24)), // Top padding
-                            ProfileAvatar(
-                              avatarUrl: user.avatarUrl,
-                              baseSize: 100,
-                              showOnlineIndicator: true,
-                              isOnline: true,
-                            ),
-                            SizedBox(height: Responsive.h(context, 16)),
-                            Text(
-                              '@${user.username ?? 'username'}',
-                              style: textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: colorScheme.onSurface,
-                              ),
-                            ),
-                            SizedBox(height: Responsive.h(context, 16)),
-                            ProfileStatsRow(
-                              followersCount: '03',
-                              followingCount: '03',
-                              followersLabel: t.profile.followers,
-                              followingLabel: t.profile.followings,
-                            ),
-                            SizedBox(
-                              height: Responsive.h(context, 32),
-                            ), // Bottom padding for gradient section to breathe
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Bio section
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
-                    child: Column(
-                      children: <Widget>[
-                        SizedBox(height: Responsive.h(context, 16)),
-                        _buildBioSection(colorScheme, textTheme, t, user),
-                        SizedBox(height: Responsive.h(context, 32)),
+        return AnimationLimiter(
+          child: CustomScrollView(
+            controller: PrimaryScrollController.of(context),
+            physics: const BouncingScrollPhysics(),
+            slivers: <Widget>[
+              // Top padding for breathing room
+              SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 16))),
+              // Profile Content
+              SliverToBoxAdapter(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        colorScheme.primary.withValues(alpha: 0.1),
+                        colorScheme.surface.withValues(alpha: 0.0),
                       ],
                     ),
                   ),
-                ),
-
-                // Sticky Tab Bar
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _StickyTabBarDelegate(
-                    child: Container(
-                      color: colorScheme.surface, // Opaque background for sticky state
-                      padding: EdgeInsets.only(bottom: Responsive.h(context, 16)),
-                      child: ProfileTabBar(
-                        tabs: _buildTabs(t),
-                        selectedId: _selectedTabId,
-                        onTabSelected: (String id) {
-                          setState(() {
-                            _selectedTabId = id;
-                          });
-                        },
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
+                    child: Column(
+                      children: AnimationConfiguration.toStaggeredList(
+                        duration: const Duration(milliseconds: 375),
+                        childAnimationBuilder:
+                            (Widget widget) => SlideAnimation(
+                              verticalOffset: 50.0,
+                              child: FadeInAnimation(child: widget),
+                            ),
+                        children: <Widget>[
+                          SizedBox(height: Responsive.h(context, 24)), // Top padding
+                          ProfileAvatar(
+                            avatarUrl: user.avatarUrl,
+                            baseSize: 100,
+                            showOnlineIndicator: true,
+                            isOnline: true,
+                          ),
+                          SizedBox(height: Responsive.h(context, 16)),
+                          Text(
+                            '@${user.username ?? 'username'}',
+                            style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          SizedBox(height: Responsive.h(context, 16)),
+                          ProfileStatsRow(
+                            followersCount: '03',
+                            followingCount: '03',
+                            followersLabel: t.profile.followers,
+                            followingLabel: t.profile.followings,
+                          ),
+                          SizedBox(
+                            height: Responsive.h(context, 32),
+                          ), // Bottom padding for gradient section to breathe
+                        ],
                       ),
                     ),
-                    maxHeight: Responsive.h(context, 60),
-                    minHeight: Responsive.h(context, 60),
                   ),
                 ),
+              ),
 
-                // Tab content (with padding to separate from tabs)
-                SliverPadding(
-                  padding: EdgeInsets.only(top: Responsive.h(context, 16)),
-                  sliver: _buildTabContent(colorScheme),
+              // Bio section
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(height: Responsive.h(context, 16)),
+                      _buildBioSection(colorScheme, textTheme, t, user),
+                      SizedBox(height: Responsive.h(context, 32)),
+                    ],
+                  ),
                 ),
+              ),
 
-                // Bottom padding for nav bar
-                SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 100))),
-              ],
-            ),
+              // Sticky Tab Bar
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _StickyTabBarDelegate(
+                  child: Container(
+                    color: colorScheme.surface, // Opaque background for sticky state
+                    padding: EdgeInsets.only(bottom: Responsive.h(context, 16)),
+                    child: ProfileTabBar(
+                      tabs: _buildTabs(t),
+                      selectedId: _selectedTabId,
+                      onTabSelected: (String id) {
+                        setState(() {
+                          _selectedTabId = id;
+                        });
+                      },
+                    ),
+                  ),
+                  maxHeight: Responsive.h(context, 60),
+                  minHeight: Responsive.h(context, 60),
+                ),
+              ),
+
+              // Tab content (with padding to separate from tabs)
+              SliverPadding(
+                padding: EdgeInsets.only(top: Responsive.h(context, 16)),
+                sliver: _buildTabContent(colorScheme),
+              ),
+
+              // Bottom padding for nav bar
+              SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 100))),
+            ],
           ),
         );
       },
