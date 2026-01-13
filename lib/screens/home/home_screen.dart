@@ -17,8 +17,6 @@ class HomeScreen extends StatelessWidget {
           controller: PrimaryScrollController.of(context),
           physics: const BouncingScrollPhysics(),
           slivers: <Widget>[
-            // Top padding to account for header space (will be pushed down by NestedScrollView)
-            SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 16))),
             // 1. Header
             const SliverToBoxAdapter(child: HomeHeader()),
 

@@ -34,7 +34,7 @@ class SliverAppHeader extends ConsumerWidget {
     final EdgeInsets safePadding = MediaQuery.paddingOf(context);
 
     // Calculate header height: safe area + content height
-    final double contentHeight = Responsive.h(context, 56);
+    final double contentHeight = Responsive.h(context, 20);
     final double headerHeight = safePadding.top + contentHeight;
 
     return SliverAppBar(
@@ -71,7 +71,7 @@ class SliverAppHeader extends ConsumerWidget {
                               parentTitle,
                               style: textTheme.bodySmall?.copyWith(
                                 fontSize: Responsive.w(context, 12),
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w900,
                                 color: colorScheme.primary.withValues(alpha: 0.8),
                                 letterSpacing: 0.5,
                               ),
@@ -92,7 +92,7 @@ class SliverAppHeader extends ConsumerWidget {
                           title,
                           style: textTheme.headlineMedium?.copyWith(
                             fontSize: Responsive.w(context, 26),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w900,
                             color: colorScheme.onSurface,
                             height: 1.1,
                             letterSpacing: -0.5,
