@@ -14,7 +14,6 @@ import '../../providers/api_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/responsive.dart';
 import '../../utils/ui_helpers.dart';
-import 'settings_screen.dart';
 import 'widgets/profile_avatar.dart';
 import 'widgets/profile_stats_row.dart';
 import 'widgets/profile_tab_bar.dart';
@@ -241,110 +240,61 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
         return Scaffold(
           backgroundColor: colorScheme.surface,
-          extendBodyBehindAppBar: true,
           body: AnimationLimiter(
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: <Widget>[
-                // Parallax App Bar
-                SliverAppBar(
-                  backgroundColor: colorScheme.surface.withValues(alpha: 0.8),
-                  expandedHeight: Responsive.h(context, 90), // Reduced height per feedback
-                  pinned: true,
-                  stretch: true, // Enable stretch parallax
-                  centerTitle: true,
-                  flexibleSpace: FlexibleSpaceBar(
-                    stretchModes: const <StretchMode>[
-                      StretchMode.zoomBackground,
-                      StretchMode.blurBackground,
-                    ],
-                    background: Stack(
-                      fit: StackFit.expand,
-                      children: <Widget>[
-                        // Gradient Background
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: <Color>[
-                                colorScheme.primary.withValues(alpha: 0.1),
-                                colorScheme.surface.withValues(alpha: 0.0),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  title: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text(
-                        user.username ?? 'User',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      SizedBox(width: Responsive.w(context, 4)),
-                      Icon(
-                        Icons.keyboard_arrow_down,
-                        color: colorScheme.onSurface,
-                        size: Responsive.w(context, 20),
-                      ),
-                    ],
-                  ),
-                  actions: <Widget>[
-                    IconButton(
-                      icon: Icon(Icons.settings_outlined, color: colorScheme.onSurface),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (BuildContext context) => const SettingsScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-
                 // Profile Content
                 SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
-                    child: Column(
-                      children: AnimationConfiguration.toStaggeredList(
-                        duration: const Duration(milliseconds: 375),
-                        childAnimationBuilder:
-                            (Widget widget) => SlideAnimation(
-                              verticalOffset: 50.0,
-                              child: FadeInAnimation(child: widget),
-                            ),
-                        children: <Widget>[
-                          SizedBox(height: Responsive.h(context, 8)),
-                          ProfileAvatar(
-                            avatarUrl: user.avatarUrl,
-                            baseSize: 100,
-                            showOnlineIndicator: true,
-                            isOnline: true,
-                          ),
-                          SizedBox(height: Responsive.h(context, 16)),
-                          Text(
-                            '@${user.username ?? 'username'}',
-                            style: textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                          SizedBox(height: Responsive.h(context, 16)),
-                          ProfileStatsRow(
-                            followersCount: '03',
-                            followingCount: '03',
-                            followersLabel: t.profile.followers,
-                            followingLabel: t.profile.followings,
-                          ),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: <Color>[
+                          colorScheme.primary.withValues(alpha: 0.1),
+                          colorScheme.surface.withValues(alpha: 0.0),
                         ],
+                      ),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
+                      child: Column(
+                        children: AnimationConfiguration.toStaggeredList(
+                          duration: const Duration(milliseconds: 375),
+                          childAnimationBuilder:
+                              (Widget widget) => SlideAnimation(
+                                verticalOffset: 50.0,
+                                child: FadeInAnimation(child: widget),
+                              ),
+                          children: <Widget>[
+                            SizedBox(height: Responsive.h(context, 24)), // Top padding
+                            ProfileAvatar(
+                              avatarUrl: user.avatarUrl,
+                              baseSize: 100,
+                              showOnlineIndicator: true,
+                              isOnline: true,
+                            ),
+                            SizedBox(height: Responsive.h(context, 16)),
+                            Text(
+                              '@${user.username ?? 'username'}',
+                              style: textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                            SizedBox(height: Responsive.h(context, 16)),
+                            ProfileStatsRow(
+                              followersCount: '03',
+                              followingCount: '03',
+                              followersLabel: t.profile.followers,
+                              followingLabel: t.profile.followings,
+                            ),
+                            SizedBox(
+                              height: Responsive.h(context, 32),
+                            ), // Bottom padding for gradient section to breathe
+                          ],
+                        ),
                       ),
                     ),
                   ),

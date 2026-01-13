@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:rally/screens/profile/settings_screen.dart';
 import 'package:rally/utils/responsive.dart';
+import 'package:rally/widgets/navigation/app_header.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/nav_item_data.dart';
@@ -147,6 +149,43 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  String _getScreenTitle(int index, Translations t) {
+    switch (index) {
+      case 0:
+        return t.nav.home;
+      case 1:
+        return t.nav.chat;
+      case 2:
+        return t.nav.explore;
+      case 3:
+        return t.nav.profile;
+      default:
+        return t.nav.home;
+    }
+  }
+
+  List<Widget>? _buildHeaderActions(int index) {
+    // Add specific actions per tab if needed
+    if (index == 3) {
+      // Profile Tab
+      return <Widget>[
+        IconButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (BuildContext context) => const SettingsScreen()),
+            );
+          },
+          icon: Icon(
+            Icons.settings_outlined,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            size: Responsive.w(context, 24),
+          ),
+        ),
+      ];
+    }
+    return null;
+  }
+
   Widget _buildScreen(int index, Translations t) {
     switch (index) {
       case 0:
@@ -183,6 +222,11 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       extendBody: true, // Content flows behind floating nav bar
+      appBar: AppHeader(
+        title: _getScreenTitle(_currentIndex, t),
+        parentTitle: 'Rally',
+        actions: _buildHeaderActions(_currentIndex),
+      ),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 400),
         switchInCurve: Curves.easeOutQuart,
