@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:rally/models/responses/profile_details_response.dart';
+import 'package:rally/utils/ui_helpers.dart';
 import 'package:rally/utils/validation_constants.dart';
 import 'package:rally/utils/validators.dart';
 import 'package:rally/widgets/common/app_bottom_sheet.dart';
@@ -13,9 +14,11 @@ import '../../i18n/generated/translations.g.dart';
 import '../../models/app_user.dart';
 import '../../providers/api_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/nav_provider.dart';
 import '../../utils/responsive.dart';
-import '../../utils/ui_helpers.dart';
+import 'edit_profile_screen.dart';
 import 'widgets/profile_avatar.dart';
+import 'widgets/profile_header.dart';
 import 'widgets/profile_stats_row.dart';
 import 'widgets/profile_tab_bar.dart';
 
@@ -228,72 +231,51 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             slivers: <Widget>[
               // Top padding for breathing room
               SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 16))),
-              // Profile Content
-              SliverToBoxAdapter(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: <Color>[
-                        colorScheme.primary.withValues(alpha: 0.1),
-                        colorScheme.surface.withValues(alpha: 0.0),
-                      ],
-                    ),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
-                    child: Column(
-                      children: AnimationConfiguration.toStaggeredList(
-                        duration: const Duration(milliseconds: 375),
-                        childAnimationBuilder:
-                            (Widget widget) => SlideAnimation(
-                              verticalOffset: 50.0,
-                              child: FadeInAnimation(child: widget),
-                            ),
-                        children: <Widget>[
-                          SizedBox(height: Responsive.h(context, 24)), // Top padding
-                          ProfileAvatar(
-                            avatarUrl: user.avatarUrl,
-                            baseSize: 100,
-                            showOnlineIndicator: true,
-                            isOnline: true,
-                          ),
-                          SizedBox(height: Responsive.h(context, 16)),
-                          Text(
-                            '@${user.username ?? 'username'}',
-                            style: textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                          SizedBox(height: Responsive.h(context, 16)),
-                          ProfileStatsRow(
-                            followersCount: '03',
-                            followingCount: '03',
-                            followersLabel: t.profile.followers,
-                            followingLabel: t.profile.followings,
-                          ),
-                          SizedBox(
-                            height: Responsive.h(context, 32),
-                          ), // Bottom padding for gradient section to breathe
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // Bio section
+              // Profile Content (Clean Layout)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
                   child: Column(
-                    children: <Widget>[
-                      SizedBox(height: Responsive.h(context, 16)),
-                      _buildBioSection(colorScheme, textTheme, t, user),
-                      SizedBox(height: Responsive.h(context, 32)),
-                    ],
+                    children: AnimationConfiguration.toStaggeredList(
+                      duration: const Duration(milliseconds: 375),
+                      childAnimationBuilder:
+                          (Widget widget) => SlideAnimation(
+                            verticalOffset: 50.0,
+                            child: FadeInAnimation(child: widget),
+                          ),
+                      children: <Widget>[
+                        SizedBox(height: Responsive.h(context, 24)),
+
+                        // New Header
+                        ProfileHeader(
+                          user: user,
+                          onEditProfile: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (BuildContext context) => const EditProfileScreen(),
+                              ),
+                            );
+                          },
+                        ),
+
+                        SizedBox(height: Responsive.h(context, 12)),
+
+                        // Stats
+                        ProfileStatsRow(
+                          followersCount: '03',
+                          followingCount: '03',
+                          followersLabel: t.profile.followers,
+                          followingLabel: t.profile.followings,
+                        ),
+
+                        SizedBox(height: Responsive.h(context, 12)),
+
+                        // Bio section
+                        _buildBioSection(colorScheme, textTheme, t, user),
+
+                        SizedBox(height: Responsive.h(context, 12)),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -412,7 +394,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           subtitle: 'Find a rally nearby and join the fun!',
           actionLabel: 'Explore Rallies',
           onAction: () {
-            // TODO: Navigate to Explore
+            ref.read(navIndexProvider.notifier).state = 2; // Map/Explore tab index
           },
         );
       default:

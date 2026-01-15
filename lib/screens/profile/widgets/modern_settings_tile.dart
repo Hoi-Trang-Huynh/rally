@@ -1,16 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:rally/utils/responsive.dart';
 
+/// A polished, modern ListTile replacement for settings screens.
 class ModernSettingsTile extends StatelessWidget {
+  /// The icon to display on the left.
   final IconData icon;
+
+  /// The main title of the tile.
   final String title;
+
+  /// Optional subtitle text.
   final String? subtitle;
+
+  /// Callback when the tile is tapped.
   final VoidCallback? onTap;
+
+  /// Custom widget to display on the trailing edge (e.g., Switch).
   final Widget? trailing;
+
+  /// Custom color for the icon.
   final Color? iconColor;
+
+  /// Custom background color for the icon container.
   final Color? iconBackgroundColor;
+
+  /// Whether this action is destructive (e.g., Logout, Delete account).
   final bool isDestructive;
 
+  /// Creates a [ModernSettingsTile].
   const ModernSettingsTile({
     super.key,
     required this.icon,

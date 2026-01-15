@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// A button that scales down when pressed, providing haptic feedback.
 class ScaleButton extends StatefulWidget {
+  /// The child widget.
   final Widget child;
+
+  /// Callback when the button is tapped.
   final VoidCallback? onTap;
+
+  /// The duration of the scale animation.
   final Duration duration;
+
+  /// The scale factor when pressed (e.g., 0.95 for 95% size).
   final double scale;
 
+  /// Creates a [ScaleButton].
   const ScaleButton({
     super.key,
     required this.child,

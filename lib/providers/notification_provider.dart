@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/models/notification_model.dart';
 
+/// Manages the list of notifications.
 class NotificationNotifier extends Notifier<List<NotificationModel>> {
   @override
   List<NotificationModel> build() {
@@ -43,6 +44,7 @@ class NotificationNotifier extends Notifier<List<NotificationModel>> {
     ];
   }
 
+  /// Marks a specific notification as read by its [id].
   void markAsRead(String id) {
     state = <NotificationModel>[
       for (final NotificationModel notification in state)
@@ -50,6 +52,7 @@ class NotificationNotifier extends Notifier<List<NotificationModel>> {
     ];
   }
 
+  /// Marks all notifications as read.
   void markAllAsRead() {
     state = <NotificationModel>[
       for (final NotificationModel notification in state) notification.copyWith(isUnread: false),
@@ -57,9 +60,11 @@ class NotificationNotifier extends Notifier<List<NotificationModel>> {
   }
 }
 
+/// Provider for the [NotificationNotifier] to access notification state.
 final NotifierProvider<NotificationNotifier, List<NotificationModel>> notificationProvider =
     NotifierProvider<NotificationNotifier, List<NotificationModel>>(NotificationNotifier.new);
 
+/// Provider to get the count of unread notifications.
 final Provider<int> unreadNotificationCountProvider = Provider<int>((Ref ref) {
   final List<NotificationModel> notifications = ref.watch(notificationProvider);
   return notifications.where((NotificationModel n) => n.isUnread).length;

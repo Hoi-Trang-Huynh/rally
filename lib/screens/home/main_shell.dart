@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rally/screens/chat/chat_screen.dart';
+import 'package:rally/screens/discovery/discovery_screen.dart';
 import 'package:rally/screens/profile/settings_screen.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/navigation/sliver_app_header.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/nav_item_data.dart';
+import '../../providers/nav_provider.dart';
 import '../../widgets/navigation/app_bottom_nav_bar.dart';
 import '../profile/profile_screen.dart';
 import 'home_screen.dart';
@@ -106,16 +110,16 @@ class _PlaceholderScreenState extends State<_PlaceholderScreen>
 ///
 /// Uses [IndexedStack] to preserve state across tab switches.
 /// This is the primary container for the authenticated app experience.
-class MainShell extends StatefulWidget {
+class MainShell extends ConsumerStatefulWidget {
   /// Creates a new [MainShell].
   const MainShell({super.key});
 
   @override
-  State<MainShell> createState() => _MainShellState();
+  ConsumerState<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
-  int _currentIndex = 0;
+class _MainShellState extends ConsumerState<MainShell> {
+  // local _currentIndex
 
   /// Build navigation items with translations.
   List<NavItemData> _buildNavItems(Translations t) {
@@ -132,10 +136,9 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _onTabSelected(int index) {
-    if (index == _currentIndex) return;
-    setState(() {
-      _currentIndex = index;
-    });
+    final int currentIndex = ref.read(navIndexProvider);
+    if (index == currentIndex) return;
+    ref.read(navIndexProvider.notifier).state = index;
   }
 
   void _onActionPressed() {
@@ -191,17 +194,9 @@ class _MainShellState extends State<MainShell> {
       case 0:
         return const HomeScreen(key: ValueKey<int>(0));
       case 1:
-        return _PlaceholderScreen(
-          key: const ValueKey<int>(1),
-          title: t.nav.chat,
-          icon: Icons.forum,
-        );
+        return const ChatScreen(key: ValueKey<int>(1));
       case 2:
-        return _PlaceholderScreen(
-          key: const ValueKey<int>(2),
-          title: t.nav.explore,
-          icon: Icons.explore,
-        );
+        return const DiscoveryScreen(key: ValueKey<int>(2));
       case 3:
         return const ProfileScreen(key: ValueKey<int>(3));
       default:
@@ -215,6 +210,7 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    final int currentIndex = ref.watch(navIndexProvider);
     final Translations t = Translations.of(context);
     final List<NavItemData> navItems = _buildNavItems(t);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -228,9 +224,9 @@ class _MainShellState extends State<MainShell> {
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
             SliverAppHeader(
-              title: _getScreenTitle(_currentIndex, t),
+              title: _getScreenTitle(currentIndex, t),
               parentTitle: 'Rally',
-              actions: _buildHeaderActions(_currentIndex),
+              actions: _buildHeaderActions(currentIndex),
             ),
           ];
         },
@@ -239,7 +235,7 @@ class _MainShellState extends State<MainShell> {
           switchInCurve: Curves.easeOutQuart,
           switchOutCurve: Curves.easeInQuart,
           transitionBuilder: (Widget child, Animation<double> animation) {
-            final bool isEntering = child.key == ValueKey<int>(_currentIndex);
+            final bool isEntering = child.key == ValueKey<int>(currentIndex);
 
             // Subtle scale and fade transition
             return FadeTransition(
@@ -253,11 +249,11 @@ class _MainShellState extends State<MainShell> {
               ),
             );
           },
-          child: _buildScreen(_currentIndex, t),
+          child: _buildScreen(currentIndex, t),
         ),
       ),
       bottomNavigationBar: AppBottomNavBar(
-        currentIndex: _currentIndex,
+        currentIndex: currentIndex,
         onIndexChanged: _onTabSelected,
         onActionPressed: _onActionPressed,
         items: navItems,

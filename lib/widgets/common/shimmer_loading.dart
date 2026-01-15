@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 
+/// A widget that displays a shimmer effect for loading states.
 class ShimmerLoading extends StatefulWidget {
+  /// The width of the shimmer container.
   final double width;
+
+  /// The height of the shimmer container.
   final double height;
+
+  /// The border radius of the shimmer container.
   final double borderRadius;
 
+  /// Creates a [ShimmerLoading] widget.
   const ShimmerLoading({
     super.key,
     required this.width,

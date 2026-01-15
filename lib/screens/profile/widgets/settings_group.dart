@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:rally/utils/responsive.dart';
 
+/// A container for a group of settings tiles with an optional title.
 class SettingsGroup extends StatelessWidget {
+  /// The title for this group of settings.
   final String? title;
+
+  /// The list of settings tiles (usually [ModernSettingsTile]).
   final List<Widget> children;
 
+  /// Creates a [SettingsGroup].
   const SettingsGroup({super.key, this.title, required this.children});
 
   @override

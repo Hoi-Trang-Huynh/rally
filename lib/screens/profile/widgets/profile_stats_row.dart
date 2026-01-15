@@ -83,11 +83,19 @@ class ProfileStatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         ProfileStatItem(count: followersCount, label: followersLabel, onTap: onFollowersTap),
-        SizedBox(width: Responsive.w(context, 16)),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 8)),
+          child: SizedBox(
+            height: Responsive.h(context, 24),
+            child: VerticalDivider(color: colorScheme.outlineVariant, width: 1, thickness: 1),
+          ),
+        ),
         ProfileStatItem(count: followingCount, label: followingLabel, onTap: onFollowingTap),
       ],
     );

@@ -7,7 +7,9 @@ import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/common/app_bottom_sheet.dart';
 import 'package:rally/widgets/notifications/notification_item.dart';
 
+/// A bottom sheet displaying the user's notifications.
 class NotificationSheet extends ConsumerWidget {
+  /// Creates a [NotificationSheet].
   const NotificationSheet({super.key});
 
   @override
@@ -46,6 +48,7 @@ class NotificationSheet extends ConsumerWidget {
                   avatarUrl: n.avatarUrl,
                   icon: n.icon,
                   iconColor: n.iconColor,
+                  onTap: () => ref.read(notificationProvider.notifier).markAsRead(n.id),
                 ),
               ),
             ],
@@ -60,6 +63,7 @@ class NotificationSheet extends ConsumerWidget {
                   avatarUrl: n.avatarUrl,
                   icon: n.icon,
                   iconColor: n.iconColor,
+                  onTap: () => ref.read(notificationProvider.notifier).markAsRead(n.id),
                 ),
               ),
             ],

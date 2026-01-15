@@ -4,7 +4,9 @@ import 'package:rally/models/app_user.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/utils/responsive.dart';
 
+/// The header widget for the home screen, displaying a greeting and user info.
 class HomeHeader extends ConsumerWidget {
+  /// Creates a [HomeHeader].
   const HomeHeader({super.key});
 
   String _getGreeting(BuildContext context) {

@@ -9,6 +9,7 @@ import 'package:rally/utils/responsive.dart';
 ///
 /// Replaces the standard dropdown with a clearer "pill" shaped button.
 class LanguageSelector extends ConsumerWidget {
+  /// Creates a [LanguageSelector].
   const LanguageSelector({super.key});
 
   @override

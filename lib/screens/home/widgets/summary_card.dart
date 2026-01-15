@@ -2,13 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/common/glass_container.dart';
 
+/// A card widget displaying summary statistics on the home screen.
 class SummaryCard extends StatelessWidget {
+  /// The title of the card (e.g., "Active Rallies").
   final String title;
+
+  /// The value to display (e.g., number of rallies).
   final String value;
+
+  /// The icon to allow visual identification.
   final IconData icon;
+
+  /// The primary color of the icon and background accents.
   final Color? color;
+
+  /// Callback when the card is tapped.
   final VoidCallback? onTap;
 
+  /// Creates a [SummaryCard].
   const SummaryCard({
     super.key,
     required this.title,

@@ -1,8 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:rally/models/cloudinary_signature.dart';
 import 'package:rally/models/responses/availability_response.dart';
 import 'package:rally/screens/auth/widgets/auth_text_field.dart';
+import 'package:rally/services/cloudinary_repository.dart';
+import 'package:rally/widgets/common/app_bottom_sheet.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/app_user.dart';
@@ -15,7 +21,7 @@ import 'widgets/profile_avatar.dart';
 
 /// Screen for editing user profile.
 ///
-/// Allows updating username, first name, last name, and avatar (placeholder).
+/// Allows updating username, first name, last name, and avatar.
 class EditProfileScreen extends ConsumerStatefulWidget {
   /// Creates a new [EditProfileScreen].
   const EditProfileScreen({super.key});
@@ -30,11 +36,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final TextEditingController _lastNameController = TextEditingController();
 
   bool _isLoading = false;
+  bool _isUploadingAvatar = false;
   String? _usernameError;
   String? _firstNameError;
   String? _lastNameError;
 
   String? _originalUsername;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -62,76 +70,133 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   void _showPhotoOptions() {
     final Translations t = Translations.of(context);
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    // colorScheme was unused, removed.
 
-    showModalBottomSheet<void>(
+    showAppBottomSheet<void>(
       context: context,
-      backgroundColor: colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Container(
-                  width: Responsive.w(context, 40),
-                  height: Responsive.h(context, 4),
-                  margin: EdgeInsets.only(bottom: Responsive.h(context, 16)),
-                  decoration: BoxDecoration(
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                Text(
-                  t.settings.changePhoto,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                SizedBox(height: Responsive.h(context, 16)),
-                ListTile(
-                  leading: Icon(
-                    Icons.photo_library_outlined,
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                  ),
-                  title: Text(
-                    t.settings.chooseFromGallery,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    showInfoSnackBar(context, t.settings.comingSoon);
-                  },
-                ),
-                ListTile(
-                  leading: Icon(
-                    Icons.camera_alt_outlined,
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                  ),
-                  title: Text(
-                    t.settings.takePhoto,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    showInfoSnackBar(context, t.settings.comingSoon);
-                  },
-                ),
-              ],
+      sheet: AppBottomSheet.fixed(
+        title: t.settings.changePhoto,
+        body: Column(
+          children: <Widget>[
+            _buildPhotoOption(
+              icon: Icons.photo_library_rounded,
+              label: t.settings.chooseFromGallery,
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
             ),
-          ),
-        );
-      },
+            _buildPhotoOption(
+              icon: Icons.camera_alt_rounded,
+              label: t.settings.takePhoto,
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
     );
+  }
+
+  // ... (keep helper logging and upload methods as is, skipping re-definition in this chunk to focus on UI unless needed context)
+
+  // ... (skipping down to build method for Avatar stack replacement)
+
+  Widget _buildPhotoOption({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: Responsive.w(context, 24),
+          vertical: Responsive.h(context, 12),
+        ),
+        child: Row(
+          children: <Widget>[
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: colorScheme.primary, size: 24),
+            ),
+            SizedBox(width: Responsive.w(context, 16)),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image == null) return;
+
+      await _uploadAvatar(File(image.path));
+    } catch (e) {
+      if (mounted) showErrorSnackBar(context, 'Failed to pick image: $e');
+    }
+  }
+
+  Future<void> _uploadAvatar(File imageFile) async {
+    if (_isUploadingAvatar) return;
+
+    setState(() => _isUploadingAvatar = true);
+
+    try {
+      // 1. Get user ID
+      final AppUser? user = ref.read(appUserProvider).valueOrNull;
+      if (user?.id == null) throw Exception('User not found');
+
+      // 2. Get Upload Signature
+      final CloudinaryRepository repo = ref.read(cloudinaryRepositoryProvider);
+      final String folderName = 'rally_avatars';
+      final CloudinarySignature signature = await repo.getUploadSignature(
+        userId: user!.id,
+        folder: folderName,
+      );
+
+      // 3. Upload directly to Cloudinary
+      final Map<String, dynamic> result = await repo.uploadImage(
+        file: imageFile,
+        signature: signature,
+        folder: folderName,
+      );
+
+      // 4.
+      await repo.verifyAvatar(
+        publicId: result['public_id'] as String,
+        avatarUrl: result['secure_url'] as String,
+      );
+      // 5. Refresh user provider to confirm new image
+      ref.invalidate(appUserProvider);
+
+      if (mounted) {
+        showSuccessSnackBar(context, 'Avatar updated successfully');
+      }
+    } catch (e) {
+      if (mounted) showErrorSnackBar(context, 'Failed to upload avatar: $e');
+    } finally {
+      if (mounted) setState(() => _isUploadingAvatar = false);
+    }
   }
 
   Future<void> _saveChanges() async {
@@ -234,29 +299,60 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 children: <Widget>[
                   // Avatar with camera button
                   GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      _showPhotoOptions();
-                    },
+                    onTap:
+                        _isUploadingAvatar
+                            ? null
+                            : () {
+                              HapticFeedback.lightImpact();
+                              _showPhotoOptions();
+                            },
                     child: Stack(
                       children: <Widget>[
-                        ProfileAvatar(avatarUrl: user?.avatarUrl, baseSize: 100),
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: colorScheme.surfaceContainerHighest,
+                              width: 1,
+                            ),
+                          ),
+                          child: ProfileAvatar(avatarUrl: user?.avatarUrl, baseSize: 120),
+                        ),
+                        if (_isUploadingAvatar)
+                          Positioned.fill(
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.black45,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                          ),
                         Positioned(
-                          right: 0,
-                          bottom: 0,
+                          right: 4,
+                          bottom: 4,
                           child: Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: colorScheme.primary,
                               shape: BoxShape.circle,
-                              border: Border.all(
-                                color: colorScheme.surface,
-                                width: Responsive.w(context, 2),
-                              ),
+                              border: Border.all(color: colorScheme.surface, width: 3),
+                              boxShadow: <BoxShadow>[
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
                             child: Icon(
-                              Icons.camera_alt,
-                              size: Responsive.w(context, 18),
+                              Icons.camera_alt_rounded,
+                              size: 20,
                               color: colorScheme.onPrimary,
                             ),
                           ),

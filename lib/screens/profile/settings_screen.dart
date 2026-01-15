@@ -206,49 +206,40 @@ class SettingsScreen extends ConsumerWidget {
 
           SizedBox(width: Responsive.w(context, 16)),
 
-          // Username and Edit button
+          // Username
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  '@${user?.username ?? 'username'}',
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                SizedBox(height: Responsive.h(context, 8)),
-                OutlinedButton(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (BuildContext context) => const EditProfileScreen(),
-                      ),
-                    );
-                  },
-                  style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: Responsive.w(context, 16),
-                      vertical: Responsive.h(context, 4),
-                    ),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    side: BorderSide(color: colorScheme.outline),
-                  ),
-                  child: Text(t.settings.edit, style: textTheme.labelMedium),
-                ),
-              ],
+            child: Text(
+              '@${user?.username ?? 'username'}',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
 
-          // More options
-          IconButton(
-            icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
+          SizedBox(width: Responsive.w(context, 16)),
+
+          // Edit button
+          OutlinedButton(
             onPressed: () {
               HapticFeedback.lightImpact();
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (BuildContext context) => const EditProfileScreen(),
+                ),
+              );
             },
+            style: OutlinedButton.styleFrom(
+              padding: EdgeInsets.symmetric(
+                horizontal: Responsive.w(context, 16),
+                vertical: Responsive.h(context, 4),
+              ),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              side: BorderSide(color: colorScheme.outline),
+            ),
+            child: Text(t.settings.edit, style: textTheme.labelMedium),
           ),
         ],
       ),

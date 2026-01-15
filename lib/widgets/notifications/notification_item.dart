@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rally/utils/responsive.dart';
 
+/// A widget representing a single notification item in the list.
 class NotificationItem extends StatelessWidget {
+  /// Creates a [NotificationItem].
   const NotificationItem({
     super.key,
     required this.title,
@@ -11,15 +13,32 @@ class NotificationItem extends StatelessWidget {
     this.avatarUrl,
     this.icon,
     this.iconColor,
+    this.onTap,
   });
 
+  /// The title of the notification.
   final String title;
+
+  /// The subtitle of the notification.
   final String subtitle;
+
+  /// The time passed since the notification was created.
   final String timeAgo;
+
+  /// Whether the notification is unread.
   final bool isUnread;
+
+  /// URL for the avatar image.
   final String? avatarUrl;
+
+  /// Facebook/Icon data if no avatar is present.
   final IconData? icon;
+
+  /// Color for the icon.
   final Color? iconColor;
+
+  /// Callback when the item is tapped.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +46,7 @@ class NotificationItem extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return InkWell(
-      onTap: () {
-        // TODO: Handle notification tap
-      },
+      onTap: onTap,
       child: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: Responsive.w(context, 24),

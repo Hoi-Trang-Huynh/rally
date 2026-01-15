@@ -4,7 +4,9 @@ import 'package:rally/screens/home/widgets/home_header.dart';
 import 'package:rally/screens/home/widgets/summary_card.dart';
 import 'package:rally/utils/responsive.dart';
 
+/// The main home screen of the application.
 class HomeScreen extends StatelessWidget {
+  /// Creates a [HomeScreen].
   const HomeScreen({super.key});
 
   @override

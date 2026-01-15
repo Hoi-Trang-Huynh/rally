@@ -49,7 +49,7 @@ class AppBottomNavBar extends StatelessWidget {
         Responsive.w(context, 12),
         0,
         Responsive.w(context, 12),
-        Responsive.h(context, 16),
+        Responsive.h(context, 12),
       ),
       child: Container(
         decoration: BoxDecoration(
