@@ -11,13 +11,17 @@ class OrDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Row(
       children: <Widget>[
         Expanded(child: Divider(color: colorScheme.outline)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(t.common.orDivider, style: TextStyle(color: colorScheme.onSurfaceVariant)),
+          child: Text(
+            t.common.orDivider,
+            style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+          ),
         ),
         Expanded(child: Divider(color: colorScheme.outline)),
       ],

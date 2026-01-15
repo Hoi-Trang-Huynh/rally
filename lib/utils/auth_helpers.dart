@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:rally/models/responses/profile_response.dart';
+import 'package:rally/models/responses/register_response.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/services/auth_repository.dart';
@@ -11,10 +13,7 @@ import 'package:rally/utils/ui_helpers.dart';
 /// Result of a Google Sign-In operation.
 class GoogleSignInResult {
   /// Creates a new [GoogleSignInResult].
-  const GoogleSignInResult({
-    required this.userCredential,
-    required this.userId,
-  });
+  const GoogleSignInResult({required this.userCredential, required this.userId});
 
   /// The Firebase user credential.
   final UserCredential userCredential;
@@ -48,8 +47,7 @@ Future<GoogleSignInResult?> signInWithGoogle({
   );
 
   // Sign in to Firebase
-  final UserCredential userCredential = await authRepository
-      .signInWithCredential(credential);
+  final UserCredential userCredential = await authRepository.signInWithCredential(credential);
 
   // Get Firebase ID token for backend API calls
   final String? idToken = await authRepository.getIdToken();
@@ -57,24 +55,17 @@ Future<GoogleSignInResult?> signInWithGoogle({
     throw Exception('Failed to get Firebase ID token');
   }
 
-  Map<String, dynamic> profile;
+  ProfileResponse profile;
 
   try {
     // Try to get existing user profile
     profile = await userRepository.getMyProfile();
   } catch (e) {
     // User not found in backend - register them first
-    final Map<String, dynamic> registerResponse = await userRepository.register(
-      idToken: idToken,
-    );
-
-    // Extract user data from register response
-    final Map<String, dynamic>? user =
-        registerResponse['user'] as Map<String, dynamic>?;
-    profile = user ?? <String, dynamic>{};
+    final RegisterResponse registerResponse = await userRepository.register(idToken: idToken);
 
     // Sync Firebase user data to MongoDB
-    final String? newUserId = profile['id'] as String?;
+    final String? newUserId = registerResponse.user.id;
     final User? firebaseUser = userCredential.user;
 
     if (newUserId != null && firebaseUser != null) {
@@ -85,14 +76,14 @@ Future<GoogleSignInResult?> signInWithGoogle({
         isEmailVerified: firebaseUser.emailVerified,
       );
     }
+
+    // Fetch the updated profile after registration
+    profile = await userRepository.getMyProfile();
   }
 
-  final String? userId = profile['id'] as String?;
+  final String? userId = profile.id;
 
-  return GoogleSignInResult(
-    userCredential: userCredential,
-    userId: userId ?? '',
-  );
+  return GoogleSignInResult(userCredential: userCredential, userId: userId ?? '');
 }
 
 /// Handles Google Sign-In with automatic navigation.

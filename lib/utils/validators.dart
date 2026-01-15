@@ -15,7 +15,7 @@ class Validators {
     }
 
     if (!emailRegex.hasMatch(email)) {
-      return t.validation.emailInvalid;
+      return t.validation.email.invalid;
     }
 
     return null;
@@ -23,6 +23,7 @@ class Validators {
 
   /// Validates a username.
   /// Returns error message if invalid, null if valid.
+  /// Username must only contain letters, numbers, and underscores
   static String? validateUsername(String value) {
     final String username = value.trim();
 
@@ -36,6 +37,10 @@ class Validators {
 
     if (username.length > UsernameValidation.maxLength) {
       return t.validation.username.tooLong(maxLength: UsernameValidation.maxLength);
+    }
+
+    if (!UsernameValidation.hasValidCharacters(username)) {
+      return t.validation.username.invalidFormat;
     }
 
     return null;
@@ -78,6 +83,15 @@ class Validators {
       return t.validation.name.tooLong(maxLength: LastNameValidation.maxLength);
     }
 
+    return null;
+  }
+
+  /// Validates a bio.
+  /// Returns error message if invalid, null if valid.
+  static String? validateBio(String value) {
+    if (value.length > BioValidation.maxLength) {
+      return t.validation.name.tooLong(maxLength: BioValidation.maxLength);
+    }
     return null;
   }
 

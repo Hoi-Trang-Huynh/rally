@@ -11,11 +11,11 @@ import 'package:rally/models/app_user.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/providers/theme_provider.dart';
+import 'package:rally/screens/auth/auth_screen.dart';
 import 'package:rally/screens/auth/profile_completion_screen.dart';
-import 'package:rally/screens/auth/signup_screen.dart';
+import 'package:rally/screens/home/main_shell.dart';
 import 'package:rally/screens/loading/app_loading.dart';
 import 'package:rally/screens/onboarding/onboarding_screen.dart';
-import 'package:rally/screens/playground/auth_test.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:rally/themes/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,7 +34,13 @@ Future<void> main() async {
     debugPrint('Warning: .env file not found or failed to load: $e');
   }
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } catch (e) {
+    debugPrint('Failed to initialize Firebase: $e');
+    // If running on an unsupported platform (e.g. Windows without config),
+    // the app might crash later when accessing Firebase services.
+  }
 
   final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
 
@@ -93,13 +99,14 @@ class RallyApp extends ConsumerWidget {
             if (!onboardingSeen) {
               return const OnboardingScreen();
             }
-            return const SignupScreen();
+            // Default to Signup for new users, consistent with "Get Started" flow
+            return const AuthScreen(initialIsLogin: false);
           }
 
           // Check if email is verified before showing home
           if (!user.isEmailVerified) {
             // User is logged in but email not verified - stay on signup for verification
-            return const SignupScreen();
+            return const AuthScreen(initialIsLogin: false);
           }
 
           // Check if profile needs completion (Google sign-in users)
@@ -108,7 +115,7 @@ class RallyApp extends ConsumerWidget {
           }
 
           // Fully authenticated and verified - show home
-          return const AuthTestScreen();
+          return const MainShell();
         },
         loading: () => const AppLoadingScreen(),
         error:

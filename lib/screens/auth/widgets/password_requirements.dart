@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/themes/app_theme_extension.dart';
+import 'package:rally/utils/responsive.dart';
 import 'package:rally/utils/validation_constants.dart';
 
 /// A widget that displays password requirements with real-time validation.
@@ -18,7 +19,7 @@ class PasswordRequirements extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color successColor =
-        Theme.of(context).extension<AppThemeExtension>()?.successColor ?? Colors.green;
+        Theme.of(context).extension<AppThemeExtension>()?.successColor ?? Colors.transparent;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,20 +69,20 @@ class _PasswordRuleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 4)),
       child: Row(
         children: <Widget>[
           Icon(
             isMet ? Icons.check_circle : Icons.circle_outlined,
-            size: 18,
+            size: Responsive.w(context, 18),
             color: isMet ? successColor : colorScheme.outline,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: Responsive.w(context, 8)),
           Text(
             text,
-            style: TextStyle(
-              fontSize: 13,
+            style: textTheme.bodySmall?.copyWith(
               color: isMet ? successColor : colorScheme.onSurfaceVariant,
             ),
           ),

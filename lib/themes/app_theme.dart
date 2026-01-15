@@ -19,11 +19,11 @@ abstract class AppTheme {
     final ColorScheme colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.seedColor,
       brightness: Brightness.light,
-      primary: const Color(0xff904a48),
-      surfaceTint: const Color(0xff904a48),
+      primary: const Color(0xffC04444),
+      surfaceTint: const Color(0xffC04444),
       onPrimary: const Color(0xffffffff),
       primaryContainer: const Color(0xffffdad7),
-      onPrimaryContainer: const Color(0xff733332),
+      onPrimaryContainer: const Color(0xff8B2D2D),
       secondary: const Color(0xff775654),
       onSecondary: const Color(0xffffffff),
       secondaryContainer: const Color(0xffffdad7),
@@ -36,34 +36,34 @@ abstract class AppTheme {
       onError: const Color(0xffffffff),
       errorContainer: const Color(0xffffdad6),
       onErrorContainer: const Color(0xff93000a),
-      surface: const Color(0xfffff8f7),
-      onSurface: const Color(0xff231919),
-      onSurfaceVariant: const Color(0xff534342),
-      outline: const Color(0xff857372),
-      outlineVariant: const Color(0xffd8c1c0),
+      surface: const Color(0xfffafafa), // Clean white
+      onSurface: const Color(0xff1a1a1a),
+      onSurfaceVariant: const Color(0xff6b6b6b),
+      outline: const Color(0xff858585),
+      outlineVariant: const Color(0xffe5e5e5),
       shadow: const Color(0xff000000),
       scrim: const Color(0xff000000),
-      inverseSurface: const Color(0xff382e2d),
+      inverseSurface: const Color(0xff262626),
       inversePrimary: const Color(0xffffb3af),
       primaryFixed: const Color(0xffffdad7),
       onPrimaryFixed: const Color(0xff3b080a),
       primaryFixedDim: const Color(0xffffb3af),
       onPrimaryFixedVariant: const Color(0xff733332),
-      secondaryFixed: const Color(0xffffdad7),
-      onSecondaryFixed: const Color(0xff2c1514),
-      secondaryFixedDim: const Color(0xffe7bdba),
-      onSecondaryFixedVariant: const Color(0xff5d3f3d),
+      secondaryFixed: const Color(0xfff5f5f5),
+      onSecondaryFixed: const Color(0xff1a1a1a),
+      secondaryFixedDim: const Color(0xffe5e5e5),
+      onSecondaryFixedVariant: const Color(0xff525252),
       tertiaryFixed: const Color(0xffffd8ec),
       onTertiaryFixed: const Color(0xff37072a),
       tertiaryFixedDim: const Color(0xfff9b1db),
       onTertiaryFixedVariant: const Color(0xff6a3457),
-      surfaceDim: const Color(0xffe8d6d5),
-      surfaceBright: const Color(0xfffff8f7),
+      surfaceDim: const Color(0xffe5e5e5),
+      surfaceBright: const Color(0xffffffff),
       surfaceContainerLowest: const Color(0xffffffff),
-      surfaceContainerLow: const Color(0xfffff0ef),
-      surfaceContainer: const Color(0xfffceae8),
-      surfaceContainerHigh: const Color(0xfff6e4e3),
-      surfaceContainerHighest: const Color(0xfff0dedd),
+      surfaceContainerLow: const Color(0xfff2f2f2), // Slightly darker than surface
+      surfaceContainer: const Color(0xffebebeb), // Distinct gray for navbar
+      surfaceContainerHigh: const Color(0xffe6e6e6), // Darker for emphasis
+      surfaceContainerHighest: const Color(0xffdfdfdf), // Darkest container
     );
 
     // Common Button Style for consistency
@@ -78,16 +78,16 @@ abstract class AppTheme {
     return base.copyWith(
       colorScheme: colorScheme,
       textTheme: AppTextStyles.m3TextTheme
-          .apply(
-            fontFamily: 'Inclusive Sans',
-            displayColor: colorScheme.onSurface,
-            bodyColor: colorScheme.onSurface,
-          )
           .copyWith(
             // Mobile optimizations
             headlineMedium: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             titleMedium: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             bodyMedium: const TextStyle(fontSize: 16), // Readable body text
+          )
+          .apply(
+            fontFamily: 'Inclusive Sans',
+            displayColor: colorScheme.onSurface,
+            bodyColor: colorScheme.onSurface,
           ),
       filledButtonTheme: filledButtonTheme,
       extensions: <ThemeExtension<dynamic>>[
@@ -109,10 +109,10 @@ abstract class AppTheme {
     final ColorScheme colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.seedColor,
       brightness: Brightness.dark,
-      primary: const Color(0xffffb3af),
-      surfaceTint: const Color(0xffffb3af),
-      onPrimary: const Color(0xff571d1d),
-      primaryContainer: const Color(0xff733332),
+      primary: const Color(0xffC04444),
+      surfaceTint: const Color(0xffC04444),
+      onPrimary: const Color(0xffffffff),
+      primaryContainer: const Color(0xff8B2D2D),
       onPrimaryContainer: const Color(0xffffdad7),
       secondary: const Color(0xffe7bdba),
       onSecondary: const Color(0xff442928),
@@ -126,14 +126,14 @@ abstract class AppTheme {
       onError: const Color(0xff690005),
       errorContainer: const Color(0xff93000a),
       onErrorContainer: const Color(0xffffdad6),
-      surface: const Color(0xff1a1111),
-      onSurface: const Color(0xfff0dedd),
-      onSurfaceVariant: const Color(0xffd8c1c0),
-      outline: const Color(0xffa08c8b),
-      outlineVariant: const Color(0xff534342),
+      surface: const Color(0xff121212), // Instagram dark gray
+      onSurface: const Color(0xfffafafa),
+      onSurfaceVariant: const Color(0xffa1a1aa),
+      outline: const Color(0xff3f3f46),
+      outlineVariant: const Color(0xff27272a),
       shadow: const Color(0xff000000),
       scrim: const Color(0xff000000),
-      inverseSurface: const Color(0xfff0dedd),
+      inverseSurface: const Color(0xfffafafa),
       inversePrimary: const Color(0xff904a48),
       primaryFixed: const Color(0xffffdad7),
       onPrimaryFixed: const Color(0xff3b080a),
@@ -147,13 +147,13 @@ abstract class AppTheme {
       onTertiaryFixed: const Color(0xff37072a),
       tertiaryFixedDim: const Color(0xfff9b1db),
       onTertiaryFixedVariant: const Color(0xff6a3457),
-      surfaceDim: const Color(0xff1a1111),
-      surfaceBright: const Color(0xff423736),
-      surfaceContainerLowest: const Color(0xff140c0c),
-      surfaceContainerLow: const Color(0xff231919),
-      surfaceContainer: const Color(0xff271d1d),
-      surfaceContainerHigh: const Color(0xff322827),
-      surfaceContainerHighest: const Color(0xff3d3231),
+      surfaceDim: const Color(0xff0a0a0a),
+      surfaceBright: const Color(0xff2a2a2a),
+      surfaceContainerLowest: const Color(0xff0a0a0a),
+      surfaceContainerLow: const Color(0xff1a1a1a),
+      surfaceContainer: const Color(0xff212121), // Nav bar - soft dark gray
+      surfaceContainerHigh: const Color(0xff2b2b2b),
+      surfaceContainerHighest: const Color(0xff363636),
     );
 
     // Common Button Style (Dark)
@@ -168,16 +168,16 @@ abstract class AppTheme {
     return base.copyWith(
       colorScheme: colorScheme,
       textTheme: AppTextStyles.m3TextTheme
-          .apply(
-            fontFamily: 'Inclusive Sans',
-            displayColor: colorScheme.onSurface,
-            bodyColor: colorScheme.onSurface,
-          )
           .copyWith(
             // Mobile optimizations
             headlineMedium: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             titleMedium: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             bodyMedium: const TextStyle(fontSize: 16),
+          )
+          .apply(
+            fontFamily: 'Inclusive Sans',
+            displayColor: colorScheme.onSurface,
+            bodyColor: colorScheme.onSurface,
           ),
       filledButtonTheme: filledButtonTheme,
       extensions: <ThemeExtension<dynamic>>[

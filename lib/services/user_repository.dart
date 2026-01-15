@@ -1,3 +1,8 @@
+import 'package:rally/models/responses/availability_response.dart';
+import 'package:rally/models/responses/login_response.dart';
+import 'package:rally/models/responses/profile_details_response.dart';
+import 'package:rally/models/responses/profile_response.dart';
+import 'package:rally/models/responses/register_response.dart';
 import 'package:rally/services/api_client.dart';
 
 /// Repository for user-related API calls.
@@ -18,12 +23,12 @@ class UserRepository {
   ///
   /// Accepts a Firebase ID token and returns user info.
   /// Returns a [LoginResponse] containing user data and message.
-  Future<Map<String, dynamic>> login({required String idToken}) async {
+  Future<LoginResponse> login({required String idToken}) async {
     final dynamic response = await _apiClient.post(
       '/api/v1/auth/login',
       body: <String, dynamic>{'id_token': idToken},
     );
-    return response as Map<String, dynamic>;
+    return LoginResponse.fromJson(response as Map<String, dynamic>);
   }
 
   /// Registers a new user or logs in via Firebase ID token.
@@ -31,12 +36,34 @@ class UserRepository {
   /// Accepts a Firebase ID token and returns user info.
   /// If the user is new, they will be registered.
   /// Returns a [RegisterResponse] containing user data and message.
-  Future<Map<String, dynamic>> register({required String idToken}) async {
+  Future<RegisterResponse> register({required String idToken}) async {
     final dynamic response = await _apiClient.post(
       '/api/v1/auth/register',
       body: <String, dynamic>{'id_token': idToken},
     );
-    return response as Map<String, dynamic>;
+    return RegisterResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Checks if an email is available for registration.
+  ///
+  /// Returns an [AvailabilityResponse] with availability status.
+  Future<AvailabilityResponse> checkEmailAvailability(String email) async {
+    final dynamic response = await _apiClient.get(
+      '/api/v1/auth/check-email',
+      queryParams: <String, String>{'email': email},
+    );
+    return AvailabilityResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Checks if a username is available for registration.
+  ///
+  /// Returns an [AvailabilityResponse] with availability status.
+  Future<AvailabilityResponse> checkUsernameAvailability(String username) async {
+    final dynamic response = await _apiClient.get(
+      '/api/v1/auth/check-username',
+      queryParams: <String, String>{'username': username},
+    );
+    return AvailabilityResponse.fromJson(response as Map<String, dynamic>);
   }
 
   // ============================================
@@ -47,18 +74,27 @@ class UserRepository {
   ///
   /// Requires Bearer Firebase ID Token in the Authorization header.
   /// Returns a [ProfileResponse] containing profile data.
-  Future<Map<String, dynamic>> getMyProfile() async {
+  Future<ProfileResponse> getMyProfile() async {
     final dynamic response = await _apiClient.get('/api/v1/user/me/profile');
-    return response as Map<String, dynamic>;
+    return ProfileResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Fetches the current user's detailed profile (including bio).
+  ///
+  /// Requires Bearer Firebase ID Token in the Authorization header.
+  /// Returns a [ProfileDetailsResponse] containing bio and other details.
+  Future<ProfileDetailsResponse> getMyProfileDetails() async {
+    final dynamic response = await _apiClient.get('/api/v1/user/me/profile/details');
+    return ProfileDetailsResponse.fromJson(response as Map<String, dynamic>);
   }
 
   /// Fetches a specific user's profile by ID.
   ///
   /// [userId] The ID of the user to fetch.
   /// Returns a [ProfileResponse] containing profile data.
-  Future<Map<String, dynamic>> getUserProfile(String userId) async {
+  Future<ProfileResponse> getUserProfile(String userId) async {
     final dynamic response = await _apiClient.get('/api/v1/user/$userId/profile');
-    return response as Map<String, dynamic>;
+    return ProfileResponse.fromJson(response as Map<String, dynamic>);
   }
 
   /// Updates the current user's profile.
@@ -66,7 +102,7 @@ class UserRepository {
   /// [userId] The ID of the user to update.
   /// All parameters are optional; only provided fields will be updated.
   /// Returns a [ProfileResponse] containing the updated profile data.
-  Future<Map<String, dynamic>> updateUserProfile({
+  Future<ProfileResponse> updateUserProfile({
     required String userId,
     String? username,
     String? firstName,
@@ -91,6 +127,6 @@ class UserRepository {
     };
 
     final dynamic response = await _apiClient.put('/api/v1/user/$userId/profile', body: body);
-    return response as Map<String, dynamic>;
+    return ProfileResponse.fromJson(response as Map<String, dynamic>);
   }
 }

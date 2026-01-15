@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:rally/constants/shared_pref_keys.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
-import 'package:rally/screens/auth/signup_screen.dart';
+import 'package:rally/screens/auth/auth_screen.dart';
 import 'package:rally/services/shared_prefs_service.dart';
-import 'package:rally/widgets/auth_primary_button.dart';
+import 'package:rally/themes/app_colors.dart';
+import 'package:rally/utils/responsive.dart';
+import 'package:rally/widgets/common/animated_background.dart';
 
 /// A screen that introduces the user to the application's features.
 ///
-/// This screen is displayed only on the first app launch (or until the user completes the flow).
-/// It uses a [PageView] to cycle through onboarding steps and persists the "seen" state
-/// to [SharedPreferences] upon completion.
+/// This screen is displayed only on the first app launch.
 class OnboardingScreen extends ConsumerStatefulWidget {
   /// Creates an [OnboardingScreen].
   const OnboardingScreen({super.key});
@@ -34,9 +35,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Future<void> _completeOnboarding() async {
     await ref.read(sharedPrefsServiceProvider).setBool(SharedPrefKeys.onboardingSeen, true);
     if (!mounted) return;
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute<void>(builder: (_) => const SignupScreen()));
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(builder: (_) => const AuthScreen(initialIsLogin: false)),
+    );
   }
 
   @override
@@ -44,120 +45,237 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
     final List<Map<String, String>> pages = _getPages();
+    final bool isLastPage = _currentPage == pages.length - 1;
+    final bool isFirstPage = _currentPage == 0;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            // Skip Button
-            Align(
-              alignment: Alignment.topRight,
-              child: TextButton(
-                onPressed: _completeOnboarding,
-                child: Text(t.common.skip, style: textTheme.titleMedium),
-              ),
-            ),
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        children: <Widget>[
+          // 1. Dynamic Background
+          const AnimatedBackground(),
 
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (int index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
-                },
-                itemCount: pages.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        // Placeholder Image
-                        Container(
-                          height: 250,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 80,
-                            color: colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                        const SizedBox(height: 64),
-                        Text(
-                          pages[index]['title']!,
-                          textAlign: TextAlign.center,
-                          style: textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          pages[index]['subtitle']!,
-                          textAlign: TextAlign.center,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                            height: 1.6,
-                          ),
-                        ),
-                      ],
+          SafeArea(
+            child: Column(
+              children: <Widget>[
+                SizedBox(height: Responsive.h(context, 16)),
+                // 2. Top Logo
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Hero(
+                      tag: 'app_logo',
+                      child: Image.asset(
+                        'assets/images/rally_logo_transparent.png',
+                        height: Responsive.h(context, 32),
+                        // Removed color to show original gradient
+                      ),
                     ),
-                  );
-                },
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                children: <Widget>[
-                  // Page Indicators
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List<Widget>.generate(
-                      pages.length,
-                      (int index) => AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        height: 8,
-                        width: _currentPage == index ? 24 : 8,
-                        decoration: BoxDecoration(
-                          color:
-                              _currentPage == index
-                                  ? colorScheme.primary
-                                  : colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(4),
+                    SizedBox(width: Responsive.w(context, 8)),
+                    ShaderMask(
+                      shaderCallback:
+                          (Rect bounds) => const LinearGradient(
+                            colors: <Color>[
+                              AppColors.brandGradientStart,
+                              AppColors.brandGradientEnd,
+                            ],
+                          ).createShader(bounds),
+                      child: Text(
+                        'Rally',
+                        style: textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white, // Must be white for ShaderMask
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 32),
+                  ],
+                ),
 
-                  // Next/Get Started Button
-                  AuthPrimaryButton(
-                    onPressed: () {
-                      if (_currentPage == pages.length - 1) {
-                        _completeOnboarding();
-                      } else {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      }
+                SizedBox(height: Responsive.h(context, 32)),
+
+                // 3. Center Content (PageView)
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: (int index) {
+                      setState(() {
+                        _currentPage = index;
+                      });
                     },
-                    text: _currentPage == pages.length - 1 ? t.common.getStarted : t.common.next,
+                    itemCount: pages.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 32)),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: AnimationConfiguration.toStaggeredList(
+                            duration: const Duration(milliseconds: 600),
+                            childAnimationBuilder:
+                                (Widget widget) => SlideAnimation(
+                                  verticalOffset: 50.0,
+                                  child: FadeInAnimation(child: widget),
+                                ),
+                            children: <Widget>[
+                              // Placeholder Image
+                              Container(
+                                height: Responsive.h(context, 300),
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: colorScheme.outline.withValues(alpha: 0.1),
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Icon(
+                                        Icons.image_outlined,
+                                        size: Responsive.w(context, 64),
+                                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                                      ),
+                                      SizedBox(height: Responsive.h(context, 16)),
+                                      Text(
+                                        'Illustration Placeholder',
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: colorScheme.onSurfaceVariant.withValues(
+                                            alpha: 0.5,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: Responsive.h(context, 48)),
+
+                              // Title
+                              Text(
+                                pages[index]['title']!,
+                                textAlign: TextAlign.center,
+                                style: textTheme.headlineMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onSurface,
+                                ),
+                              ),
+                              SizedBox(height: Responsive.h(context, 16)),
+
+                              // Subtitle
+                              Text(
+                                pages[index]['subtitle']!,
+                                textAlign: TextAlign.center,
+                                style: textTheme.bodyLarge?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                  height: Responsive.h(context, 1.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                ],
-              ),
+                ),
+
+                // 4. Bottom Navigation Area
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    Responsive.w(context, 24),
+                    Responsive.h(context, 16),
+                    Responsive.w(context, 24),
+                    Responsive.h(context, 32),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      // Left Button (Skip or Back)
+                      SizedBox(
+                        width: Responsive.w(context, 80),
+                        child: FilledButton(
+                          onPressed: () {
+                            if (isFirstPage) {
+                              _completeOnboarding();
+                            } else {
+                              _pageController.previousPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                            }
+                          },
+                          style: FilledButton.styleFrom(
+                            backgroundColor: colorScheme.surfaceContainerHighest,
+                            foregroundColor: colorScheme.onSurface,
+                            padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 16)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            isFirstPage ? t.common.skip : t.common.back,
+                            style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+
+                      // Indicators
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List<Widget>.generate(
+                          pages.length,
+                          (int index) => AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            margin: EdgeInsets.symmetric(horizontal: Responsive.w(context, 4)),
+                            height: Responsive.h(context, 6),
+                            width: _currentPage == index ? 24 : 6,
+                            decoration: BoxDecoration(
+                              color:
+                                  _currentPage == index
+                                      ? colorScheme.primary
+                                      : colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Right Button (Next or Get Started)
+                      SizedBox(
+                        width: Responsive.w(context, 80),
+                        child: FilledButton(
+                          onPressed: () {
+                            if (isLastPage) {
+                              _completeOnboarding();
+                            } else {
+                              _pageController.nextPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                            }
+                          },
+                          style: FilledButton.styleFrom(
+                            backgroundColor: colorScheme.primary,
+                            padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 12)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            isLastPage ? t.common.getStarted : t.common.next,
+                            style: textTheme.labelLarge?.copyWith(
+                              color: colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

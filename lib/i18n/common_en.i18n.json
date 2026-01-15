@@ -3,8 +3,12 @@
   "orDivider": "Or",
   "continueButton": "Continue",
   "next": "Next",
+  "back": "Back",
   "getStarted": "Get Started",
   "skip": "Skip",
+  "save": "Save",
+  "saved": "Saved",
+  "cancel": "Cancel",
   "language": {
     "english": "English",
     "vietnamese": "Vietnamese",

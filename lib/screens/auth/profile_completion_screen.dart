@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/models/app_user.dart';
+import 'package:rally/models/responses/availability_response.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
+import 'package:rally/screens/auth/widgets/auth_primary_button.dart';
+import 'package:rally/screens/auth/widgets/auth_screen_layout.dart';
+import 'package:rally/screens/auth/widgets/auth_text_field.dart';
+import 'package:rally/utils/responsive.dart';
 import 'package:rally/utils/ui_helpers.dart';
 import 'package:rally/utils/validators.dart';
-import 'package:rally/widgets/auth_primary_button.dart';
-import 'package:rally/widgets/auth_text_field.dart';
-import 'package:rally/widgets/layout/auth_screen_layout.dart';
 
 /// Screen for completing user profile after Google Sign-In.
 ///
@@ -63,6 +65,18 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
     setState(() => _isLoading = true);
 
     try {
+      // Check if username is available
+      final AvailabilityResponse response = await ref
+          .read(userRepositoryProvider)
+          .checkUsernameAvailability(_usernameController.text.trim());
+      if (!response.available) {
+        setState(() {
+          _usernameError = t.validation.username.taken;
+          _isLoading = false;
+        });
+        return;
+      }
+
       // Get current user ID
       final AppUser? user = ref.read(appUserProvider).valueOrNull;
       if (user?.id == null) {
@@ -101,7 +115,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
             labelText: t.auth.signup.username,
             errorText: _usernameError,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: Responsive.h(context, 16)),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -112,7 +126,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
                   errorText: _firstNameError,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: Responsive.w(context, 16)),
               Expanded(
                 child: AuthTextField(
                   controller: _lastNameController,
@@ -122,7 +136,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: Responsive.h(context, 24)),
           AuthPrimaryButton(
             text: t.common.continueButton,
             onPressed: _onSubmit,

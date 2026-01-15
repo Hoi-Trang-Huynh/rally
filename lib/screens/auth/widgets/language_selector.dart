@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/providers/theme_provider.dart';
+import 'package:rally/utils/responsive.dart';
 
 /// A polished language selector widget that uses a popup menu.
 ///
 /// Replaces the standard dropdown with a clearer "pill" shaped button.
 class LanguageSelector extends ConsumerWidget {
+  /// Creates a [LanguageSelector].
   const LanguageSelector({super.key});
 
   @override
@@ -46,7 +48,10 @@ class LanguageSelector extends ConsumerWidget {
       elevation: 4,
       // The trigger button
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: Responsive.w(context, 12),
+          vertical: Responsive.h(context, 8),
+        ),
         decoration: BoxDecoration(
           color: Colors.transparent, // User requested transparent
           borderRadius: BorderRadius.circular(20),
@@ -55,7 +60,7 @@ class LanguageSelector extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(Icons.language, size: 18, color: colorScheme.onSurface),
+            Icon(Icons.language, size: Responsive.w(context, 18), color: colorScheme.onSurface),
             const SizedBox(width: 8),
             Text(
               localeState.locale.languageCode.toUpperCase(),
@@ -65,7 +70,11 @@ class LanguageSelector extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 4),
-            Icon(Icons.keyboard_arrow_down, size: 18, color: colorScheme.onSurfaceVariant),
+            Icon(
+              Icons.keyboard_arrow_down,
+              size: Responsive.w(context, 18),
+              color: colorScheme.onSurfaceVariant,
+            ),
           ],
         ),
       ),

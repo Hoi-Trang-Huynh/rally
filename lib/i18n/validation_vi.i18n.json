@@ -1,9 +1,14 @@
 {
   "required": "Trường này là bắt buộc",
-  "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ",
+  "email": {
+    "invalid": "Vui lòng nhập địa chỉ email hợp lệ",
+    "taken": "Email này đã được sử dụng"
+  },
   "username": {
     "tooShort": "Tên người dùng phải có ít nhất $minLength ký tự",
-    "tooLong": "Tên người dùng tối đa $maxLength ký tự"
+    "tooLong": "Tên người dùng tối đa $maxLength ký tự",
+    "invalidFormat": "Chỉ được chứa chữ cái, số và dấu gạch dưới",
+    "taken": "Tên người dùng này đã được sử dụng"
   },
   "name": {
     "tooShort": "Phải có ít nhất $minLength ký tự",

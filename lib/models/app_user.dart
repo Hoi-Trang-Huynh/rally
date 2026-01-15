@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:rally/models/responses/profile_response.dart';
 
 /// Represents a user in the application.
 ///
@@ -94,6 +95,27 @@ class AppUser {
     );
   }
 
+  /// Factory constructor to create an [AppUser] from a [ProfileResponse].
+  ///
+  /// [firebaseUid] is required as the backend doesn't return the Firebase UID.
+  /// [profile] is the typed profile response from the backend.
+  factory AppUser.fromProfileResponse({
+    required String firebaseUid,
+    required ProfileResponse profile,
+  }) {
+    return AppUser(
+      uid: firebaseUid,
+      id: profile.id,
+      email: profile.email,
+      username: profile.username,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      avatarUrl: profile.avatarUrl,
+      isEmailVerified: profile.isEmailVerified,
+      isOnboarding: profile.isOnboarding,
+    );
+  }
+
   /// Returns true if the user needs to complete their profile.
   ///
   /// This is used to detect Google Sign-In users who haven't filled in
@@ -103,6 +125,19 @@ class AppUser {
       (username == null || username!.isEmpty) ||
       (firstName == null || firstName!.isEmpty) ||
       (lastName == null || lastName!.isEmpty);
+
+  /// Returns the display name for the user.
+  ///
+  /// Prefers [firstName], falls back to [username], then 'User'.
+  String get displayName {
+    if (firstName != null && firstName!.isNotEmpty) {
+      return firstName!;
+    }
+    if (username != null && username!.isNotEmpty) {
+      return username!;
+    }
+    return 'User';
+  }
 
   @override
   String toString() {

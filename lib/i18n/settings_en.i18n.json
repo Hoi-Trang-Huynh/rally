@@ -1,0 +1,20 @@
+{
+  "title": "Settings",
+  "account": "Account",
+  "privacy": "Privacy",
+  "preferences": "Preferences",
+  "support": "Support",
+  "language": "Language",
+  "mode": "Mode",
+  "darkMode": "Dark Mode",
+  "lightMode": "Light Mode",
+  "helpFeedback": "Help & Feedback",
+  "logout": "Log out",
+  "edit": "Edit",
+  "editProfile": "Edit Profile",
+  "saveChanges": "Save Changes",
+  "changePhoto": "Change Photo",
+  "chooseFromGallery": "Choose from Gallery",
+  "takePhoto": "Take Photo",
+  "comingSoon": "Coming soon"
+}
