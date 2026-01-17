@@ -56,6 +56,7 @@ class _AuthScreenState extends State<AuthScreen> {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final double screenHeight = MediaQuery.of(context).size.height;
     final bool isSmallScreen = screenHeight < 700;
+    final bool isVerySmallScreen = screenHeight < 650;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -85,16 +86,20 @@ class _AuthScreenState extends State<AuthScreen> {
                               child: Image.asset(
                                 'assets/images/rally_logo_transparent.png',
                                 height:
-                                    isSmallScreen
-                                        ? Responsive.h(context, 70)
-                                        : Responsive.h(context, 100),
+                                    isVerySmallScreen
+                                        ? Responsive.h(context, 50)
+                                        : isSmallScreen
+                                        ? Responsive.h(context, 65)
+                                        : Responsive.h(context, 90),
                               ),
                             ),
                             SizedBox(
                               height:
-                                  isSmallScreen
-                                      ? Responsive.h(context, 16)
-                                      : Responsive.h(context, 32),
+                                  isVerySmallScreen
+                                      ? Responsive.h(context, 8)
+                                      : isSmallScreen
+                                      ? Responsive.h(context, 12)
+                                      : Responsive.h(context, 24),
                             ),
                           ],
 
@@ -113,7 +118,11 @@ class _AuthScreenState extends State<AuthScreen> {
                               duration: const Duration(milliseconds: 500),
                               curve: Curves.easeOutBack,
                               child: Padding(
-                                padding: EdgeInsets.all(Responsive.w(context, 24)),
+                                padding: EdgeInsets.all(
+                                  isVerySmallScreen
+                                      ? Responsive.w(context, 16)
+                                      : Responsive.w(context, 20),
+                                ),
                                 child: AnimatedSwitcher(
                                   layoutBuilder: (
                                     Widget? currentChild,
@@ -182,7 +191,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: Responsive.w(context, 24),
-                      vertical: Responsive.h(context, 16),
+                      vertical: Responsive.h(context, 12),
                     ),
                     child: TextButton(
                       onPressed: _toggleAuthMode,
@@ -192,7 +201,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               _isLogin
                                   ? '${t.auth.login.needAccountQuestion} '
                                   : '${t.auth.login.alreadyHaveAccountQuestion} ',
-                          style: textTheme.bodyMedium?.copyWith(
+                          style: textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurface,
                             fontWeight: FontWeight.w600,
                           ),
@@ -202,7 +211,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                   _isLogin
                                       ? t.auth.login.needAccountAction
                                       : t.auth.login.alreadyHaveAccountAction,
-                              style: textTheme.titleMedium?.copyWith(
+                              style: textTheme.labelLarge?.copyWith(
                                 color: colorScheme.primary,
                                 fontWeight: FontWeight.bold,
                                 decoration: TextDecoration.underline,

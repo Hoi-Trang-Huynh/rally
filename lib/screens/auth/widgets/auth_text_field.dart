@@ -78,7 +78,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
         ),
         contentPadding: EdgeInsets.symmetric(
           horizontal: Responsive.w(context, 16),
-          vertical: Responsive.h(context, 16),
+          vertical: Responsive.h(context, 12),
         ),
         errorText: widget.errorText,
         suffixIcon:

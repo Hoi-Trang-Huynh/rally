@@ -193,7 +193,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     children: <Widget>[
                       // Left Button (Skip or Back)
                       SizedBox(
-                        width: Responsive.w(context, 80),
+                        width: Responsive.w(context, 110),
+                        height: Responsive.h(context, 50),
                         child: FilledButton(
                           onPressed: () {
                             if (isFirstPage) {
@@ -214,7 +215,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ),
                           child: Text(
                             isFirstPage ? t.common.skip : t.common.back,
-                            style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+                            style: textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
                           ),
                         ),
                       ),
@@ -242,7 +243,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
                       // Right Button (Next or Get Started)
                       SizedBox(
-                        width: Responsive.w(context, 80),
+                        width: Responsive.w(context, 110),
+                        height: Responsive.h(context, 50),
                         child: FilledButton(
                           onPressed: () {
                             if (isLastPage) {
@@ -262,7 +264,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ),
                           child: Text(
                             isLastPage ? t.common.getStarted : t.common.next,
-                            style: textTheme.labelLarge?.copyWith(
+                            style: textTheme.labelMedium?.copyWith(
                               color: colorScheme.onPrimary,
                               fontWeight: FontWeight.bold,
                             ),

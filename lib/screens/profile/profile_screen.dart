@@ -327,14 +327,41 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     Translations t,
     AppUser user,
   ) {
-    if (_isLoadingBio) {
-      return ShimmerLoading(width: Responsive.w(context, 120), height: Responsive.h(context, 20));
-    }
+    // Wrap in AnimatedSize to smoothly animate height changes
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      alignment: Alignment.topCenter,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        switchInCurve: Curves.easeIn,
+        switchOutCurve: Curves.easeOut,
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        child:
+            _isLoadingBio
+                ? ShimmerLoading(
+                  key: const ValueKey<String>('bio_loading'),
+                  width: Responsive.w(context, 120),
+                  height: Responsive.h(context, 20),
+                )
+                : _buildBioContent(colorScheme, textTheme, t, user),
+      ),
+    );
+  }
 
-    // Display mode - tap to edit
+  /// The actual bio content when loaded.
+  Widget _buildBioContent(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    Translations t,
+    AppUser user,
+  ) {
     final bool hasBio = _bioText != null && _bioText!.isNotEmpty;
-    // Using ScaleButton instead of GestureDetector
+
     return ScaleButton(
+      key: const ValueKey<String>('bio_content'),
       onTap: () => _showEditBioBottomSheet(user),
       child: Container(
         padding: EdgeInsets.symmetric(

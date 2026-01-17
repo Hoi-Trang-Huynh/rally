@@ -119,7 +119,14 @@ class MainShell extends ConsumerStatefulWidget {
 }
 
 class _MainShellState extends ConsumerState<MainShell> {
-  // local _currentIndex
+  // Scroll controller for the NestedScrollView
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   /// Build navigation items with translations.
   List<NavItemData> _buildNavItems(Translations t) {
@@ -138,6 +145,16 @@ class _MainShellState extends ConsumerState<MainShell> {
   void _onTabSelected(int index) {
     final int currentIndex = ref.read(navIndexProvider);
     if (index == currentIndex) return;
+
+    // Reset scroll position when switching tabs
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+
     ref.read(navIndexProvider.notifier).state = index;
   }
 
@@ -217,9 +234,10 @@ class _MainShellState extends ConsumerState<MainShell> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      extendBody: true, // Content flows behind floating nav bar
+      extendBody: true, // Content flows behind navbar for floating effect
       extendBodyBehindAppBar: true,
       body: NestedScrollView(
+        controller: _scrollController,
         floatHeaderSlivers: true,
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
