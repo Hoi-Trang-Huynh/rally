@@ -55,16 +55,7 @@ class AppBottomNavBar extends StatelessWidget {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 12)),
           child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(borderRadius),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: colorScheme.shadow.withValues(alpha: 0.15),
-                  blurRadius: Responsive.w(context, 16),
-                  offset: Offset(0, Responsive.h(context, 4)),
-                ),
-              ],
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(borderRadius)),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(borderRadius),
               child: BackdropFilter(
@@ -147,7 +138,7 @@ class AppBottomNavBar extends StatelessWidget {
           ),
         ),
         // Small spacer to account for system nav bar (the actual system nav bar will show through)
-        SizedBox(height: systemNavBarHeight + Responsive.h(context, 4)),
+        SizedBox(height: systemNavBarHeight + Responsive.h(context, 5)),
       ],
     );
   }

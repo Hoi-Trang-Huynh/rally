@@ -213,8 +213,9 @@ class _SheetContainer extends StatelessWidget {
           if (showDivider) const Divider(height: 1),
           // Body - wrapped in Flexible to prevent overflow
           if (isFixed) Flexible(child: SingleChildScrollView(child: child)) else child,
-          // Bottom safe area padding for fixed sheets
-          if (isFixed) SizedBox(height: Responsive.h(context, 16)),
+          // Bottom safe area padding to account for system navigation bar
+          if (isFixed)
+            SizedBox(height: MediaQuery.paddingOf(context).bottom + Responsive.h(context, 16)),
         ],
       ),
     );

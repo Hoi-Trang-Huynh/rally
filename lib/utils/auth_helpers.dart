@@ -34,6 +34,10 @@ Future<GoogleSignInResult?> signInWithGoogle({
   required UserRepository userRepository,
 }) async {
   final GoogleSignIn googleSignIn = GoogleSignIn();
+
+  // Sign out first to force the account picker to show, allowing user to choose a different account
+  await googleSignIn.signOut();
+
   final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
   if (googleUser == null) {
