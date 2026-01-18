@@ -12,6 +12,7 @@ import 'package:rally/widgets/common/empty_state.dart';
 import 'package:rally/widgets/common/shimmer_loading.dart';
 
 import '../../i18n/generated/translations.g.dart';
+import 'widgets/follow_list_sheet.dart';
 
 /// Screen to display another user's public profile.
 ///
@@ -184,6 +185,18 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                             onEditProfile: null,
                             onEditBio: null,
                             primaryButton: _buildFollowButton(context, followStatusAsync),
+                            onFollowersTap:
+                                () => showFollowListSheet(
+                                  context: context,
+                                  userId: widget.userId,
+                                  initialTab: FollowListTab.followers,
+                                ),
+                            onFollowingTap:
+                                () => showFollowListSheet(
+                                  context: context,
+                                  userId: widget.userId,
+                                  initialTab: FollowListTab.following,
+                                ),
                           ),
                         ),
                       ),

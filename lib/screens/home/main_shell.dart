@@ -238,7 +238,8 @@ class _MainShellState extends State<MainShell> {
                 right: 0,
                 height: Responsive.h(context, 60) + MediaQuery.paddingOf(context).top,
                 child: AnimatedSlide(
-                  duration: const Duration(milliseconds: 200),
+                  duration: const Duration(milliseconds: 700),
+                  curve: Curves.easeOutCubic,
                   offset: _isNavbarVisible ? Offset.zero : const Offset(0, -1),
                   child: CustomScrollView(
                     physics: const NeverScrollableScrollPhysics(),
@@ -256,7 +257,8 @@ class _MainShellState extends State<MainShell> {
           ),
         ),
         bottomNavigationBar: AnimatedSlide(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 700),
+          curve: Curves.easeOutCubic,
           offset: _isNavbarVisible ? Offset.zero : const Offset(0, 1),
           child: AppBottomNavBar(
             currentIndex: currentIndex,

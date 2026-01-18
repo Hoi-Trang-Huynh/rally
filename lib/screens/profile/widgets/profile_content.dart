@@ -106,6 +106,12 @@ class ProfileContent extends StatelessWidget {
   /// Optional primary button widget (displayed below bio).
   final Widget? primaryButton;
 
+  /// Callback when followers count is tapped.
+  final VoidCallback? onFollowersTap;
+
+  /// Callback when following count is tapped.
+  final VoidCallback? onFollowingTap;
+
   /// Creates a new [ProfileContent].
   const ProfileContent({
     super.key,
@@ -116,6 +122,8 @@ class ProfileContent extends StatelessWidget {
     this.onEditBio,
     this.actionButton,
     this.primaryButton,
+    this.onFollowersTap,
+    this.onFollowingTap,
   });
 
   @override
@@ -173,6 +181,8 @@ class ProfileContent extends StatelessWidget {
               followingCount: data.followingCount.toString(),
               followersLabel: t.profile.followers,
               followingLabel: t.profile.followings,
+              onFollowersTap: onFollowersTap,
+              onFollowingTap: onFollowingTap,
             ),
 
             SizedBox(height: Responsive.h(context, 12)),

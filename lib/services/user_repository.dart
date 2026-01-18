@@ -1,4 +1,5 @@
 import 'package:rally/models/responses/availability_response.dart';
+import 'package:rally/models/responses/follow_list_response.dart';
 import 'package:rally/models/responses/follow_response.dart';
 import 'package:rally/models/responses/follow_status_response.dart';
 import 'package:rally/models/responses/login_response.dart';
@@ -185,5 +186,41 @@ class UserRepository {
   Future<FollowResponse> unfollowUser(String userId) async {
     final dynamic response = await _apiClient.delete('/api/v1/user/$userId/follow');
     return FollowResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Gets a paginated list of users who follow the specified user.
+  ///
+  /// [userId] The ID of the user to get followers for.
+  /// [page] The page number (default: 1).
+  /// [pageSize] The number of results per page (default: 20).
+  /// Returns a [FollowListResponse] containing the followers list.
+  Future<FollowListResponse> getFollowers({
+    required String userId,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final dynamic response = await _apiClient.get(
+      '/api/v1/user/$userId/followers',
+      queryParams: <String, String>{'page': page.toString(), 'pageSize': pageSize.toString()},
+    );
+    return FollowListResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Gets a paginated list of users that the specified user follows.
+  ///
+  /// [userId] The ID of the user to get following for.
+  /// [page] The page number (default: 1).
+  /// [pageSize] The number of results per page (default: 20).
+  /// Returns a [FollowListResponse] containing the following list.
+  Future<FollowListResponse> getFollowing({
+    required String userId,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final dynamic response = await _apiClient.get(
+      '/api/v1/user/$userId/following',
+      queryParams: <String, String>{'page': page.toString(), 'pageSize': pageSize.toString()},
+    );
+    return FollowListResponse.fromJson(response as Map<String, dynamic>);
   }
 }

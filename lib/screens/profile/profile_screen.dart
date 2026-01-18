@@ -17,6 +17,7 @@ import '../../providers/api_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/nav_provider.dart';
 import '../../utils/responsive.dart';
+import 'widgets/follow_list_sheet.dart';
 import 'widgets/profile_avatar.dart';
 import 'widgets/profile_content.dart';
 import 'widgets/profile_tab_bar.dart';
@@ -177,7 +178,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         backgroundColor: colorScheme.surfaceContainerHighest,
                         foregroundColor: colorScheme.onSurfaceVariant,
                       ),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
                       child: Text(t.common.cancel),
                     ),
                   ),
@@ -269,6 +270,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               overrideBioText: _bioText,
                               onEditBio: () => _showEditBioBottomSheet(user),
                               onEditProfile: () => context.push(AppRoutes.editProfile),
+                              onFollowersTap:
+                                  () => showFollowListSheet(
+                                    context: context,
+                                    userId: user.id!,
+                                    initialTab: FollowListTab.followers,
+                                  ),
+                              onFollowingTap:
+                                  () => showFollowListSheet(
+                                    context: context,
+                                    userId: user.id!,
+                                    initialTab: FollowListTab.following,
+                                  ),
                             ),
                             SizedBox(height: Responsive.h(context, 12)),
                           ],
