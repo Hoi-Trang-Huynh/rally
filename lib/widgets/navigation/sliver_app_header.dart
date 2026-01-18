@@ -16,13 +16,18 @@ import 'package:rally/widgets/notifications/notification_sheet.dart';
 /// - Smooth scroll-based show/hide animations
 class SliverAppHeader extends ConsumerWidget {
   /// Creates a new [SliverAppHeader].
-  const SliverAppHeader({super.key, required this.title, required this.parentTitle, this.actions});
+  const SliverAppHeader({
+    super.key,
+    required this.title,
+    this.breadcrumbs = const <String>['Rally'],
+    this.actions,
+  });
 
   /// The title text to display in the header.
   final String title;
 
-  /// The parent/breadcrumb title (e.g., "Rally").
-  final String parentTitle;
+  /// The breadcrumb path (e.g., ["Rally"] or ["Rally", "Discover"]).
+  final List<String> breadcrumbs;
 
   /// Optional list of widgets to display after the notification icon.
   final List<Widget>? actions;
@@ -35,7 +40,7 @@ class SliverAppHeader extends ConsumerWidget {
     final EdgeInsets safePadding = MediaQuery.paddingOf(context);
 
     // Calculate header height: safe area + content height
-    final double contentHeight = Responsive.h(context, 60);
+    final double contentHeight = Responsive.h(context, 35);
     final double headerHeight = safePadding.top + contentHeight;
 
     // Determine if we're in dark mode
@@ -81,23 +86,27 @@ class SliverAppHeader extends ConsumerWidget {
                           // Breadcrumb
                           Row(
                             children: <Widget>[
-                              Text(
-                                parentTitle,
-                                style: textTheme.bodySmall?.copyWith(
-                                  fontSize: Responsive.w(context, 12),
-                                  fontWeight: FontWeight.w900,
-                                  color: colorScheme.primary.withValues(alpha: 0.8),
-                                  letterSpacing: 0.5,
+                              for (int i = 0; i < breadcrumbs.length; i++) ...<Widget>[
+                                Text(
+                                  breadcrumbs[i],
+                                  style: textTheme.bodySmall?.copyWith(
+                                    fontSize: Responsive.w(context, 12),
+                                    fontWeight: FontWeight.w900,
+                                    color: colorScheme.primary.withValues(alpha: 0.8),
+                                    letterSpacing: 0.5,
+                                  ),
                                 ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 6)),
-                                child: Icon(
-                                  Icons.chevron_right_rounded,
-                                  size: Responsive.w(context, 14),
-                                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: Responsive.w(context, 6),
+                                  ),
+                                  child: Icon(
+                                    Icons.chevron_right_rounded,
+                                    size: Responsive.w(context, 14),
+                                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ],
                           ),
                           SizedBox(height: Responsive.h(context, 2)),

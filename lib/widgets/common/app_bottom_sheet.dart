@@ -231,6 +231,7 @@ Future<T?> showAppBottomSheet<T>({
   required AppBottomSheet sheet,
   bool isDismissible = true,
   bool enableDrag = true,
+  bool useRootNavigator = false,
 }) {
   final bool isDraggable = sheet.isDraggable;
 
@@ -239,6 +240,7 @@ Future<T?> showAppBottomSheet<T>({
     isScrollControlled: true,
     isDismissible: isDismissible,
     enableDrag: enableDrag,
+    useRootNavigator: useRootNavigator,
     backgroundColor: isDraggable ? Colors.transparent : null,
     shape:
         isDraggable

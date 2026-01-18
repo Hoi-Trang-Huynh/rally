@@ -1,6 +1,8 @@
 {
   "followers": "followers",
   "followings": "followings",
+  "follow": "Follow",
+  "following": "Following",
   "bio": "Love traveling alone and sheet",
   "bioPlaceholder": "Tell us about yourself...",
   "addBio": "Tap to add bio",
@@ -8,5 +10,13 @@
   "achievements": "Achievements",
   "posts": "Posts",
   "rallies": "Rallies",
-  "notLoggedIn": "Not logged in"
+  "notLoggedIn": "Not logged in",
+  "noPosts": "No Posts Yet",
+  "noPostsSubtitle": "This user hasn't shared any posts.",
+  "noRallies": "No Rallies Yet", 
+  "noRalliesSubtitle": "This user hasn't joined any rallies.",
+  "privateProfile": "Private Profile",
+  "followToSee": "Follow to see their posts and rallies.",
+  "errorFollow": "Failed to follow: $error",
+  "errorUnfollow": "Failed to unfollow: $error"
 }

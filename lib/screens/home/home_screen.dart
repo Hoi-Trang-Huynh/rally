@@ -19,8 +19,9 @@ class HomeScreen extends StatelessWidget {
           controller: PrimaryScrollController.of(context),
           physics: const BouncingScrollPhysics(),
           slivers: <Widget>[
-            // 1. Header
-            const SliverToBoxAdapter(child: HomeHeader()),
+            // 1. Header Spacer (for overlaid MainShell header)
+            // 1. Header (wrapped in SafeArea to respect injected header height)
+            const SliverSafeArea(bottom: false, sliver: SliverToBoxAdapter(child: HomeHeader())),
 
             // 2. Summary Cards Grid
             SliverToBoxAdapter(

@@ -151,7 +151,7 @@ class _ChatScreenState extends State<ChatScreen> {
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.fromLTRB(
             Responsive.w(context, 20),
-            Responsive.h(context, 10),
+            MediaQuery.paddingOf(context).top + Responsive.h(context, 10),
             Responsive.w(context, 20),
             Responsive.h(context, 100),
           ),

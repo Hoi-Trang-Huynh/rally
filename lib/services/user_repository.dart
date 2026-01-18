@@ -1,8 +1,12 @@
 import 'package:rally/models/responses/availability_response.dart';
+import 'package:rally/models/responses/follow_response.dart';
+import 'package:rally/models/responses/follow_status_response.dart';
 import 'package:rally/models/responses/login_response.dart';
 import 'package:rally/models/responses/profile_details_response.dart';
 import 'package:rally/models/responses/profile_response.dart';
 import 'package:rally/models/responses/register_response.dart';
+import 'package:rally/models/responses/user_public_profile_response.dart';
+import 'package:rally/models/responses/user_search_response.dart';
 import 'package:rally/services/api_client.dart';
 
 /// Repository for user-related API calls.
@@ -88,13 +92,13 @@ class UserRepository {
     return ProfileDetailsResponse.fromJson(response as Map<String, dynamic>);
   }
 
-  /// Fetches a specific user's profile by ID.
+  /// Fetches a specific user's public profile by ID.
   ///
   /// [userId] The ID of the user to fetch.
-  /// Returns a [ProfileResponse] containing profile data.
-  Future<ProfileResponse> getUserProfile(String userId) async {
+  /// Returns a [UserPublicProfileResponse] containing public profile data.
+  Future<UserPublicProfileResponse> getUserPublicProfile(String userId) async {
     final dynamic response = await _apiClient.get('/api/v1/user/$userId/profile');
-    return ProfileResponse.fromJson(response as Map<String, dynamic>);
+    return UserPublicProfileResponse.fromJson(response as Map<String, dynamic>);
   }
 
   /// Updates the current user's profile.
@@ -128,5 +132,58 @@ class UserRepository {
 
     final dynamic response = await _apiClient.put('/api/v1/user/$userId/profile', body: body);
     return ProfileResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Searches for users by query string.
+  ///
+  /// [query] The search query (username, first name, or last name).
+  /// [page] The page number (default: 1).
+  /// [pageSize] The number of results per page (default: 20).
+  /// Returns a [UserSearchResponse] containing search results.
+  Future<UserSearchResponse> searchUsers({
+    required String query,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final dynamic response = await _apiClient.get(
+      '/api/v1/user/search',
+      queryParams: <String, String>{
+        'q': query,
+        'page': page.toString(),
+        'pageSize': pageSize.toString(),
+      },
+    );
+    return UserSearchResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  // ============================================
+  // Follow Endpoints
+  // ============================================
+
+  /// Checks if the authenticated user follows the target user.
+  ///
+  /// [userId] The ID of the user to check follow status for.
+  /// Returns a [FollowStatusResponse] containing the follow status.
+  Future<FollowStatusResponse> getFollowStatus(String userId) async {
+    final dynamic response = await _apiClient.get('/api/v1/user/$userId/follow/status');
+    return FollowStatusResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Follows a user.
+  ///
+  /// [userId] The ID of the user to follow.
+  /// Returns a [FollowResponse] containing the result.
+  Future<FollowResponse> followUser(String userId) async {
+    final dynamic response = await _apiClient.post('/api/v1/user/$userId/follow');
+    return FollowResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Unfollows a user.
+  ///
+  /// [userId] The ID of the user to unfollow.
+  /// Returns a [FollowResponse] containing the result.
+  Future<FollowResponse> unfollowUser(String userId) async {
+    final dynamic response = await _apiClient.delete('/api/v1/user/$userId/follow');
+    return FollowResponse.fromJson(response as Map<String, dynamic>);
   }
 }
