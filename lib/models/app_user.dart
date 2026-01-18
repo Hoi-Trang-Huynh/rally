@@ -128,7 +128,7 @@ class AppUser {
   /// their username, firstName, or lastName yet.
   /// Checks for both null and empty strings.
   bool get needsProfileCompletion =>
-      (uid.isNotEmpty) &&
+      (id!.isNotEmpty) &&
       ((username == null || username!.isEmpty) ||
           (firstName == null || firstName!.isEmpty) ||
           (lastName == null || lastName!.isEmpty));
