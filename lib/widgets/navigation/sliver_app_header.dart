@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/providers/notification_provider.dart';
 import 'package:rally/utils/responsive.dart';
@@ -15,13 +16,18 @@ import 'package:rally/widgets/notifications/notification_sheet.dart';
 /// - Smooth scroll-based show/hide animations
 class SliverAppHeader extends ConsumerWidget {
   /// Creates a new [SliverAppHeader].
-  const SliverAppHeader({super.key, required this.title, required this.parentTitle, this.actions});
+  const SliverAppHeader({
+    super.key,
+    required this.title,
+    this.breadcrumbs = const <String>['Rally'],
+    this.actions,
+  });
 
   /// The title text to display in the header.
   final String title;
 
-  /// The parent/breadcrumb title (e.g., "Rally").
-  final String parentTitle;
+  /// The breadcrumb path (e.g., ["Rally"] or ["Rally", "Discover"]).
+  final List<String> breadcrumbs;
 
   /// Optional list of widgets to display after the notification icon.
   final List<Widget>? actions;
@@ -34,8 +40,11 @@ class SliverAppHeader extends ConsumerWidget {
     final EdgeInsets safePadding = MediaQuery.paddingOf(context);
 
     // Calculate header height: safe area + content height
-    final double contentHeight = Responsive.h(context, 20);
+    final double contentHeight = Responsive.h(context, 35);
     final double headerHeight = safePadding.top + contentHeight;
+
+    // Determine if we're in dark mode
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SliverAppBar(
       expandedHeight: headerHeight,
@@ -48,6 +57,12 @@ class SliverAppHeader extends ConsumerWidget {
       elevation: 0,
       scrolledUnderElevation: 0,
       automaticallyImplyLeading: false,
+      // Explicitly set status bar style to fix light mode icons
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      ),
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(color: colorScheme.surface),
@@ -60,45 +75,54 @@ class SliverAppHeader extends ConsumerWidget {
                 children: <Widget>[
                   // Left side: Title and breadcrumb
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        // Breadcrumb
-                        Row(
-                          children: <Widget>[
-                            Text(
-                              parentTitle,
-                              style: textTheme.bodySmall?.copyWith(
-                                fontSize: Responsive.w(context, 12),
-                                fontWeight: FontWeight.w900,
-                                color: colorScheme.primary.withValues(alpha: 0.8),
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 6)),
-                              child: Icon(
-                                Icons.chevron_right_rounded,
-                                size: Responsive.w(context, 14),
-                                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: Responsive.h(context, 2)),
-                        // Page Title
-                        Text(
-                          title,
-                          style: textTheme.headlineMedium?.copyWith(
-                            fontSize: Responsive.w(context, 26),
-                            fontWeight: FontWeight.w900,
-                            color: colorScheme.onSurface,
-                            height: 1.1,
-                            letterSpacing: -0.5,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          // Breadcrumb
+                          Row(
+                            children: <Widget>[
+                              for (int i = 0; i < breadcrumbs.length; i++) ...<Widget>[
+                                Text(
+                                  breadcrumbs[i],
+                                  style: textTheme.bodySmall?.copyWith(
+                                    fontSize: Responsive.w(context, 12),
+                                    fontWeight: FontWeight.w900,
+                                    color: colorScheme.primary.withValues(alpha: 0.8),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: Responsive.w(context, 6),
+                                  ),
+                                  child: Icon(
+                                    Icons.chevron_right_rounded,
+                                    size: Responsive.w(context, 14),
+                                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
-                        ),
-                      ],
+                          SizedBox(height: Responsive.h(context, 2)),
+                          // Page Title
+                          Text(
+                            title,
+                            style: textTheme.headlineMedium?.copyWith(
+                              fontSize: Responsive.w(context, 26),
+                              fontWeight: FontWeight.w900,
+                              color: colorScheme.onSurface,
+                              height: 1.1,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   // Right side: Actions row
@@ -152,27 +176,21 @@ class _NotificationButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
         child: Container(
           padding: EdgeInsets.all(Responsive.w(context, 10)),
-          decoration: BoxDecoration(
-            color:
-                hasUnread
-                    ? colorScheme.primaryContainer.withValues(alpha: 0.3)
-                    : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
-            border: Border.all(
-              color:
-                  hasUnread
-                      ? colorScheme.primary.withValues(alpha: 0.2)
-                      : colorScheme.outline.withValues(alpha: 0.1),
-              width: 1,
-            ),
-          ),
+          decoration:
+              hasUnread
+                  ? BoxDecoration(
+                    color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+                    border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2), width: 1),
+                  )
+                  : null, // No decoration when no notifications
           child: Stack(
             clipBehavior: Clip.none,
             children: <Widget>[
               Icon(
                 hasUnread ? Icons.notifications_rounded : Icons.notifications_outlined,
                 color: hasUnread ? colorScheme.primary : colorScheme.onSurfaceVariant,
-                size: Responsive.w(context, 22),
+                size: Responsive.w(context, 24),
               ),
               // Custom Badge
               if (hasUnread)

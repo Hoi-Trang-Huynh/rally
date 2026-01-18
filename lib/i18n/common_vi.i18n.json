@@ -13,5 +13,14 @@
     "english": "Tiếng Anh",
     "vietnamese": "Tiếng Việt",
     "korean": "Tiếng Hàn"
-  }
+  },
+  "search": {
+    "searchUsers": "Tìm kiếm người dùng...",
+    "typeToSearch": "Nhập để tìm người dùng...",
+    "noUsersFound": "Không tìm thấy người dùng",
+    "errorLoading": "Lỗi"
+  },
+  "errorLoadingProfile": "Không thể tải hồ sơ",
+  "goBack": "Quay lại",
+  "retry": "Thử lại"
 }

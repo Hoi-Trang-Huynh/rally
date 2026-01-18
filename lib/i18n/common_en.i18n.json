@@ -13,5 +13,14 @@
     "english": "English",
     "vietnamese": "Vietnamese",
     "korean": "Korean"
-  }
+  },
+  "search": {
+    "searchUsers": "Search users...",
+    "typeToSearch": "Type to search for users...",
+    "noUsersFound": "No users found",
+    "errorLoading": "Error"
+  },
+  "errorLoadingProfile": "Failed to load profile",
+  "goBack": "Go Back",
+  "retry": "Retry"
 }

@@ -1,22 +1,19 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rally/constants/shared_pref_keys.dart';
 import 'package:rally/firebase_options.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
-import 'package:rally/models/app_user.dart';
-import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
 import 'package:rally/providers/theme_provider.dart';
-import 'package:rally/screens/auth/auth_screen.dart';
-import 'package:rally/screens/auth/profile_completion_screen.dart';
-import 'package:rally/screens/home/main_shell.dart';
-import 'package:rally/screens/loading/app_loading.dart';
-import 'package:rally/screens/onboarding/onboarding_screen.dart';
+import 'package:rally/router/app_router.dart';
 import 'package:rally/services/shared_prefs_service.dart';
+import 'package:rally/themes/app_colors.dart';
 import 'package:rally/themes/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -80,47 +77,38 @@ class RallyApp extends ConsumerWidget {
     ref.watch(themeProvider);
     ref.watch(localeProvider);
 
-    final AsyncValue<AppUser?> authState = ref.watch(appUserProvider);
+    // Get the router
+    final GoRouter router = ref.watch(goRouterProvider);
 
-    return MaterialApp(
-      title: 'Rally',
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: themeNotifier.currentThemeMode,
-      locale: localeNotifier.currentFlutterLocale,
-      supportedLocales: AppLocaleUtils.supportedLocales,
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: authState.when(
-        data: (AppUser? user) {
-          if (user == null) {
-            final SharedPreferences prefs = ref.watch(sharedPrefsServiceProvider);
-            final bool onboardingSeen = prefs.getBool(SharedPrefKeys.onboardingSeen) ?? false;
+    // Determine system UI colors based on current theme
+    final bool isDark =
+        themeNotifier.currentThemeMode == ThemeMode.dark ||
+        (themeNotifier.currentThemeMode == ThemeMode.system &&
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark);
 
-            if (!onboardingSeen) {
-              return const OnboardingScreen();
-            }
-            // Default to Signup for new users, consistent with "Get Started" flow
-            return const AuthScreen(initialIsLogin: false);
-          }
+    final SystemUiOverlayStyle systemUiStyle = SystemUiOverlayStyle(
+      // Status bar
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
 
-          // Check if email is verified before showing home
-          if (!user.isEmailVerified) {
-            // User is logged in but email not verified - stay on signup for verification
-            return const AuthScreen(initialIsLogin: false);
-          }
+      // Navigation bar (Android bottom bar)
+      systemNavigationBarColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      systemNavigationBarDividerColor: Colors.transparent,
+    );
 
-          // Check if profile needs completion (Google sign-in users)
-          if (user.needsProfileCompletion) {
-            return const ProfileCompletionScreen();
-          }
-
-          // Fully authenticated and verified - show home
-          return const MainShell();
-        },
-        loading: () => const AppLoadingScreen(),
-        error:
-            (Object error, StackTrace stack) =>
-                Scaffold(body: Center(child: Text('Error: $error'))),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: systemUiStyle,
+      child: MaterialApp.router(
+        title: 'Rally',
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: themeNotifier.currentThemeMode,
+        locale: localeNotifier.currentFlutterLocale,
+        supportedLocales: AppLocaleUtils.supportedLocales,
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        routerConfig: router,
       ),
     );
   }

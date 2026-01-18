@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rally/models/responses/profile_details_response.dart';
+import 'package:rally/router/app_router.dart';
 import 'package:rally/utils/ui_helpers.dart';
 import 'package:rally/utils/validation_constants.dart';
 import 'package:rally/utils/validators.dart';
 import 'package:rally/widgets/common/app_bottom_sheet.dart';
 import 'package:rally/widgets/common/empty_state.dart';
-import 'package:rally/widgets/common/scale_button.dart';
 import 'package:rally/widgets/common/shimmer_loading.dart';
 
 import '../../i18n/generated/translations.g.dart';
@@ -16,10 +17,9 @@ import '../../providers/api_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/nav_provider.dart';
 import '../../utils/responsive.dart';
-import 'edit_profile_screen.dart';
+import 'widgets/follow_list_sheet.dart';
 import 'widgets/profile_avatar.dart';
-import 'widgets/profile_header.dart';
-import 'widgets/profile_stats_row.dart';
+import 'widgets/profile_content.dart';
 import 'widgets/profile_tab_bar.dart';
 
 /// The main profile screen displaying user information.
@@ -37,16 +37,18 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _selectedTabId = 'achievements';
 
-  // Bio state
+  // Profile details state
   String? _bioText;
-  bool _isLoadingBio = true;
+  int _followersCount = 0;
+  int _followingCount = 0;
+  bool _isLoadingDetails = true;
   bool _isSavingBio = false;
   final TextEditingController _bioController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _fetchBio();
+    _fetchDetails();
   }
 
   @override
@@ -55,22 +57,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.dispose();
   }
 
-  /// Fetches the bio from the backend.
-  Future<void> _fetchBio() async {
+  /// Fetches the profile details (bio, follow counts) from the backend.
+  Future<void> _fetchDetails() async {
     try {
       final ProfileDetailsResponse response =
           await ref.read(userRepositoryProvider).getMyProfileDetails();
       if (mounted) {
         setState(() {
           _bioText = response.bioText;
-          _isLoadingBio = false;
+          _followersCount = response.followersCount;
+          _followingCount = response.followingCount;
+          _isLoadingDetails = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _bioText = null;
-          _isLoadingBio = false;
+          _followersCount = 0;
+          _followingCount = 0;
+          _isLoadingDetails = false;
         });
       }
     }
@@ -83,7 +89,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     // Don't save if unchanged
     if (newBio == (_bioText ?? '')) {
-      Navigator.pop(context); // Close sheet
+      Navigator.of(context, rootNavigator: true).pop();
       return;
     }
 
@@ -98,12 +104,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     try {
       await ref.read(userRepositoryProvider).updateUserProfile(userId: user!.id!, bioText: newBio);
-      if (mounted) {
+      if (mounted && context.mounted) {
         setState(() {
           _bioText = newBio.isEmpty ? null : newBio;
           _isSavingBio = false;
         });
-        Navigator.pop(context); // Close sheet
+        Navigator.of(context, rootNavigator: true).pop(); // Close sheet
         showSuccessSnackBar(context, Translations.of(context).common.saved);
       }
     } catch (e) {
@@ -124,6 +130,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     showAppBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       sheet: AppBottomSheet.fixed(
         title: t.profile.editBio,
         showDivider: false,
@@ -171,7 +178,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         backgroundColor: colorScheme.surfaceContainerHighest,
                         foregroundColor: colorScheme.onSurfaceVariant,
                       ),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
                       child: Text(t.common.cancel),
                     ),
                   ),
@@ -215,7 +222,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final AsyncValue<AppUser?> userAsync = ref.watch(appUserProvider);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TextTheme textTheme = Theme.of(context).textTheme;
     final Translations t = Translations.of(context);
 
     return userAsync.when(
@@ -224,151 +230,105 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           return Center(child: Text(t.profile.notLoggedIn));
         }
 
-        return AnimationLimiter(
-          child: CustomScrollView(
-            controller: PrimaryScrollController.of(context),
-            physics: const BouncingScrollPhysics(),
-            slivers: <Widget>[
-              // Top padding for breathing room
-              SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 16))),
-              // Profile Content (Clean Layout)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
-                  child: Column(
-                    children: AnimationConfiguration.toStaggeredList(
-                      duration: const Duration(milliseconds: 375),
-                      childAnimationBuilder:
-                          (Widget widget) => SlideAnimation(
-                            verticalOffset: 50.0,
-                            child: FadeInAnimation(child: widget),
-                          ),
-                      children: <Widget>[
-                        SizedBox(height: Responsive.h(context, 24)),
-
-                        // New Header
-                        ProfileHeader(
-                          user: user,
-                          onEditProfile: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (BuildContext context) => const EditProfileScreen(),
+        return RefreshIndicator(
+          onRefresh: _fetchDetails,
+          displacement: 120,
+          strokeWidth: 2.5,
+          child: AnimationLimiter(
+            child: CustomScrollView(
+              controller: PrimaryScrollController.of(context),
+              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              slivers: <Widget>[
+                // Profile Content (Clean Layout)
+                // Profile Content (Standardized)
+                SliverSafeArea(
+                  bottom: false,
+                  sliver: SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
+                      child: Column(
+                        children: AnimationConfiguration.toStaggeredList(
+                          duration: const Duration(milliseconds: 375),
+                          childAnimationBuilder:
+                              (Widget widget) => SlideAnimation(
+                                verticalOffset: 50.0,
+                                child: FadeInAnimation(child: widget),
                               ),
-                            );
-                          },
+                          children: <Widget>[
+                            ProfileContent(
+                              data: ProfileData(
+                                id: user.id,
+                                username: user.username,
+                                firstName: user.firstName,
+                                lastName: user.lastName,
+                                avatarUrl: user.avatarUrl,
+                                followersCount: _followersCount,
+                                followingCount: _followingCount,
+                                isOwnProfile: true,
+                              ),
+                              isBioLoading: _isLoadingDetails,
+                              overrideBioText: _bioText,
+                              onEditBio: () => _showEditBioBottomSheet(user),
+                              onEditProfile: () => context.push(AppRoutes.editProfile),
+                              onFollowersTap:
+                                  () => showFollowListSheet(
+                                    context: context,
+                                    userId: user.id!,
+                                    initialTab: FollowListTab.followers,
+                                  ),
+                              onFollowingTap:
+                                  () => showFollowListSheet(
+                                    context: context,
+                                    userId: user.id!,
+                                    initialTab: FollowListTab.following,
+                                  ),
+                            ),
+                            SizedBox(height: Responsive.h(context, 12)),
+                          ],
                         ),
-
-                        SizedBox(height: Responsive.h(context, 12)),
-
-                        // Stats
-                        ProfileStatsRow(
-                          followersCount: '03',
-                          followingCount: '03',
-                          followersLabel: t.profile.followers,
-                          followingLabel: t.profile.followings,
-                        ),
-
-                        SizedBox(height: Responsive.h(context, 12)),
-
-                        // Bio section
-                        _buildBioSection(colorScheme, textTheme, t, user),
-
-                        SizedBox(height: Responsive.h(context, 12)),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              // Sticky Tab Bar
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _StickyTabBarDelegate(
-                  child: Container(
-                    color: colorScheme.surface, // Opaque background for sticky state
-                    padding: EdgeInsets.only(bottom: Responsive.h(context, 16)),
-                    child: ProfileTabBar(
-                      tabs: _buildTabs(t),
-                      selectedId: _selectedTabId,
-                      onTabSelected: (String id) {
-                        setState(() {
-                          _selectedTabId = id;
-                        });
-                      },
+                // Sticky Tab Bar
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _StickyTabBarDelegate(
+                    child: Container(
+                      color: colorScheme.surface, // Opaque background for sticky state
+                      padding: EdgeInsets.only(bottom: Responsive.h(context, 16)),
+                      child: ProfileTabBar(
+                        tabs: _buildTabs(t),
+                        selectedId: _selectedTabId,
+                        onTabSelected: (String id) {
+                          setState(() {
+                            _selectedTabId = id;
+                          });
+                        },
+                      ),
                     ),
+                    maxHeight: Responsive.h(context, 60),
+                    minHeight: Responsive.h(context, 60),
                   ),
-                  maxHeight: Responsive.h(context, 60),
-                  minHeight: Responsive.h(context, 60),
                 ),
-              ),
 
-              // Tab content (with padding to separate from tabs)
-              SliverPadding(
-                padding: EdgeInsets.only(top: Responsive.h(context, 16)),
-                sliver: _buildTabContent(colorScheme),
-              ),
+                // Tab content (with padding to separate from tabs)
+                SliverPadding(
+                  padding: EdgeInsets.only(top: Responsive.h(context, 16)),
+                  sliver: _buildTabContent(colorScheme),
+                ),
 
-              // Bottom padding for nav bar
-              SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 100))),
-            ],
+                // Bottom padding for nav bar
+                SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 100))),
+              ],
+            ),
           ),
         );
       },
       loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
       error:
           (Object error, StackTrace stack) => Scaffold(body: Center(child: Text('Error: $error'))),
-    );
-  }
-
-  /// Builds the bio section with loading, display, and edit states.
-  Widget _buildBioSection(
-    ColorScheme colorScheme,
-    TextTheme textTheme,
-    Translations t,
-    AppUser user,
-  ) {
-    if (_isLoadingBio) {
-      return ShimmerLoading(width: Responsive.w(context, 120), height: Responsive.h(context, 20));
-    }
-
-    // Display mode - tap to edit
-    final bool hasBio = _bioText != null && _bioText!.isNotEmpty;
-    // Using ScaleButton instead of GestureDetector
-    return ScaleButton(
-      onTap: () => _showEditBioBottomSheet(user),
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: Responsive.w(context, 16),
-          vertical: Responsive.h(context, 8),
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(Responsive.w(context, 8)),
-          color: Colors.transparent,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Flexible(
-              child: Text(
-                hasBio ? _bioText! : t.profile.addBio,
-                style: textTheme.bodyMedium?.copyWith(
-                  color:
-                      hasBio ? colorScheme.onSurface : colorScheme.onSurface.withValues(alpha: 0.5),
-                  fontStyle: hasBio ? FontStyle.normal : FontStyle.italic,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            SizedBox(width: Responsive.w(context, 4)),
-            Icon(
-              Icons.edit_outlined,
-              size: Responsive.w(context, 14),
-              color: colorScheme.onSurface.withValues(alpha: 0.5),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

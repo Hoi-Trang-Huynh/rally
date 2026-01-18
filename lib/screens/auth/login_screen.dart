@@ -95,7 +95,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               color: colorScheme.onSurface,
             ),
           ),
-          SizedBox(height: Responsive.h(context, 36)),
+          SizedBox(height: Responsive.h(context, 24)),
 
           // Error Message
           if (_errorMessage != null) ...<Widget>[
@@ -104,7 +104,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colorScheme.error),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: Responsive.h(context, 16)),
+            SizedBox(height: Responsive.h(context, 12)),
           ],
 
           // Email Field
@@ -114,7 +114,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             keyboardType: TextInputType.emailAddress,
             enabled: !anyLoading,
           ),
-          SizedBox(height: Responsive.h(context, 16)),
+          SizedBox(height: Responsive.h(context, 12)),
 
           // Password Field
           AuthTextField(
@@ -123,17 +123,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             obscureText: true,
             enabled: !anyLoading,
           ),
-          SizedBox(height: Responsive.h(context, 24)),
+          SizedBox(height: Responsive.h(context, 16)),
 
           AuthPrimaryButton(
             text: t.common.continueButton,
             onPressed: anyLoading ? null : _signIn,
             isLoading: _isSignInLoading,
           ),
-          SizedBox(height: Responsive.h(context, 24)),
+          SizedBox(height: Responsive.h(context, 16)),
 
           const OrDivider(),
-          SizedBox(height: Responsive.h(context, 24)),
+          SizedBox(height: Responsive.h(context, 16)),
 
           // Google Button
           AuthGoogleButton(

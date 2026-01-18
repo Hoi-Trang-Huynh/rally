@@ -16,6 +16,16 @@ abstract class AppColors {
   /// Brand Gradient End - #FF6A9F (Hot Pink)
   static const Color brandGradientEnd = Color(0xFFFF6A9F);
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // Surface Colors (used for backgrounds and system UI)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Light mode surface - Clean white
+  static const Color surfaceLight = Color(0xFFFAFAFA);
+
+  /// Dark mode surface - Instagram dark gray
+  static const Color surfaceDark = Color(0xFF121212);
+
   /// Success colors: Used for success states, confirmations, etc.
   /// 50 - #F0FDF4
   static const Color success50 = Color(0xFFF0FDF4);

@@ -1,125 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rally/screens/chat/chat_screen.dart';
-import 'package:rally/screens/discovery/discovery_screen.dart';
-import 'package:rally/screens/profile/settings_screen.dart';
+import 'package:flutter/rendering.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rally/router/app_router.dart';
+import 'package:rally/router/route_metadata.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/navigation/sliver_app_header.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/nav_item_data.dart';
-import '../../providers/nav_provider.dart';
 import '../../widgets/navigation/app_bottom_nav_bar.dart';
-import '../profile/profile_screen.dart';
-import 'home_screen.dart';
 
-/// Placeholder screen widget for tabs not yet implemented.
-class _PlaceholderScreen extends StatefulWidget {
-  const _PlaceholderScreen({super.key, required this.title, required this.icon});
+/// The main shell screen that hosts the bottom navigation bar.
+///
+/// Uses go_router's [StatefulNavigationShell] to preserve state across tab switches.
+/// This is the primary container for the authenticated app experience.
+class MainShell extends StatefulWidget {
+  /// Creates a new [MainShell].
+  const MainShell({super.key, required this.navigationShell});
 
-  final String title;
-  final IconData icon;
+  /// The navigation shell provided by go_router's StatefulShellRoute.
+  final StatefulNavigationShell navigationShell;
 
   @override
-  State<_PlaceholderScreen> createState() => _PlaceholderScreenState();
+  State<MainShell> createState() => _MainShellState();
 }
 
-class _PlaceholderScreenState extends State<_PlaceholderScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
+class _MainShellState extends State<MainShell> {
+  // Scroll controller for the NestedScrollView
+  final ScrollController _scrollController = ScrollController();
+  bool _isNavbarVisible = true;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this)
-      ..repeat(reverse: true);
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.1,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    // Listen to router changes to update header (e.g. title, breadcrumbs)
+    GoRouter.of(context).routerDelegate.addListener(_onRouteChanged);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    GoRouter.of(context).routerDelegate.removeListener(_onRouteChanged);
+    _scrollController.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TextTheme textTheme = Theme.of(context).textTheme;
-    final Translations t = Translations.of(context);
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          // Animated icon with subtle pulse
-          AnimatedBuilder(
-            animation: _scaleAnimation,
-            builder: (BuildContext context, Widget? child) {
-              return Transform.scale(
-                scale: _scaleAnimation.value,
-                child: Container(
-                  padding: EdgeInsets.all(Responsive.w(context, 24)),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer.withValues(alpha: 0.3),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    widget.icon,
-                    size: Responsive.w(context, 48),
-                    color: colorScheme.primary,
-                  ),
-                ),
-              );
-            },
-          ),
-          SizedBox(height: Responsive.h(context, 24)),
-          Text(
-            widget.title,
-            style: textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
-            ),
-          ),
-          SizedBox(height: Responsive.h(context, 8)),
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: Responsive.w(context, 16),
-              vertical: Responsive.h(context, 8),
-            ),
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(Responsive.w(context, 20)),
-            ),
-            child: Text(
-              t.nav.comingSoon,
-              style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-            ),
-          ),
-        ],
-      ),
-    );
+  void _onRouteChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
-}
-
-/// The main shell screen that hosts the bottom navigation bar.
-///
-/// Uses [IndexedStack] to preserve state across tab switches.
-/// This is the primary container for the authenticated app experience.
-class MainShell extends ConsumerStatefulWidget {
-  /// Creates a new [MainShell].
-  const MainShell({super.key});
-
-  @override
-  ConsumerState<MainShell> createState() => _MainShellState();
-}
-
-class _MainShellState extends ConsumerState<MainShell> {
-  // local _currentIndex
 
   /// Build navigation items with translations.
   List<NavItemData> _buildNavItems(Translations t) {
@@ -136,14 +65,26 @@ class _MainShellState extends ConsumerState<MainShell> {
   }
 
   void _onTabSelected(int index) {
-    final int currentIndex = ref.read(navIndexProvider);
-    if (index == currentIndex) return;
-    ref.read(navIndexProvider.notifier).state = index;
+    if (index == widget.navigationShell.currentIndex) return;
+
+    // Reset scroll position when switching tabs
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+
+    // Use go_router's goBranch to switch tabs
+    widget.navigationShell.goBranch(
+      index,
+      initialLocation: index == widget.navigationShell.currentIndex,
+    );
   }
 
   void _onActionPressed() {
     final Translations t = Translations.of(context);
-    debugPrint('Action button pressed');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${t.nav.createRally} - ${t.nav.comingSoon}!'),
@@ -152,8 +93,8 @@ class _MainShellState extends ConsumerState<MainShell> {
     );
   }
 
-  String _getScreenTitle(int index, Translations t) {
-    switch (index) {
+  String _getScreenTitle(Translations t) {
+    switch (widget.navigationShell.currentIndex) {
       case 0:
         return t.nav.home;
       case 1:
@@ -167,17 +108,44 @@ class _MainShellState extends ConsumerState<MainShell> {
     }
   }
 
+  /// Get current location from GoRouter.
+  String _getCurrentLocation() {
+    return GoRouter.of(context).routerDelegate.currentConfiguration.uri.toString();
+  }
+
+  /// Get current URI from GoRouter.
+  Uri _getCurrentUri() {
+    return GoRouter.of(context).routerDelegate.currentConfiguration.uri;
+  }
+
+  List<String> _getBreadcrumbs() {
+    final String location = _getCurrentLocation();
+    return RouteMetadataRegistry.getBreadcrumbs(context, location);
+  }
+
+  String _getTitle(Translations t) {
+    final String location = _getCurrentLocation();
+    final Uri uri = _getCurrentUri();
+
+    // Try to get title from route metadata
+    final String? metadataTitle = RouteMetadataRegistry.getTitle(context, location, uri);
+    if (metadataTitle != null) {
+      return metadataTitle;
+    }
+
+    // Default: tab title
+    return _getScreenTitle(t);
+  }
+
   List<Widget>? _buildHeaderActions(int index) {
-    // Add specific actions per tab if needed
+    // Show back button for nested routes
+    // REMOVED as per user request
+
+    // Profile tab: show settings button
     if (index == 3) {
-      // Profile Tab
       return <Widget>[
         IconButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (BuildContext context) => const SettingsScreen()),
-            );
-          },
+          onPressed: () => context.push(AppRoutes.settings),
           icon: Icon(
             Icons.settings_outlined,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -186,77 +154,119 @@ class _MainShellState extends ConsumerState<MainShell> {
         ),
       ];
     }
+
     return null;
   }
 
-  Widget _buildScreen(int index, Translations t) {
-    switch (index) {
-      case 0:
-        return const HomeScreen(key: ValueKey<int>(0));
-      case 1:
-        return const ChatScreen(key: ValueKey<int>(1));
-      case 2:
-        return const DiscoveryScreen(key: ValueKey<int>(2));
-      case 3:
-        return const ProfileScreen(key: ValueKey<int>(3));
-      default:
-        return _PlaceholderScreen(
-          key: const ValueKey<int>(0),
-          title: t.nav.home,
-          icon: Icons.cottage,
-        );
+  /// Check if current route is a nested route that should pop to parent.
+  bool _isNestedRoute() {
+    return RouteMetadataRegistry.isNestedRoute(_getCurrentLocation());
+  }
+
+  /// Get the parent route for the current nested route.
+  String? _getParentRoute() {
+    return RouteMetadataRegistry.getParentRoute(_getCurrentLocation());
+  }
+
+  /// Handle back navigation for nested routes.
+  /// Returns true if we handled the navigation, false to allow default behavior.
+  Future<bool> _handleBackNavigation() async {
+    if (_isNestedRoute()) {
+      final String? parentRoute = _getParentRoute();
+      if (parentRoute != null) {
+        context.go(parentRoute);
+        return true; // We handled it
+      }
     }
+    return false; // Let default behavior happen
   }
 
   @override
   Widget build(BuildContext context) {
-    final int currentIndex = ref.watch(navIndexProvider);
+    final int currentIndex = widget.navigationShell.currentIndex;
     final Translations t = Translations.of(context);
     final List<NavItemData> navItems = _buildNavItems(t);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      extendBody: true, // Content flows behind floating nav bar
-      extendBodyBehindAppBar: true,
-      body: NestedScrollView(
-        floatHeaderSlivers: true,
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            SliverAppHeader(
-              title: _getScreenTitle(currentIndex, t),
-              parentTitle: 'Rally',
-              actions: _buildHeaderActions(currentIndex),
-            ),
-          ];
-        },
-        body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 400),
-          switchInCurve: Curves.easeOutQuart,
-          switchOutCurve: Curves.easeInQuart,
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            final bool isEntering = child.key == ValueKey<int>(currentIndex);
-
-            // Subtle scale and fade transition
-            return FadeTransition(
-              opacity: CurvedAnimation(
-                parent: animation,
-                curve: const Interval(0.2, 1.0), // Delay fade in slightly
-              ),
-              child: ScaleTransition(
-                scale: Tween<double>(begin: isEntering ? 0.95 : 1.05, end: 1.0).animate(animation),
-                child: child,
-              ),
-            );
+    // Wrap with PopScope to handle back navigation for nested routes.
+    // When on a nested route (like /explore/user/...), pressing back should
+    // go to the parent route (/explore) instead of exiting the app.
+    return PopScope(
+      canPop: !_isNestedRoute(), // Block pop if we're on a nested route
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (!didPop) {
+          // We blocked the pop, so handle it ourselves
+          await _handleBackNavigation();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: colorScheme.surface,
+        extendBody: true, // Content flows behind navbar for floating effect
+        extendBodyBehindAppBar: true,
+        body: NotificationListener<UserScrollNotification>(
+          onNotification: (UserScrollNotification notification) {
+            if (notification.direction == ScrollDirection.reverse && _isNavbarVisible) {
+              setState(() => _isNavbarVisible = false);
+            } else if (notification.direction == ScrollDirection.forward && !_isNavbarVisible) {
+              setState(() => _isNavbarVisible = true);
+            }
+            return false;
           },
-          child: _buildScreen(currentIndex, t),
+          child: Stack(
+            children: <Widget>[
+              // 1. Main Content (Tabs)
+              Positioned.fill(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    final double headerHeight = Responsive.h(context, 60);
+                    final EdgeInsets currentPadding = MediaQuery.paddingOf(context);
+
+                    return MediaQuery(
+                      data: MediaQuery.of(context).copyWith(
+                        padding: currentPadding.copyWith(top: currentPadding.top + headerHeight),
+                      ),
+                      child: widget.navigationShell,
+                    );
+                  },
+                ),
+              ),
+
+              // 2. Overlaid Header (Slide Up to hide)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: Responsive.h(context, 60) + MediaQuery.paddingOf(context).top,
+                child: AnimatedSlide(
+                  duration: const Duration(milliseconds: 700),
+                  curve: Curves.easeOutCubic,
+                  offset: _isNavbarVisible ? Offset.zero : const Offset(0, -1),
+                  child: CustomScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    slivers: <Widget>[
+                      SliverAppHeader(
+                        title: _getTitle(t),
+                        breadcrumbs: _getBreadcrumbs(),
+                        actions: _buildHeaderActions(currentIndex),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: AppBottomNavBar(
-        currentIndex: currentIndex,
-        onIndexChanged: _onTabSelected,
-        onActionPressed: _onActionPressed,
-        items: navItems,
+        bottomNavigationBar: AnimatedSlide(
+          duration: const Duration(milliseconds: 700),
+          curve: Curves.easeOutCubic,
+          offset: _isNavbarVisible ? Offset.zero : const Offset(0, 1),
+          child: AppBottomNavBar(
+            currentIndex: currentIndex,
+            onIndexChanged: _onTabSelected,
+            onActionPressed: _onActionPressed,
+            items: navItems,
+          ),
+        ),
       ),
     );
   }

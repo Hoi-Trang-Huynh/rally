@@ -75,14 +75,6 @@ class NavBarItem extends StatelessWidget {
                 ),
                 child: Text(item.label, maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
-              // Optional: Small dot indicator
-              SizedBox(height: Responsive.h(context, 4)),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                height: Responsive.w(context, 4),
-                width: isSelected ? Responsive.w(context, 4) : 0,
-                decoration: BoxDecoration(color: activeColor, shape: BoxShape.circle),
-              ),
             ],
           ),
         ),

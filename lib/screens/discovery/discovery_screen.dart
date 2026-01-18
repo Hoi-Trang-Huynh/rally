@@ -5,6 +5,7 @@ import 'package:rally/themes/app_colors.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/common/glass_container.dart';
 import 'package:rally/widgets/common/scale_button.dart';
+import 'package:rally/widgets/search/user_search_bar.dart';
 
 /// The discovery screen displaying templates and destinations.
 ///
@@ -58,7 +59,12 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
         strokeWidth: 2.5,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-          padding: EdgeInsets.fromLTRB(0, Responsive.h(context, 10), 0, Responsive.h(context, 100)),
+          padding: EdgeInsets.fromLTRB(
+            0,
+            MediaQuery.paddingOf(context).top + Responsive.h(context, 10),
+            0,
+            Responsive.h(context, 100),
+          ),
           child: AnimationLimiter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,6 +77,13 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                   );
                 },
                 children: <Widget>[
+                  // Search Bar
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
+                    child: const UserSearchBar(),
+                  ),
+                  SizedBox(height: Responsive.h(context, 24)),
+
                   // Section 1: Templates
                   _buildSectionHeader(
                     context,

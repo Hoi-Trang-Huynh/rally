@@ -24,6 +24,9 @@ class AppUser {
   /// The user's last name.
   final String? lastName;
 
+  /// The user's bio.
+  final String? bioText;
+
   /// The URL of the user's avatar.
   final String? avatarUrl;
 
@@ -41,6 +44,7 @@ class AppUser {
     this.username,
     this.firstName,
     this.lastName,
+    this.bioText,
     this.avatarUrl,
     this.isEmailVerified = false,
     this.isOnboarding = true,
@@ -68,6 +72,7 @@ class AppUser {
       username: '',
       firstName: '',
       lastName: '',
+      bioText: '',
       avatarUrl: '',
       isEmailVerified: false,
       isOnboarding: true,
@@ -89,6 +94,7 @@ class AppUser {
       username: profileData['username'] as String?,
       firstName: profileData['firstName'] as String?,
       lastName: profileData['lastName'] as String?,
+      bioText: profileData['bioText'] as String?,
       avatarUrl: profileData['avatarUrl'] as String?,
       isEmailVerified: profileData['isEmailVerified'] as bool? ?? false,
       isOnboarding: profileData['isOnboarding'] as bool? ?? true,
@@ -122,9 +128,10 @@ class AppUser {
   /// their username, firstName, or lastName yet.
   /// Checks for both null and empty strings.
   bool get needsProfileCompletion =>
-      (username == null || username!.isEmpty) ||
-      (firstName == null || firstName!.isEmpty) ||
-      (lastName == null || lastName!.isEmpty);
+      (id!.isNotEmpty) &&
+      ((username == null || username!.isEmpty) ||
+          (firstName == null || firstName!.isEmpty) ||
+          (lastName == null || lastName!.isEmpty));
 
   /// Returns the display name for the user.
   ///

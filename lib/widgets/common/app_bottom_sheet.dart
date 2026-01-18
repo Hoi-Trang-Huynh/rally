@@ -211,10 +211,11 @@ class _SheetContainer extends StatelessWidget {
             ),
           ),
           if (showDivider) const Divider(height: 1),
-          // Body
-          child,
-          // Bottom safe area padding for fixed sheets
-          if (isFixed) SizedBox(height: Responsive.h(context, 16)),
+          // Body - wrapped in Flexible to prevent overflow
+          if (isFixed) Flexible(child: SingleChildScrollView(child: child)) else child,
+          // Bottom safe area padding to account for system navigation bar
+          if (isFixed)
+            SizedBox(height: MediaQuery.paddingOf(context).bottom + Responsive.h(context, 16)),
         ],
       ),
     );
@@ -230,6 +231,7 @@ Future<T?> showAppBottomSheet<T>({
   required AppBottomSheet sheet,
   bool isDismissible = true,
   bool enableDrag = true,
+  bool useRootNavigator = false,
 }) {
   final bool isDraggable = sheet.isDraggable;
 
@@ -238,6 +240,7 @@ Future<T?> showAppBottomSheet<T>({
     isScrollControlled: true,
     isDismissible: isDismissible,
     enableDrag: enableDrag,
+    useRootNavigator: useRootNavigator,
     backgroundColor: isDraggable ? Colors.transparent : null,
     shape:
         isDraggable

@@ -13,7 +13,7 @@ class NavBarActionButton extends StatelessWidget {
     super.key,
     required this.onTap,
     this.icon = Icons.add,
-    this.baseSize = 56,
+    this.baseSize = 40,
   });
 
   /// Callback when the button is tapped.
@@ -46,7 +46,7 @@ class NavBarActionButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(icon, color: colorScheme.onPrimary, size: Responsive.w(context, 28)),
+        child: Icon(icon, color: colorScheme.onPrimary, size: Responsive.w(context, 30)),
       ),
     );
   }

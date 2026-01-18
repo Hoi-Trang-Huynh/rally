@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/app_user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../router/app_router.dart';
 import '../../utils/responsive.dart';
-import 'edit_profile_screen.dart';
 import 'language_screen.dart';
 import 'widgets/modern_settings_tile.dart';
 import 'widgets/profile_avatar.dart';
@@ -31,18 +32,9 @@ class SettingsScreen extends ConsumerWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Translations t = Translations.of(context);
 
-    String languageName = 'English';
+    String languageName = t.common.language.english;
     if (localeState.locale == AppLocale.vi) {
-      // We can't easily access t.common without knowing if it exists broadly,
-      // but assuming LanguageScreen logic works:
-      // t.common.language.vietnamese might work, but let's stick to simple strings
-      // if we are not sure about t.common structure in settings_screen context.
-      // Wait, t is typed. If LanguageScreen uses it, I can too.
-      // But I need to be careful about null safety if common is optional?
-      // Usually generated code is robust.
-      // Let's safe bet on string literals if strict on errors, or try t.
-      // Actually, let's just use 'Tiếng Việt' for vi and 'English' for en.
-      languageName = 'Tiếng Việt';
+      languageName = t.common.language.vietnamese;
     }
 
     return userAsync.when(
@@ -224,11 +216,7 @@ class SettingsScreen extends ConsumerWidget {
           OutlinedButton(
             onPressed: () {
               HapticFeedback.lightImpact();
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (BuildContext context) => const EditProfileScreen(),
-                ),
-              );
+              context.push(AppRoutes.editProfile);
             },
             style: OutlinedButton.styleFrom(
               padding: EdgeInsets.symmetric(

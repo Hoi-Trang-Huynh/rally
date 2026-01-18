@@ -1,6 +1,12 @@
 {
   "followers": "người theo dõi",
   "followings": "đang theo dõi",
+  "follow": "Theo dõi",
+  "following": "Đang theo dõi",
+  "followersTitle": "Người theo dõi",
+  "followingTitle": "Đang theo dõi",
+  "noFollowers": "Chưa có người theo dõi",
+  "noFollowing": "Chưa theo dõi ai",
   "bio": "Thích du lịch một mình và tự do",
   "bioPlaceholder": "Hãy kể về bạn...",
   "addBio": "Nhấn để thêm tiểu sử",
@@ -8,5 +14,13 @@
   "achievements": "Thành tựu",
   "posts": "Bài viết",
   "rallies": "Rallies",
-  "notLoggedIn": "Chưa đăng nhập"
+  "notLoggedIn": "Chưa đăng nhập",
+  "noPosts": "Chưa có bài viết",
+  "noPostsSubtitle": "Người dùng này chưa chia sẻ bài viết nào.",
+  "noRallies": "Chưa có Rallies",
+  "noRalliesSubtitle": "Người dùng này chưa tham gia rallies nào.",
+  "privateProfile": "Hồ sơ riêng tư",
+  "followToSee": "Theo dõi để xem bài viết và rallies của họ.",
+  "errorFollow": "Không thể theo dõi: $error",
+  "errorUnfollow": "Không thể hủy theo dõi: $error"
 }

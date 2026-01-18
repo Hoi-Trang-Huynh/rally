@@ -31,7 +31,7 @@ class AuthPrimaryButton extends StatefulWidget {
 class _AuthPrimaryButtonState extends State<AuthPrimaryButton> {
   @override
   Widget build(BuildContext context) {
-    final double buttonHeight = Responsive.h(context, 48);
+    final double buttonHeight = Responsive.h(context, 44);
     final double spinnerSize = Responsive.w(context, 24);
 
     if (widget.isLoading) {

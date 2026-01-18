@@ -31,7 +31,7 @@ class _AuthGoogleButtonState extends State<AuthGoogleButton> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final double buttonHeight = Responsive.h(context, 48);
+    final double buttonHeight = Responsive.h(context, 44);
     final double iconSize = Responsive.w(context, 24);
 
     if (widget.isLoading) {
