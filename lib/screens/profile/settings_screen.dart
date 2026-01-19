@@ -111,7 +111,10 @@ class SettingsScreen extends ConsumerWidget {
                         ModernSettingsTile(
                           icon: Icons.help_outline,
                           title: t.settings.helpFeedback,
-                          onTap: () {},
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            context.push(AppRoutes.feedback);
+                          },
                         ),
                       ],
                     ),

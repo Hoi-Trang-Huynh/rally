@@ -12,6 +12,7 @@ import 'package:rally/screens/home/home_screen.dart';
 import 'package:rally/screens/home/main_shell.dart';
 import 'package:rally/screens/onboarding/onboarding_screen.dart';
 import 'package:rally/screens/profile/edit_profile_screen.dart';
+import 'package:rally/screens/profile/feedback_screen.dart';
 import 'package:rally/screens/profile/profile_screen.dart';
 import 'package:rally/screens/profile/settings_screen.dart';
 import 'package:rally/screens/profile/user_profile_screen.dart';
@@ -52,6 +53,9 @@ class AppRoutes {
 
   /// Edit profile route (full screen, no shell).
   static const String editProfile = '/edit-profile';
+
+  /// Feedback route (full screen, no shell).
+  static const String feedback = '/feedback';
 }
 
 /// Navigator keys for each shell branch.
@@ -138,6 +142,11 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
       GoRoute(
         path: AppRoutes.editProfile,
         builder: (BuildContext context, GoRouterState state) => const EditProfileScreen(),
+      ),
+      // Feedback (full screen, outside shell)
+      GoRoute(
+        path: AppRoutes.feedback,
+        builder: (BuildContext context, GoRouterState state) => const FeedbackScreen(),
       ),
 
       // Main app with bottom navigation (StatefulShellRoute)

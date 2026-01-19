@@ -16,5 +16,21 @@
   "changePhoto": "Change Photo",
   "chooseFromGallery": "Choose from Gallery",
   "takePhoto": "Take Photo",
-  "comingSoon": "Coming soon"
+  "comingSoon": "Coming soon",
+  "feedback": {
+    "title": "Send Feedback",
+    "subtitle": "Help us improve Rally by sharing your thoughts",
+    "placeholder": "Tell us what you think...",
+    "selectCategory": "Select a category",
+    "submit": "Submit Feedback",
+    "success": "Thank you for your feedback!",
+    "error": "Failed to submit feedback. Please try again.",
+    "categories": {
+      "uiUx": "UI/UX",
+      "bug": "Bug Report",
+      "feature": "Feature Request",
+      "performance": "Performance",
+      "other": "Other"
+    }
+  }
 }
