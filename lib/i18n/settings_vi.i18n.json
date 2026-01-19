@@ -16,5 +16,21 @@
   "changePhoto": "Đổi ảnh",
   "chooseFromGallery": "Chọn từ thư viện",
   "takePhoto": "Chụp ảnh",
-  "comingSoon": "Sắp ra mắt"
+  "comingSoon": "Sắp ra mắt",
+  "feedback": {
+    "title": "Gửi phản hồi",
+    "subtitle": "Giúp chúng tôi cải thiện Rally bằng cách chia sẻ suy nghĩ của bạn",
+    "placeholder": "Hãy cho chúng tôi biết suy nghĩ của bạn...",
+    "selectCategory": "Chọn một danh mục",
+    "submit": "Gửi phản hồi",
+    "success": "Cảm ơn phản hồi của bạn!",
+    "error": "Không thể gửi phản hồi. Vui lòng thử lại.",
+    "categories": {
+      "uiUx": "UI/UX",
+      "bug": "Báo lỗi",
+      "feature": "Đề xuất tính năng",
+      "performance": "Hiệu suất",
+      "other": "Khác"
+    }
+  }
 }
