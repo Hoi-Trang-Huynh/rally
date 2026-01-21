@@ -201,12 +201,12 @@ class _FollowListSheetState extends ConsumerState<FollowListSheet>
               child: TabBar(
                 controller: _tabController,
                 indicator: BoxDecoration(
-                  color: colorScheme.primaryContainer,
+                  color: colorScheme.primary,
                   borderRadius: BorderRadius.circular(Responsive.w(context, 10)),
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 dividerColor: Colors.transparent,
-                labelColor: colorScheme.onPrimaryContainer,
+                labelColor: colorScheme.onPrimary,
                 unselectedLabelColor: colorScheme.onSurfaceVariant,
                 labelStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
                 unselectedLabelStyle: textTheme.labelLarge,

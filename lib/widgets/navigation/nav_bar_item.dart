@@ -32,7 +32,6 @@ class NavBarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TextTheme textTheme = Theme.of(context).textTheme;
 
     final Color activeColor = colorScheme.primary;
     final Color inactiveColor = colorScheme.onSurfaceVariant;
@@ -45,37 +44,27 @@ class NavBarItem extends StatelessWidget {
         highlightColor: activeColor.withValues(alpha: 0.05),
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 8)),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              // Bounce animation for icon
-              AnimatedScale(
-                scale: isSelected ? 1.2 : 1.0,
+          child: Center(
+            child: AnimatedScale(
+              scale: isSelected ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutBack,
+              child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutBack,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
-                  child: Icon(
-                    isSelected ? item.activeIcon : item.icon,
-                    key: ValueKey<bool>(isSelected),
-                    color: isSelected ? activeColor : inactiveColor,
-                    size: Responsive.w(context, 24),
-                  ),
-                ),
-              ),
-              SizedBox(height: Responsive.h(context, 4)),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: (textTheme.labelSmall ?? const TextStyle()).copyWith(
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: Icon(
+                  isSelected ? item.activeIcon : item.icon,
+                  key: ValueKey<bool>(isSelected),
                   color: isSelected ? activeColor : inactiveColor,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
+                  size:
+                      (item.icon == Icons.forum || item.icon == Icons.forum_outlined)
+                          ? Responsive.w(context, 28)
+                          : Responsive.w(context, 30),
                 ),
-                child: Text(item.label, maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
-            ],
+            ),
           ),
         ),
       ),

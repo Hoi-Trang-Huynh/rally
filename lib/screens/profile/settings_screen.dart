@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/app_user.dart';
@@ -158,11 +159,20 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                           ),
                           SizedBox(height: Responsive.h(context, 8)),
-                          Text(
-                            'Version 1.0.0', // TODO: Get actual version
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodySmall?.copyWith(color: colorScheme.outline),
+                          FutureBuilder<PackageInfo>(
+                            future: PackageInfo.fromPlatform(),
+                            builder: (BuildContext context, AsyncSnapshot<PackageInfo> snapshot) {
+                              final String version =
+                                  snapshot.hasData
+                                      ? '${t.settings.version} ${snapshot.data!.version} (${snapshot.data!.buildNumber})'
+                                      : '${t.settings.version} ...';
+                              return Text(
+                                version,
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.copyWith(color: colorScheme.outline),
+                              );
+                            },
                           ),
                         ],
                       ),

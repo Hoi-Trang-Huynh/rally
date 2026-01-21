@@ -30,7 +30,10 @@ class NotificationSheet extends ConsumerWidget {
         onPressed: () {
           ref.read(notificationProvider.notifier).markAllAsRead();
         },
-        child: Text(t.notifications.markAllAsRead),
+        child: Text(
+          t.notifications.markAllAsRead,
+          style: textTheme.labelSmall?.copyWith(color: colorScheme.primary),
+        ),
       ),
       bodyBuilder: (ScrollController scrollController) {
         return ListView(
