@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../i18n/generated/translations.g.dart';
-import 'app_router.dart';
-
 /// Typedef for a function that builds breadcrumbs for a route.
 /// Takes BuildContext to access translations.
 typedef BreadcrumbBuilder = List<String> Function(BuildContext context);
@@ -54,25 +51,8 @@ class RouteMetadataRegistry {
   /// All registered route metadata.
   /// Order matters: more specific patterns should come first.
   static final List<RouteMetadata> _routes = <RouteMetadata>[
-    // Nested route: User profile under explore
-    RouteMetadata(
-      pattern: RegExp(r'^/explore/user/'),
-      parentRoute: AppRoutes.explore,
-      isNested: true,
-      breadcrumbBuilder: (BuildContext context) {
-        final Translations t = Translations.of(context);
-        return <String>['Rally', t.nav.explore, t.nav.profile];
-      },
-      titleBuilder: (BuildContext context, Uri uri) {
-        // Try to get username from query params
-        final String? username = uri.queryParameters['username'];
-        if (username != null && username.isNotEmpty) {
-          return username;
-        }
-        // Fallback to generic profile title
-        return Translations.of(context).nav.profile;
-      },
-    ),
+    // NOTE: User profile (/user/:userId) is now a standalone route outside the shell.
+    // It has its own AppBar with back button and doesn't need metadata here.
 
     // Add more nested routes here as needed:
     // Example for future chat conversation route:

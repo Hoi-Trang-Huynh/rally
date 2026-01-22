@@ -45,8 +45,11 @@ class AppRoutes {
   /// Profile tab route.
   static const String profile = '/profile';
 
-  /// User profile route (nested under explore).
-  static const String userProfile = 'user/:userId';
+  /// User profile route (standalone, pushes onto stack).
+  static const String userProfilePath = '/user/:userId';
+
+  /// Helper to build user profile route path.
+  static String userProfile(String userId) => '/user/$userId';
 
   /// Settings route (full screen, no shell).
   static const String settings = '/settings';
@@ -148,6 +151,14 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
         path: AppRoutes.feedback,
         builder: (BuildContext context, GoRouterState state) => const FeedbackScreen(),
       ),
+      // User Profile (full screen, outside shell - pushes onto stack)
+      GoRoute(
+        path: AppRoutes.userProfilePath,
+        builder: (BuildContext context, GoRouterState state) {
+          final String userId = state.pathParameters['userId'] ?? '';
+          return UserProfileScreen(userId: userId);
+        },
+      ),
 
       // Main app with bottom navigation (StatefulShellRoute)
       StatefulShellRoute.indexedStack(
@@ -194,16 +205,6 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
                 pageBuilder:
                     (BuildContext context, GoRouterState state) =>
                         const NoTransitionPage<void>(child: DiscoveryScreen()),
-                routes: <RouteBase>[
-                  // Nested user profile route
-                  GoRoute(
-                    path: AppRoutes.userProfile,
-                    builder: (BuildContext context, GoRouterState state) {
-                      final String userId = state.pathParameters['userId'] ?? '';
-                      return UserProfileScreen(userId: userId);
-                    },
-                  ),
-                ],
               ),
             ],
           ),

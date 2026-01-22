@@ -165,9 +165,8 @@ class _FollowListSheetState extends ConsumerState<FollowListSheet>
       // Navigate to own profile tab
       context.go(AppRoutes.profile);
     } else {
-      // Navigate to user profile
-      final String encodedUsername = Uri.encodeComponent(user.username);
-      context.go('${AppRoutes.explore}/user/${user.id}?username=$encodedUsername');
+      // Push to user profile (maintains back stack)
+      context.push(AppRoutes.userProfile(user.id));
     }
   }
 

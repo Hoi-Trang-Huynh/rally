@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rally/router/app_router.dart';
-import 'package:rally/router/route_metadata.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/navigation/sliver_app_header.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/nav_item_data.dart';
+import '../../utils/ui_helpers.dart';
 import '../../widgets/navigation/app_bottom_nav_bar.dart';
 
 /// The main shell screen that hosts the bottom navigation bar.
@@ -29,6 +30,9 @@ class _MainShellState extends State<MainShell> {
   // Scroll controller for the NestedScrollView
   final ScrollController _scrollController = ScrollController();
   bool _isNavbarVisible = true;
+
+  /// Timestamp of last back press for double-tap-to-exit functionality.
+  DateTime? _lastBackPressTime;
 
   @override
   void initState() {
@@ -55,7 +59,7 @@ class _MainShellState extends State<MainShell> {
     return <NavItemData>[
       NavItemData(icon: Icons.home_outlined, activeIcon: Icons.home_rounded, label: t.nav.home),
       NavItemData(icon: Icons.forum_outlined, activeIcon: Icons.forum, label: t.nav.chat),
-      NavItemData(icon: Icons.map_outlined, activeIcon: Icons.map, label: t.nav.explore),
+      NavItemData(icon: Icons.search_outlined, activeIcon: Icons.search, label: t.nav.explore),
       NavItemData(
         icon: Icons.account_circle_outlined,
         activeIcon: Icons.account_circle,
@@ -108,32 +112,14 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
-  /// Get current location from GoRouter.
-  String _getCurrentLocation() {
-    return GoRouter.of(context).routerDelegate.currentConfiguration.uri.toString();
-  }
-
-  /// Get current URI from GoRouter.
-  Uri _getCurrentUri() {
-    return GoRouter.of(context).routerDelegate.currentConfiguration.uri;
-  }
-
   List<String> _getBreadcrumbs() {
-    final String location = _getCurrentLocation();
-    return RouteMetadataRegistry.getBreadcrumbs(context, location);
+    // For MainShell, we only show Rally + current tab as breadcrumbs
+    // (User profiles and other nested routes are now outside the shell)
+    return <String>['Rally'];
   }
 
   String _getTitle(Translations t) {
-    final String location = _getCurrentLocation();
-    final Uri uri = _getCurrentUri();
-
-    // Try to get title from route metadata
-    final String? metadataTitle = RouteMetadataRegistry.getTitle(context, location, uri);
-    if (metadataTitle != null) {
-      return metadataTitle;
-    }
-
-    // Default: tab title
+    // For MainShell, just use the tab title
     return _getScreenTitle(t);
   }
 
@@ -158,27 +144,39 @@ class _MainShellState extends State<MainShell> {
     return null;
   }
 
-  /// Check if current route is a nested route that should pop to parent.
-  bool _isNestedRoute() {
-    return RouteMetadataRegistry.isNestedRoute(_getCurrentLocation());
-  }
-
-  /// Get the parent route for the current nested route.
-  String? _getParentRoute() {
-    return RouteMetadataRegistry.getParentRoute(_getCurrentLocation());
-  }
-
-  /// Handle back navigation for nested routes.
-  /// Returns true if we handled the navigation, false to allow default behavior.
+  /// Handle back navigation for top-level routes.
+  /// - Non-home tabs (chat, explore, profile) → go to home
+  /// - Home tab → show 'tap again to exit' snackbar
+  /// Returns true if we handled the navigation, false to allow app exit.
   Future<bool> _handleBackNavigation() async {
-    if (_isNestedRoute()) {
-      final String? parentRoute = _getParentRoute();
-      if (parentRoute != null) {
-        context.go(parentRoute);
-        return true; // We handled it
-      }
+    // Use GoRouter's location to determine current route - this is more reliable
+    // than navigationShell.currentIndex after hot reload
+    final GoRouter router = GoRouter.of(context);
+    final String currentPath = router.routerDelegate.currentConfiguration.uri.path;
+    final Translations t = Translations.of(context);
+
+    // Determine if we're on home based on actual router location
+    final bool isOnHome = currentPath == AppRoutes.home || currentPath == '/';
+
+    // If not on home, navigate to home using context.go()
+    // This is more reliable than goBranch() after hot reload
+    if (!isOnHome) {
+      context.go(AppRoutes.home);
+      return true;
     }
-    return false; // Let default behavior happen
+
+    // On home tab - implement double-tap-to-exit
+    final DateTime now = DateTime.now();
+    if (_lastBackPressTime != null &&
+        now.difference(_lastBackPressTime!) < const Duration(seconds: 2)) {
+      // Second tap within 2 seconds - allow exit
+      return false;
+    }
+
+    // First tap - show snackbar and block exit
+    _lastBackPressTime = now;
+    showInfoSnackBar(context, t.common.tapAgainToExit);
+    return true;
   }
 
   @override
@@ -188,15 +186,19 @@ class _MainShellState extends State<MainShell> {
     final List<NavItemData> navItems = _buildNavItems(t);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    // Wrap with PopScope to handle back navigation for nested routes.
-    // When on a nested route (like /explore/user/...), pressing back should
-    // go to the parent route (/explore) instead of exiting the app.
+    // Wrap with PopScope to handle back navigation.
+    // - On non-home tabs: go to home
+    // - On home tab: show 'tap again to exit' snackbar
     return PopScope(
-      canPop: !_isNestedRoute(), // Block pop if we're on a nested route
+      canPop: false, // Always block pop, we handle it ourselves
       onPopInvokedWithResult: (bool didPop, dynamic result) async {
         if (!didPop) {
-          // We blocked the pop, so handle it ourselves
-          await _handleBackNavigation();
+          final bool handled = await _handleBackNavigation();
+          if (!handled) {
+            // Use SystemNavigator.pop() for clean app exit
+            // This bypasses any stale navigation state after hot reload
+            await SystemNavigator.pop();
+          }
         }
       },
       child: Scaffold(

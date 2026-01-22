@@ -176,13 +176,8 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                                     // Navigate to own profile tab
                                     context.go(AppRoutes.profile);
                                   } else {
-                                    // Navigate to other user's profile via go_router
-                                    final String encodedUsername = Uri.encodeComponent(
-                                      user.username ?? '',
-                                    );
-                                    context.go(
-                                      '${AppRoutes.explore}/user/${user.id ?? ''}?username=$encodedUsername',
-                                    );
+                                    // Push to user profile (maintains back stack)
+                                    context.push(AppRoutes.userProfile(user.id ?? ''));
                                   }
                                 },
                               );
