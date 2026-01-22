@@ -8,8 +8,7 @@ import 'package:rally/models/responses/register_response.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
-import 'package:rally/screens/auth/widgets/auth_google_button.dart';
-import 'package:rally/screens/auth/widgets/auth_primary_button.dart';
+import 'package:rally/screens/auth/widgets/auth_filled_button.dart';
 import 'package:rally/screens/auth/widgets/auth_text_field.dart';
 import 'package:rally/screens/auth/widgets/or_divider.dart';
 import 'package:rally/screens/auth/widgets/password_requirements.dart';
@@ -379,7 +378,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         enabled: !_anyLoading,
       ),
       SizedBox(height: Responsive.h(context, 24)),
-      AuthPrimaryButton(
+      AuthFilledButton(
         text: t.common.continueButton,
         onPressed: _anyLoading ? null : _onContinueStep1,
         isLoading: _isSignupLoading,
@@ -387,8 +386,17 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       SizedBox(height: Responsive.h(context, 24)),
       const OrDivider(),
       SizedBox(height: Responsive.h(context, 24)),
-      AuthGoogleButton(
+      AuthFilledButton(
         text: t.auth.login.google,
+        style: AuthButtonStyle.outlined,
+        icon: Image.asset(
+          'assets/images/google_logo.png',
+          height: Responsive.w(context, 24),
+          width: Responsive.w(context, 24),
+          errorBuilder:
+              (BuildContext context, Object error, StackTrace? stackTrace) =>
+                  Icon(Icons.g_mobiledata, size: Responsive.w(context, 28)),
+        ),
         onPressed: _anyLoading ? null : _signInWithGoogle,
         isLoading: _isGoogleLoading,
       ),
@@ -438,7 +446,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         enabled: !_anyLoading,
       ),
       SizedBox(height: Responsive.h(context, 24)),
-      AuthPrimaryButton(
+      AuthFilledButton(
         text: t.common.continueButton,
         onPressed: _anyLoading ? null : _onContinueStep3,
         isLoading: _isSignupLoading,
@@ -483,7 +491,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         textAlign: TextAlign.center,
       ),
       SizedBox(height: Responsive.h(context, 32)),
-      AuthPrimaryButton(
+      AuthFilledButton(
         text: t.auth.signup.checkVerification,
         onPressed: _checkEmailVerification,
         isLoading: _isSignupLoading,

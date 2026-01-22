@@ -6,7 +6,7 @@ import 'package:rally/models/responses/availability_response.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/locale_provider.dart';
-import 'package:rally/screens/auth/widgets/auth_primary_button.dart';
+import 'package:rally/screens/auth/widgets/auth_filled_button.dart';
 import 'package:rally/screens/auth/widgets/auth_screen_layout.dart';
 import 'package:rally/screens/auth/widgets/auth_text_field.dart';
 import 'package:rally/utils/responsive.dart';
@@ -137,7 +137,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
             ],
           ),
           SizedBox(height: Responsive.h(context, 24)),
-          AuthPrimaryButton(
+          AuthFilledButton(
             text: t.common.continueButton,
             onPressed: _onSubmit,
             isLoading: _isLoading,
