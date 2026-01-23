@@ -166,73 +166,79 @@ class _MainShellState extends State<MainShell> {
     final List<NavItemData> navItems = _buildNavItems(t);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      extendBody: true, // Content flows behind navbar for floating effect
-      extendBodyBehindAppBar: true,
-      body: NotificationListener<UserScrollNotification>(
-        onNotification: (UserScrollNotification notification) {
-          if (notification.direction == ScrollDirection.reverse && _isNavbarVisible) {
-            setState(() => _isNavbarVisible = false);
-          } else if (notification.direction == ScrollDirection.forward && !_isNavbarVisible) {
-            setState(() => _isNavbarVisible = true);
-          }
-          return false;
-        },
-        child: Stack(
-          children: <Widget>[
-            // 1. Main Content (The child widget - Chat/Home/etc)
-            Positioned.fill(
-              child: Builder(
-                builder: (BuildContext context) {
-                  final double headerHeight = Responsive.h(context, 60);
-                  final EdgeInsets currentPadding = MediaQuery.paddingOf(context);
+    final bool onHome = currentIndex == 0;
 
-                  // Inject padding for the fixed header
-                  return MediaQuery(
-                    data: MediaQuery.of(context).copyWith(
-                      padding: currentPadding.copyWith(top: currentPadding.top + headerHeight),
-                    ),
-                    child: widget.child,
-                  );
-                },
-              ),
-            ),
+    return PopScope(
+      canPop: onHome, // Always block pop, we handle it ourselves
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {},
+      child: Scaffold(
+        backgroundColor: colorScheme.surface,
+        extendBody: true, // Content flows behind navbar for floating effect
+        extendBodyBehindAppBar: true,
+        body: NotificationListener<UserScrollNotification>(
+          onNotification: (UserScrollNotification notification) {
+            if (notification.direction == ScrollDirection.reverse && _isNavbarVisible) {
+              setState(() => _isNavbarVisible = false);
+            } else if (notification.direction == ScrollDirection.forward && !_isNavbarVisible) {
+              setState(() => _isNavbarVisible = true);
+            }
+            return false;
+          },
+          child: Stack(
+            children: <Widget>[
+              // 1. Main Content (The child widget - Chat/Home/etc)
+              Positioned.fill(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    final double headerHeight = Responsive.h(context, 60);
+                    final EdgeInsets currentPadding = MediaQuery.paddingOf(context);
 
-            // 2. Overlaid Header (Slide Up to hide)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: Responsive.h(context, 60) + MediaQuery.paddingOf(context).top,
-              child: AnimatedSlide(
-                duration: const Duration(milliseconds: 700),
-                curve: Curves.easeOutCubic,
-                offset: _isNavbarVisible ? Offset.zero : const Offset(0, -1),
-                child: CustomScrollView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  slivers: <Widget>[
-                    SliverAppHeader(
-                      title: _getTitle(t, currentIndex),
-                      breadcrumbs: _getBreadcrumbs(),
-                      actions: _buildHeaderActions(currentIndex),
-                    ),
-                  ],
+                    // Inject padding for the fixed header
+                    return MediaQuery(
+                      data: MediaQuery.of(context).copyWith(
+                        padding: currentPadding.copyWith(top: currentPadding.top + headerHeight),
+                      ),
+                      child: widget.child,
+                    );
+                  },
                 ),
               ),
-            ),
-          ],
+
+              // 2. Overlaid Header (Slide Up to hide)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: Responsive.h(context, 60) + MediaQuery.paddingOf(context).top,
+                child: AnimatedSlide(
+                  duration: const Duration(milliseconds: 700),
+                  curve: Curves.easeOutCubic,
+                  offset: _isNavbarVisible ? Offset.zero : const Offset(0, -1),
+                  child: CustomScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    slivers: <Widget>[
+                      SliverAppHeader(
+                        title: _getTitle(t, currentIndex),
+                        breadcrumbs: _getBreadcrumbs(),
+                        actions: _buildHeaderActions(currentIndex),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: AnimatedSlide(
-        duration: const Duration(milliseconds: 700),
-        curve: Curves.easeOutCubic,
-        offset: _isNavbarVisible ? Offset.zero : const Offset(0, 1),
-        child: AppBottomNavBar(
-          currentIndex: currentIndex,
-          onIndexChanged: _onTabSelected,
-          onActionPressed: _onActionPressed,
-          items: navItems,
+        bottomNavigationBar: AnimatedSlide(
+          duration: const Duration(milliseconds: 700),
+          curve: Curves.easeOutCubic,
+          offset: _isNavbarVisible ? Offset.zero : const Offset(0, 1),
+          child: AppBottomNavBar(
+            currentIndex: currentIndex,
+            onIndexChanged: _onTabSelected,
+            onActionPressed: _onActionPressed,
+            items: navItems,
+          ),
         ),
       ),
     );
