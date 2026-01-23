@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rally/router/app_router.dart';
 import 'package:rally/utils/responsive.dart';
@@ -8,7 +7,6 @@ import 'package:rally/widgets/navigation/sliver_app_header.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/nav_item_data.dart';
-import '../../utils/ui_helpers.dart';
 import '../../widgets/navigation/app_bottom_nav_bar.dart';
 
 /// The main shell screen that hosts the bottom navigation bar.
@@ -17,10 +15,10 @@ import '../../widgets/navigation/app_bottom_nav_bar.dart';
 /// This is the primary container for the authenticated app experience.
 class MainShell extends StatefulWidget {
   /// Creates a new [MainShell].
-  const MainShell({super.key, required this.navigationShell});
+  const MainShell({super.key, required this.child});
 
-  /// The navigation shell provided by go_router's StatefulShellRoute.
-  final StatefulNavigationShell navigationShell;
+  /// The child widget provided by go_router's ShellRoute.
+  final Widget child;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -68,23 +66,43 @@ class _MainShellState extends State<MainShell> {
     ];
   }
 
+  int _getCurrentIndex(BuildContext context) {
+    final GoRouter router = GoRouter.of(context);
+    final String location = router.routerDelegate.currentConfiguration.uri.path;
+
+    if (location.startsWith(AppRoutes.chat)) return 1;
+    if (location.startsWith(AppRoutes.explore)) return 2;
+    if (location.startsWith(AppRoutes.profile)) return 3;
+    return 0; // Default to home (index 0)
+  }
+
   void _onTabSelected(int index) {
-    if (index == widget.navigationShell.currentIndex) return;
+    final int currentIndex = _getCurrentIndex(context);
+    if (index == currentIndex) {
+      // If tapping same tab, could scroll to top or reset stack
+      // For shell route, usually we just ensure we are at the root of that tab
+      return;
+    }
 
     // Reset scroll position when switching tabs
     if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+      _scrollController.jumpTo(0);
     }
 
-    // Use go_router's goBranch to switch tabs
-    widget.navigationShell.goBranch(
-      index,
-      initialLocation: index == widget.navigationShell.currentIndex,
-    );
+    switch (index) {
+      case 0:
+        context.go(AppRoutes.home);
+        break;
+      case 1:
+        context.go(AppRoutes.chat);
+        break;
+      case 2:
+        context.go(AppRoutes.explore);
+        break;
+      case 3:
+        context.go(AppRoutes.profile);
+        break;
+    }
   }
 
   void _onActionPressed() {
@@ -97,8 +115,8 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
-  String _getScreenTitle(Translations t) {
-    switch (widget.navigationShell.currentIndex) {
+  String _getScreenTitle(Translations t, int index) {
+    switch (index) {
       case 0:
         return t.nav.home;
       case 1:
@@ -118,15 +136,12 @@ class _MainShellState extends State<MainShell> {
     return <String>['Rally'];
   }
 
-  String _getTitle(Translations t) {
+  String _getTitle(Translations t, int index) {
     // For MainShell, just use the tab title
-    return _getScreenTitle(t);
+    return _getScreenTitle(t, index);
   }
 
   List<Widget>? _buildHeaderActions(int index) {
-    // Show back button for nested routes
-    // REMOVED as per user request
-
     // Profile tab: show settings button
     if (index == 3) {
       return <Widget>[
@@ -144,130 +159,80 @@ class _MainShellState extends State<MainShell> {
     return null;
   }
 
-  /// Handle back navigation for top-level routes.
-  /// - Non-home tabs (chat, explore, profile) → go to home
-  /// - Home tab → show 'tap again to exit' snackbar
-  /// Returns true if we handled the navigation, false to allow app exit.
-  Future<bool> _handleBackNavigation() async {
-    // Use GoRouter's location to determine current route - this is more reliable
-    // than navigationShell.currentIndex after hot reload
-    final GoRouter router = GoRouter.of(context);
-    final String currentPath = router.routerDelegate.currentConfiguration.uri.path;
-    final Translations t = Translations.of(context);
-
-    // Determine if we're on home based on actual router location
-    final bool isOnHome = currentPath == AppRoutes.home || currentPath == '/';
-
-    // If not on home, navigate to home using context.go()
-    // This is more reliable than goBranch() after hot reload
-    if (!isOnHome) {
-      context.go(AppRoutes.home);
-      return true;
-    }
-
-    // On home tab - implement double-tap-to-exit
-    final DateTime now = DateTime.now();
-    if (_lastBackPressTime != null &&
-        now.difference(_lastBackPressTime!) < const Duration(seconds: 2)) {
-      // Second tap within 2 seconds - allow exit
-      return false;
-    }
-
-    // First tap - show snackbar and block exit
-    _lastBackPressTime = now;
-    showInfoSnackBar(context, t.common.tapAgainToExit);
-    return true;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final int currentIndex = widget.navigationShell.currentIndex;
+    final int currentIndex = _getCurrentIndex(context);
     final Translations t = Translations.of(context);
     final List<NavItemData> navItems = _buildNavItems(t);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    // Wrap with PopScope to handle back navigation.
-    // - On non-home tabs: go to home
-    // - On home tab: show 'tap again to exit' snackbar
-    return PopScope(
-      canPop: false, // Always block pop, we handle it ourselves
-      onPopInvokedWithResult: (bool didPop, dynamic result) async {
-        if (!didPop) {
-          final bool handled = await _handleBackNavigation();
-          if (!handled) {
-            // Use SystemNavigator.pop() for clean app exit
-            // This bypasses any stale navigation state after hot reload
-            await SystemNavigator.pop();
+    return Scaffold(
+      backgroundColor: colorScheme.surface,
+      extendBody: true, // Content flows behind navbar for floating effect
+      extendBodyBehindAppBar: true,
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: (UserScrollNotification notification) {
+          if (notification.direction == ScrollDirection.reverse && _isNavbarVisible) {
+            setState(() => _isNavbarVisible = false);
+          } else if (notification.direction == ScrollDirection.forward && !_isNavbarVisible) {
+            setState(() => _isNavbarVisible = true);
           }
-        }
-      },
-      child: Scaffold(
-        backgroundColor: colorScheme.surface,
-        extendBody: true, // Content flows behind navbar for floating effect
-        extendBodyBehindAppBar: true,
-        body: NotificationListener<UserScrollNotification>(
-          onNotification: (UserScrollNotification notification) {
-            if (notification.direction == ScrollDirection.reverse && _isNavbarVisible) {
-              setState(() => _isNavbarVisible = false);
-            } else if (notification.direction == ScrollDirection.forward && !_isNavbarVisible) {
-              setState(() => _isNavbarVisible = true);
-            }
-            return false;
-          },
-          child: Stack(
-            children: <Widget>[
-              // 1. Main Content (Tabs)
-              Positioned.fill(
-                child: Builder(
-                  builder: (BuildContext context) {
-                    final double headerHeight = Responsive.h(context, 60);
-                    final EdgeInsets currentPadding = MediaQuery.paddingOf(context);
+          return false;
+        },
+        child: Stack(
+          children: <Widget>[
+            // 1. Main Content (The child widget - Chat/Home/etc)
+            Positioned.fill(
+              child: Builder(
+                builder: (BuildContext context) {
+                  final double headerHeight = Responsive.h(context, 60);
+                  final EdgeInsets currentPadding = MediaQuery.paddingOf(context);
 
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(
-                        padding: currentPadding.copyWith(top: currentPadding.top + headerHeight),
-                      ),
-                      child: widget.navigationShell,
-                    );
-                  },
+                  // Inject padding for the fixed header
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      padding: currentPadding.copyWith(top: currentPadding.top + headerHeight),
+                    ),
+                    child: widget.child,
+                  );
+                },
+              ),
+            ),
+
+            // 2. Overlaid Header (Slide Up to hide)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: Responsive.h(context, 60) + MediaQuery.paddingOf(context).top,
+              child: AnimatedSlide(
+                duration: const Duration(milliseconds: 700),
+                curve: Curves.easeOutCubic,
+                offset: _isNavbarVisible ? Offset.zero : const Offset(0, -1),
+                child: CustomScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  slivers: <Widget>[
+                    SliverAppHeader(
+                      title: _getTitle(t, currentIndex),
+                      breadcrumbs: _getBreadcrumbs(),
+                      actions: _buildHeaderActions(currentIndex),
+                    ),
+                  ],
                 ),
               ),
-
-              // 2. Overlaid Header (Slide Up to hide)
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: Responsive.h(context, 60) + MediaQuery.paddingOf(context).top,
-                child: AnimatedSlide(
-                  duration: const Duration(milliseconds: 700),
-                  curve: Curves.easeOutCubic,
-                  offset: _isNavbarVisible ? Offset.zero : const Offset(0, -1),
-                  child: CustomScrollView(
-                    physics: const NeverScrollableScrollPhysics(),
-                    slivers: <Widget>[
-                      SliverAppHeader(
-                        title: _getTitle(t),
-                        breadcrumbs: _getBreadcrumbs(),
-                        actions: _buildHeaderActions(currentIndex),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-        bottomNavigationBar: AnimatedSlide(
-          duration: const Duration(milliseconds: 700),
-          curve: Curves.easeOutCubic,
-          offset: _isNavbarVisible ? Offset.zero : const Offset(0, 1),
-          child: AppBottomNavBar(
-            currentIndex: currentIndex,
-            onIndexChanged: _onTabSelected,
-            onActionPressed: _onActionPressed,
-            items: navItems,
-          ),
+      ),
+      bottomNavigationBar: AnimatedSlide(
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeOutCubic,
+        offset: _isNavbarVisible ? Offset.zero : const Offset(0, 1),
+        child: AppBottomNavBar(
+          currentIndex: currentIndex,
+          onIndexChanged: _onTabSelected,
+          onActionPressed: _onActionPressed,
+          items: navItems,
         ),
       ),
     );

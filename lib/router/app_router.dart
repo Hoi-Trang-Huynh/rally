@@ -37,13 +37,13 @@ class AppRoutes {
   static const String home = '/home';
 
   /// Chat tab route.
-  static const String chat = '/chat';
+  static const String chat = '/home/chat';
 
   /// Explore tab route.
-  static const String explore = '/explore';
+  static const String explore = '/home/explore';
 
   /// Profile tab route.
-  static const String profile = '/profile';
+  static const String profile = '/home/profile';
 
   /// User profile route (standalone, pushes onto stack).
   static const String userProfilePath = '/user/:userId';
@@ -60,17 +60,6 @@ class AppRoutes {
   /// Feedback route (full screen, no shell).
   static const String feedback = '/feedback';
 }
-
-/// Navigator keys for each shell branch.
-/// These allow proper back navigation within nested routes.
-final GlobalKey<NavigatorState> _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
-final GlobalKey<NavigatorState> _chatNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'chat');
-final GlobalKey<NavigatorState> _exploreNavigatorKey = GlobalKey<NavigatorState>(
-  debugLabel: 'explore',
-);
-final GlobalKey<NavigatorState> _profileNavigatorKey = GlobalKey<NavigatorState>(
-  debugLabel: 'profile',
-);
 
 /// Provider for the go_router instance.
 final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
@@ -160,61 +149,36 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
         },
       ),
 
-      // Main app with bottom navigation (StatefulShellRoute)
-      StatefulShellRoute.indexedStack(
-        builder: (
-          BuildContext context,
-          GoRouterState state,
-          StatefulNavigationShell navigationShell,
-        ) {
-          return MainShell(navigationShell: navigationShell);
+      // Main app with bottom navigation (ShellRoute)
+      ShellRoute(
+        builder: (BuildContext context, GoRouterState state, Widget child) {
+          return MainShell(child: child);
         },
-        branches: <StatefulShellBranch>[
-          // Home branch (index 0)
-          StatefulShellBranch(
-            navigatorKey: _homeNavigatorKey,
+        routes: <RouteBase>[
+          // Home is the parent route for the shell content
+          GoRoute(
+            path: AppRoutes.home,
+            pageBuilder:
+                (BuildContext context, GoRouterState state) =>
+                    const NoTransitionPage<void>(child: HomeScreen()),
             routes: <RouteBase>[
+              // Chat sub-route
               GoRoute(
-                path: AppRoutes.home,
-                pageBuilder:
-                    (BuildContext context, GoRouterState state) =>
-                        const NoTransitionPage<void>(child: HomeScreen()),
-              ),
-            ],
-          ),
-
-          // Chat branch (index 1)
-          StatefulShellBranch(
-            navigatorKey: _chatNavigatorKey,
-            routes: <RouteBase>[
-              GoRoute(
-                path: AppRoutes.chat,
+                path: 'chat', // /home/chat
                 pageBuilder:
                     (BuildContext context, GoRouterState state) =>
                         const NoTransitionPage<void>(child: ChatScreen()),
               ),
-            ],
-          ),
-
-          // Explore branch (index 2)
-          StatefulShellBranch(
-            navigatorKey: _exploreNavigatorKey,
-            routes: <RouteBase>[
+              // Explore sub-route
               GoRoute(
-                path: AppRoutes.explore,
+                path: 'explore', // /home/explore
                 pageBuilder:
                     (BuildContext context, GoRouterState state) =>
                         const NoTransitionPage<void>(child: DiscoveryScreen()),
               ),
-            ],
-          ),
-
-          // Profile branch (index 3)
-          StatefulShellBranch(
-            navigatorKey: _profileNavigatorKey,
-            routes: <RouteBase>[
+              // Profile sub-route
               GoRoute(
-                path: AppRoutes.profile,
+                path: 'profile', // /home/profile
                 pageBuilder:
                     (BuildContext context, GoRouterState state) =>
                         const NoTransitionPage<void>(child: ProfileScreen()),
