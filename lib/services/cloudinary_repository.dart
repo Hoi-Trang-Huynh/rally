@@ -81,3 +81,5 @@ class CloudinaryRepository {
     return ProfileResponse.fromJson(response as Map<String, dynamic>);
   }
 }
+
+/// Provider for [CloudinaryRepository].

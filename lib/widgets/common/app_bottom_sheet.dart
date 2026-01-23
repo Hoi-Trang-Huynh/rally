@@ -192,7 +192,7 @@ class _SheetContainer extends StatelessWidget {
               Responsive.w(context, 24),
               Responsive.h(context, 16),
               Responsive.w(context, 24),
-              Responsive.h(context, 16),
+              0,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -206,10 +206,22 @@ class _SheetContainer extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (action != null) action!,
               ],
             ),
           ),
+          if (action != null)
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  Responsive.w(context, 24),
+                  0,
+                  Responsive.w(context, 24),
+                  0,
+                ),
+                child: action!,
+              ),
+            ),
           if (showDivider) const Divider(height: 1),
           // Body - wrapped in Flexible to prevent overflow
           if (isFixed) Flexible(child: SingleChildScrollView(child: child)) else child,

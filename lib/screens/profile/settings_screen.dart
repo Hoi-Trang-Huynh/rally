@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/app_user.dart';
@@ -11,6 +12,7 @@ import '../../providers/locale_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../router/app_router.dart';
 import '../../utils/responsive.dart';
+import '../../widgets/navigation/secondary_shell.dart';
 import 'language_screen.dart';
 import 'widgets/modern_settings_tile.dart';
 import 'widgets/profile_avatar.dart';
@@ -39,17 +41,8 @@ class SettingsScreen extends ConsumerWidget {
 
     return userAsync.when(
       data: (AppUser? user) {
-        return Scaffold(
-          backgroundColor: colorScheme.surface,
-          appBar: AppBar(
-            backgroundColor: colorScheme.surface,
-            surfaceTintColor: Colors.transparent,
-            centerTitle: true,
-            title: Text(
-              t.settings.title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
-            ),
-          ),
+        return SecondaryShell(
+          title: t.settings.title,
           body: AnimationLimiter(
             child: SingleChildScrollView(
               padding: EdgeInsets.only(bottom: Responsive.h(context, 32)),
@@ -158,11 +151,20 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                           ),
                           SizedBox(height: Responsive.h(context, 8)),
-                          Text(
-                            'Version 1.0.0', // TODO: Get actual version
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodySmall?.copyWith(color: colorScheme.outline),
+                          FutureBuilder<PackageInfo>(
+                            future: PackageInfo.fromPlatform(),
+                            builder: (BuildContext context, AsyncSnapshot<PackageInfo> snapshot) {
+                              final String version =
+                                  snapshot.hasData
+                                      ? '${t.settings.version} ${snapshot.data!.version} (${snapshot.data!.buildNumber})'
+                                      : '${t.settings.version} ...';
+                              return Text(
+                                version,
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.copyWith(color: colorScheme.outline),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -174,9 +176,10 @@ class SettingsScreen extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () => const SecondaryShell(body: Center(child: CircularProgressIndicator())),
       error:
-          (Object error, StackTrace stack) => Scaffold(body: Center(child: Text('Error: $error'))),
+          (Object error, StackTrace stack) =>
+              SecondaryShell(body: Center(child: Text('Error: $error'))),
     );
   }
 

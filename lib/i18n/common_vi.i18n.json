@@ -22,5 +22,6 @@
   },
   "errorLoadingProfile": "Không thể tải hồ sơ",
   "goBack": "Quay lại",
-  "retry": "Thử lại"
+  "retry": "Thử lại",
+  "tapAgainToExit": "Nhấn lại để thoát"
 }

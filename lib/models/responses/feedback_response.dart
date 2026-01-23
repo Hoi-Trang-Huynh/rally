@@ -14,8 +14,8 @@ class FeedbackResponse {
   /// The feedback comment text.
   final String comment;
 
-  /// Optional image URL attached to feedback.
-  final String? imageUrl;
+  /// List of attachment URLs for the feedback.
+  final List<String> attachmentUrls;
 
   /// List of category values for the feedback.
   final List<String> categories;
@@ -35,7 +35,7 @@ class FeedbackResponse {
     required this.username,
     this.avatarUrl,
     required this.comment,
-    this.imageUrl,
+    this.attachmentUrls = const <String>[],
     required this.categories,
     required this.resolved,
     this.createdAt,
@@ -49,7 +49,9 @@ class FeedbackResponse {
       username: json['username'] as String? ?? '',
       avatarUrl: json['avatar_url'] as String?,
       comment: json['comment'] as String? ?? '',
-      imageUrl: json['image_url'] as String?,
+      attachmentUrls:
+          (json['attachment_urls'] as List<dynamic>?)?.map((dynamic e) => e as String).toList() ??
+          <String>[],
       categories:
           (json['categories'] as List<dynamic>?)?.map((dynamic e) => e as String).toList() ??
           <String>[],
@@ -68,7 +70,7 @@ class FeedbackResponse {
       'username': username,
       'avatar_url': avatarUrl,
       'comment': comment,
-      'image_url': imageUrl,
+      'attachment_urls': attachmentUrls,
       'categories': categories,
       'resolved': resolved,
       'created_at': createdAt?.toIso8601String(),

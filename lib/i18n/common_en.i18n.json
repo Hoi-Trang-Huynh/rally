@@ -22,5 +22,6 @@
   },
   "errorLoadingProfile": "Failed to load profile",
   "goBack": "Go Back",
-  "retry": "Retry"
+  "retry": "Retry",
+  "tapAgainToExit": "Tap back again to exit"
 }

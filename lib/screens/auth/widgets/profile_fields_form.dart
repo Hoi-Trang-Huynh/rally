@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
-import 'package:rally/screens/auth/widgets/auth_primary_button.dart';
+import 'package:rally/screens/auth/widgets/auth_filled_button.dart';
 import 'package:rally/screens/auth/widgets/auth_text_field.dart';
 import 'package:rally/utils/responsive.dart';
 
@@ -78,7 +78,7 @@ class ProfileFieldsForm extends StatelessWidget {
           ],
         ),
         SizedBox(height: Responsive.h(context, 24)),
-        AuthPrimaryButton(
+        AuthFilledButton(
           text: t.common.continueButton,
           onPressed: onContinue,
           isLoading: isLoading,

@@ -71,9 +71,9 @@ workflows:
           STATE_FILE="$CM_BUILD_DIR/state.env"
           touch "$STATE_FILE"
           set +e
-          flutter build apk --release
+          flutter build apk --release --build-number=$BUILD_NUMBER
           BUILD_ANDROID_APK_EXIT_CODE=$?
-          flutter build appbundle --release
+          flutter build appbundle --release --build-number=$BUILD_NUMBER
           BUILD_ANDROID_AAB_EXIT_CODE=$?
           
           # Consider Android successful only if both succeed
@@ -117,86 +117,6 @@ workflows:
 
           echo "Token acquired."
           echo "TOKEN=$TOKEN" >> "$STATE_FILE"
-
-      - name: Upload Android build to SharePoint
-        script: |
-          STATE_FILE="$CM_BUILD_DIR/state.env"
-          source "$STATE_FILE"
-
-          if [ -z "$TOKEN" ]; then
-            echo "No OAuth token available — skipping upload"
-            exit 0
-          fi
-
-          if [ "$BUILD_ANDROID_EXIT_CODE" != "0" ]; then
-            echo "Android build failed - skipping upload"
-            exit 0
-          fi
-          
-          set -e
-          BASE_FOLDER="Frontend/Builds"
-
-          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr -d '\r')
-          VERSION_BUILD="${VERSION}+${BUILD_NUMBER}"
-          PLATFORM_FOLDER="Android"
-          BUILD_FOLDER="$BASE_FOLDER/$VERSION_BUILD/$PLATFORM_FOLDER"
-
-          echo "Preparing Android upload → $BUILD_FOLDER"
-
-          for FOLDER in "$BASE_FOLDER" "$BASE_FOLDER/$VERSION_BUILD" "$BUILD_FOLDER"; do
-              echo "Ensuring folder exists: $FOLDER"
-              EXISTS=$(curl -s -H "Authorization: Bearer $TOKEN" \
-              "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER" | jq -r '.id // empty')
-              echo "  Found $FOLDER"
-              if [ -z "$EXISTS" ]; then
-              # Create folder if not exist
-              echo "  Creating $FOLDER..."
-              FOLDER_RESPONSE=$(curl -s -X PUT \
-                  -H "Authorization: Bearer $TOKEN" \
-                  -H "Content-Type: application/json" \
-                  -d '{"folder": {}, "@microsoft.graph.conflictBehavior": "fail"}' \
-                  "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$FOLDER")
-              fi
-          done
-
-          upload_file() {
-            local FILE_PATH="$1"
-            local MIME_TYPE="$2"
-            local FILE_NAME=$(basename "$FILE_PATH")
-
-            if [ ! -f "$FILE_PATH" ]; then
-              echo "File not found: $FILE_PATH — skipping"
-              return
-            fi
-
-            echo "⬆ Uploading $FILE_NAME..."
-            START_TIME=$(date +%s)
-
-            RESPONSE=$(curl -s -w "%{http_code}" -o upload_result.json \
-              -X PUT \
-              -H "Authorization: Bearer $TOKEN" \
-              -H "Content-Type: $MIME_TYPE" \
-              --data-binary @"$FILE_PATH" \
-              "https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/$BUILD_FOLDER/$FILE_NAME:/content")
-
-            END_TIME=$(date +%s)
-            DURATION=$((END_TIME - START_TIME))
-
-            if [ "$RESPONSE" != "201" ] && [ "$RESPONSE" != "200" ]; then
-              echo "Upload failed for $FILE_NAME (HTTP $RESPONSE)"
-              cat upload_result.json
-              return
-            fi
-
-            FILE_WEBURL=$(jq -r '.webUrl' upload_result.json)
-            echo "✅ Uploaded: $FILE_WEBURL"
-            echo "⏱ Duration: ${DURATION}s"
-          }
-
-          upload_file "build/app/outputs/bundle/release/app-release.aab" "application/octet-stream"
-          upload_file "build/app/outputs/flutter-apk/app-release.apk" "application/vnd.android.package-archive"
-
-
 
     artifacts:
       - build/app/outputs/flutter-apk/*.apk

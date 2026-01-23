@@ -18,21 +18,21 @@ class FeedbackRepository {
   /// [comment] The feedback comment text (required).
   /// [categories] List of category values (e.g., 'ui', 'bug', 'feature').
   /// [avatarUrl] Optional avatar URL of the submitter.
-  /// [imageUrl] Optional image URL attached to feedback.
+  /// [attachmentUrls] Optional list of attachment URLs.
   /// Returns a [FeedbackResponse] containing the created feedback.
   Future<FeedbackResponse> submitFeedback({
     required String username,
     required String comment,
     required List<String> categories,
     String? avatarUrl,
-    String? imageUrl,
+    List<String>? attachmentUrls,
   }) async {
     final Map<String, dynamic> body = <String, dynamic>{
       'username': username,
       'comment': comment,
       'categories': categories,
       if (avatarUrl != null) 'avatar_url': avatarUrl,
-      if (imageUrl != null) 'image_url': imageUrl,
+      if (attachmentUrls != null) 'attachment_urls': attachmentUrls,
     };
 
     final dynamic response = await _apiClient.post('/api/v1/feedback', body: body);

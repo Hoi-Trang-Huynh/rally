@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/providers/auth_provider.dart';
-import 'package:rally/screens/auth/widgets/auth_google_button.dart';
-import 'package:rally/screens/auth/widgets/auth_primary_button.dart';
+import 'package:rally/screens/auth/widgets/auth_filled_button.dart';
 import 'package:rally/screens/auth/widgets/auth_text_field.dart';
 import 'package:rally/screens/auth/widgets/or_divider.dart';
 import 'package:rally/utils/auth_helpers.dart';
@@ -125,7 +124,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
           SizedBox(height: Responsive.h(context, 16)),
 
-          AuthPrimaryButton(
+          AuthFilledButton(
             text: t.common.continueButton,
             onPressed: anyLoading ? null : _signIn,
             isLoading: _isSignInLoading,
@@ -136,8 +135,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           SizedBox(height: Responsive.h(context, 16)),
 
           // Google Button
-          AuthGoogleButton(
+          AuthFilledButton(
             text: t.auth.login.google,
+            style: AuthButtonStyle.outlined,
+            icon: Image.asset(
+              'assets/images/google_logo.png',
+              height: Responsive.w(context, 24),
+              width: Responsive.w(context, 24),
+              errorBuilder:
+                  (BuildContext context, Object error, StackTrace? stackTrace) =>
+                      Icon(Icons.g_mobiledata, size: Responsive.w(context, 28)),
+            ),
             onPressed: anyLoading ? null : _signInWithGoogle,
             isLoading: _isGoogleLoading,
           ),

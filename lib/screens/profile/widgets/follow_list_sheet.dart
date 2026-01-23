@@ -165,9 +165,8 @@ class _FollowListSheetState extends ConsumerState<FollowListSheet>
       // Navigate to own profile tab
       context.go(AppRoutes.profile);
     } else {
-      // Navigate to user profile
-      final String encodedUsername = Uri.encodeComponent(user.username);
-      context.go('${AppRoutes.explore}/user/${user.id}?username=$encodedUsername');
+      // Push to user profile (maintains back stack)
+      context.push(AppRoutes.userProfile(user.id));
     }
   }
 
@@ -201,12 +200,12 @@ class _FollowListSheetState extends ConsumerState<FollowListSheet>
               child: TabBar(
                 controller: _tabController,
                 indicator: BoxDecoration(
-                  color: colorScheme.primaryContainer,
+                  color: colorScheme.primary,
                   borderRadius: BorderRadius.circular(Responsive.w(context, 10)),
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 dividerColor: Colors.transparent,
-                labelColor: colorScheme.onPrimaryContainer,
+                labelColor: colorScheme.onPrimary,
                 unselectedLabelColor: colorScheme.onSurfaceVariant,
                 labelStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
                 unselectedLabelStyle: textTheme.labelLarge,
