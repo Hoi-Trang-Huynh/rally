@@ -6,7 +6,12 @@ import 'package:flutter/material.dart';
 /// for each navigation destination in the bottom nav bar.
 class NavItemData {
   /// Creates a new [NavItemData].
-  const NavItemData({required this.icon, required this.activeIcon, required this.label});
+  const NavItemData({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.iconSize,
+  });
 
   /// The icon displayed when this item is not selected.
   final IconData icon;
@@ -16,4 +21,7 @@ class NavItemData {
 
   /// The label text displayed below the icon.
   final String label;
+
+  /// The size of the icon.
+  final double iconSize;
 }
