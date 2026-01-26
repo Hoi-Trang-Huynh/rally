@@ -58,10 +58,7 @@ class NavBarItem extends StatelessWidget {
                   isSelected ? item.activeIcon : item.icon,
                   key: ValueKey<bool>(isSelected),
                   color: isSelected ? activeColor : inactiveColor,
-                  size:
-                      (item.icon == Icons.forum || item.icon == Icons.forum_outlined)
-                          ? Responsive.w(context, 28)
-                          : Responsive.w(context, 30),
+                  size: Responsive.w(context, item.iconSize),
                 ),
               ),
             ),

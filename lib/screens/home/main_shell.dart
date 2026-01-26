@@ -55,13 +55,29 @@ class _MainShellState extends State<MainShell> {
   /// Build navigation items with translations.
   List<NavItemData> _buildNavItems(Translations t) {
     return <NavItemData>[
-      NavItemData(icon: Icons.home_outlined, activeIcon: Icons.home_rounded, label: t.nav.home),
-      NavItemData(icon: Icons.forum_outlined, activeIcon: Icons.forum, label: t.nav.chat),
-      NavItemData(icon: Icons.search_outlined, activeIcon: Icons.search, label: t.nav.explore),
       NavItemData(
-        icon: Icons.account_circle_outlined,
-        activeIcon: Icons.account_circle,
+        icon: Icons.home_outlined,
+        activeIcon: Icons.home_rounded,
+        label: t.nav.home,
+        iconSize: 30,
+      ),
+      NavItemData(
+        icon: Icons.forum_outlined,
+        activeIcon: Icons.forum,
+        label: t.nav.chat,
+        iconSize: 26,
+      ),
+      NavItemData(
+        icon: Icons.explore_outlined,
+        activeIcon: Icons.explore,
+        label: t.nav.explore,
+        iconSize: 30,
+      ),
+      NavItemData(
+        icon: Icons.person_outlined,
+        activeIcon: Icons.person,
         label: t.nav.profile,
+        iconSize: 32,
       ),
     ];
   }

@@ -10,6 +10,7 @@ import 'package:rally/screens/chat/chat_screen.dart';
 import 'package:rally/screens/discovery/discovery_screen.dart';
 import 'package:rally/screens/home/home_screen.dart';
 import 'package:rally/screens/home/main_shell.dart';
+import 'package:rally/screens/loading/app_loading.dart';
 import 'package:rally/screens/onboarding/onboarding_screen.dart';
 import 'package:rally/screens/profile/edit_profile_screen.dart';
 import 'package:rally/screens/profile/feedback_screen.dart';
@@ -21,6 +22,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Route names for the app.
 class AppRoutes {
+  /// Splash screen route (shown during app initialization).
+  static const String splash = '/splash';
+
   /// Onboarding screen route.
   static const String onboarding = '/onboarding';
 
@@ -61,28 +65,63 @@ class AppRoutes {
   static const String feedback = '/feedback';
 }
 
+/// Notifier that triggers router refresh when auth state changes.
+class _AuthChangeNotifier extends ChangeNotifier {
+  _AuthChangeNotifier(this._ref) {
+    _ref.listen(appUserProvider, (_, __) => notifyListeners());
+  }
+
+  final Ref _ref;
+}
+
+/// Provider for the auth change notifier.
+final Provider<_AuthChangeNotifier> _authChangeNotifierProvider =
+    Provider<_AuthChangeNotifier>((Ref ref) {
+  return _AuthChangeNotifier(ref);
+});
+
 /// Provider for the go_router instance.
 final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
-  // Only watch auth state changes (login/logout/profile completion)
-  // to avoid rebuilding router on minor user updates (like name/bio changes)
-  final bool isLoggedIn = ref.watch(
-    appUserProvider.select((AsyncValue<AppUser?> s) => s.valueOrNull != null),
-  );
-  final bool needsProfileCompletion = ref.watch(
-    appUserProvider.select(
-      (AsyncValue<AppUser?> s) => s.valueOrNull?.needsProfileCompletion ?? false,
-    ),
-  );
+  final _AuthChangeNotifier authChangeNotifier = ref.watch(_authChangeNotifierProvider);
 
   return GoRouter(
-    initialLocation: AppRoutes.home,
+    initialLocation: AppRoutes.splash,
     debugLogDiagnostics: true,
+    refreshListenable: authChangeNotifier,
     redirect: (BuildContext context, GoRouterState state) {
+      // Read (not watch) auth state in redirect to avoid router recreation
+      final AsyncValue<AppUser?> authState = ref.read(appUserProvider);
+      final bool isLoading = authState.isLoading;
+      final bool isLoggedIn = authState.valueOrNull != null;
+      final bool needsProfileCompletion =
+          authState.valueOrNull?.needsProfileCompletion ?? false;
+
+      final bool isOnSplash = state.matchedLocation == AppRoutes.splash;
       final bool isOnAuthRoute =
           state.matchedLocation.startsWith('/login') ||
           state.matchedLocation.startsWith('/signup') ||
           state.matchedLocation.startsWith('/onboarding') ||
           state.matchedLocation.startsWith('/profile-completion');
+
+      // While auth is loading, show splash screen (only during initial boot)
+      // If already on auth routes (login/signup), stay there during login process
+      if (isLoading) {
+        if (isOnSplash || isOnAuthRoute) {
+          return null; // Stay on current screen
+        }
+        return AppRoutes.splash;
+      }
+
+      // Auth finished loading - redirect away from splash
+      if (isOnSplash) {
+        if (isLoggedIn) {
+          return needsProfileCompletion ? AppRoutes.profileCompletion : AppRoutes.home;
+        } else {
+          final SharedPreferences? prefs = ref.read(sharedPrefsServiceProvider);
+          final bool onboardingSeen = prefs?.getBool(SharedPrefKeys.onboardingSeen) ?? false;
+          return onboardingSeen ? AppRoutes.login : AppRoutes.onboarding;
+        }
+      }
 
       // If not logged in and not on auth route, redirect to onboarding/login
       if (!isLoggedIn && !isOnAuthRoute) {
@@ -106,6 +145,11 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
       return null; // No redirect
     },
     routes: <RouteBase>[
+      // Splash screen (shown during app initialization)
+      GoRoute(
+        path: AppRoutes.splash,
+        builder: (BuildContext context, GoRouterState state) => const AppLoadingScreen(),
+      ),
       // Auth routes (outside shell)
       GoRoute(
         path: AppRoutes.onboarding,
