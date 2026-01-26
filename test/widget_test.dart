@@ -1,30 +1,34 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+/// Rally App Test Suite
+///
+/// Tests are organized into the following structure:
+///
+/// ```
+/// test/
+/// ├── unit/           # Unit tests (pure logic, no UI)
+/// │   ├── models/     # Model class tests
+/// │   ├── services/   # Service/repository tests
+/// │   └── utils/      # Utility function tests
+/// ├── widget/         # Widget tests (isolated UI components)
+/// │   └── common/     # Common widget tests
+/// └── integration/    # Integration tests (full app flows)
+/// ```
+///
+/// Run all tests: `flutter test`
+/// Run specific test: `flutter test test/unit/models/app_user_test.dart`
+/// Run with coverage: `flutter test --coverage`
+library;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:rally/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const RallyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  group('Rally Test Suite', () {
+    test('test suite is configured correctly', () {
+      // This is a placeholder test to verify the test infrastructure works.
+      // Actual tests are in subdirectories:
+      // - test/unit/
+      // - test/widget/
+      // - test/integration/
+      expect(true, isTrue);
+    });
   });
 }

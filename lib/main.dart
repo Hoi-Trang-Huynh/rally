@@ -15,14 +15,20 @@ import 'package:rally/router/app_router.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:rally/themes/app_colors.dart';
 import 'package:rally/themes/app_theme.dart';
+import 'package:rally/utils/error_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Entry point for the Rally app.
 ///
 /// Initializes Flutter bindings, disables Google Fonts runtime fetching,
-/// loads environment variables, initializes Firebase, and runs the app.
+/// loads environment variables, initializes Firebase, sets up global error
+/// handling, and runs the app.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize global error handling early to catch initialization errors
+  ErrorHandler.initialize();
+
   GoogleFonts.config.allowRuntimeFetching = false;
 
   try {
