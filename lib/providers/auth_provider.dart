@@ -15,35 +15,61 @@ final StreamProvider<User?> authStateChangesProvider = StreamProvider<User?>((Re
   return ref.watch(authRepositoryProvider).authStateChanges;
 });
 
+/// Provider for fetching the current user's profile from backend.
+///
+/// This is separate from auth state so it can be refreshed independently
+/// (e.g., after avatar upload) without triggering a full auth reload.
+final FutureProvider<ProfileResponse?> myProfileProvider = FutureProvider<ProfileResponse?>((
+  Ref ref,
+) async {
+  final User? firebaseUser = ref.watch(authStateChangesProvider).valueOrNull;
+  if (firebaseUser == null) return null;
+
+  // Retry fetching profile up to 3 times with delay
+  for (int i = 0; i < 3; i++) {
+    try {
+      return await ref.read(userRepositoryProvider).getMyProfile();
+    } catch (e) {
+      if (i == 2) return null; // All retries failed
+      await Future<void>.delayed(Duration(milliseconds: 500 * (1 << i)));
+    }
+  }
+  return null;
+});
+
 /// Provider for the current [AppUser].
 ///
-/// This provider fetches user profile data from the backend API when
-/// Firebase auth state changes. Falls back to Firebase user data if
-/// backend fetch fails.
-final StreamProvider<AppUser?> appUserProvider = StreamProvider<AppUser?>((Ref ref) {
-  final AuthRepository authRepository = ref.watch(authRepositoryProvider);
+/// Combines Firebase auth state with backend profile data.
+/// To refresh just the profile (e.g., after avatar update), use:
+/// `ref.invalidate(myProfileProvider)` instead of invalidating this provider.
+final Provider<AsyncValue<AppUser?>> appUserProvider = Provider<AsyncValue<AppUser?>>((Ref ref) {
+  final AsyncValue<User?> authState = ref.watch(authStateChangesProvider);
+  final AsyncValue<ProfileResponse?> profileState = ref.watch(myProfileProvider);
 
-  return authRepository.authStateChanges.asyncMap((User? firebaseUser) async {
-    if (firebaseUser == null) {
-      return null;
-    }
-
-    // Retry fetching profile up to 3 times with delay
-    // This handles the race condition where the backend user record isn't immediately available
-    // after Firebase authentication
-    for (int i = 0; i < 3; i++) {
-      try {
-        final ProfileResponse profile = await ref.read(userRepositoryProvider).getMyProfile();
-        return AppUser.fromProfileResponse(firebaseUid: firebaseUser.uid, profile: profile);
-      } catch (e) {
-        if (i == 2) {
-          // If all retries fail, fall back to Firebase user
-          return AppUser.fromFirebaseUser(firebaseUser);
-        }
-        // Wait before retrying (exponential backoff: 500ms, 1000ms, 2000ms)
-        await Future<void>.delayed(Duration(milliseconds: 500 * (1 << i)));
+  return authState.when(
+    data: (User? firebaseUser) {
+      if (firebaseUser == null) {
+        return const AsyncValue<AppUser?>.data(null);
       }
-    }
-    return AppUser.fromFirebaseUser(firebaseUser);
-  });
+
+      return profileState.when(
+        data: (ProfileResponse? profile) {
+          if (profile != null) {
+            return AsyncValue<AppUser?>.data(
+              AppUser.fromProfileResponse(firebaseUid: firebaseUser.uid, profile: profile),
+            );
+          }
+          // Fallback to Firebase user if profile fetch failed
+          return AsyncValue<AppUser?>.data(AppUser.fromFirebaseUser(firebaseUser));
+        },
+        loading: () => const AsyncValue<AppUser?>.loading(),
+        error: (Object e, StackTrace st) {
+          // Fallback to Firebase user on error
+          return AsyncValue<AppUser?>.data(AppUser.fromFirebaseUser(firebaseUser));
+        },
+      );
+    },
+    loading: () => const AsyncValue<AppUser?>.loading(),
+    error: (Object e, StackTrace st) => AsyncValue<AppUser?>.error(e, st),
+  );
 });

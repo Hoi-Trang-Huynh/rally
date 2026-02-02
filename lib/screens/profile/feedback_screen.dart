@@ -8,12 +8,11 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../i18n/generated/translations.g.dart';
 import '../../models/app_user.dart';
-import '../../models/cloudinary_signature.dart';
 import '../../models/feedback_category.dart';
 import '../../providers/api_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../services/cloudinary_repository.dart';
 import '../../services/feedback_repository.dart';
+import '../../utils/image_upload_helper.dart';
 import '../../utils/responsive.dart';
 
 /// Screen for submitting user feedback.
@@ -75,39 +74,22 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     if (_selectedImages.isEmpty) return <String>[];
 
     setState(() => _isUploading = true);
-    final List<String> uploadedUrls = <String>[];
-    final CloudinaryRepository cloudinary = ref.read(cloudinaryRepositoryProvider);
+    List<ImageUploadResult> results = <ImageUploadResult>[];
 
     try {
-      // Get signature once (can be reused if backend allows, or per image)
-      // Assuming one signature works for standard upload or getting one per image.
-      // Doing one per image to be safe and simple for now.
+      final ImageUploadHelper helper = ref.read(imageUploadHelperProvider);
+      final List<File> files = _selectedImages.map((XFile x) => File(x.path)).toList();
 
-      for (int i = 0; i < _selectedImages.length; i++) {
-        final XFile image = _selectedImages[i];
-        // Create unique ID to prevent overwriting and ensure valid public_id
-        final String uniqueId = '${userId}_${DateTime.now().millisecondsSinceEpoch}_$i';
-
-        final CloudinarySignature signature = await cloudinary.getUploadSignature(
-          userId: uniqueId,
-          folder: 'rally_feedback',
-        );
-
-        final Map<String, dynamic> result = await cloudinary.uploadImage(
-          file: File(image.path),
-          signature: signature,
-          folder: 'rally_feedback',
-        );
-
-        uploadedUrls.add(result['secure_url'] as String);
-      }
-    } catch (e) {
-      rethrow;
+      results = await helper.uploadMultipleImages(
+        files: files,
+        folder: 'rally_feedback',
+        userId: userId,
+      );
     } finally {
       setState(() => _isUploading = false);
     }
 
-    return uploadedUrls;
+    return results.map((ImageUploadResult r) => r.secureUrl).toList();
   }
 
   Future<void> _submitFeedback() async {
@@ -329,7 +311,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 
               // Attachments Section
               Text(
-                'Attachments (Optional, max 3)',
+                t.settings.feedback.attachments,
                 style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
               SizedBox(height: Responsive.h(context, 12)),

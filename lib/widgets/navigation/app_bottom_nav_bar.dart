@@ -99,11 +99,9 @@ class AppBottomNavBar extends StatelessWidget {
                         ),
                         // Center action button with spacing
                         Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            Responsive.w(context, 15),
-                            Responsive.h(context, 2),
-                            Responsive.w(context, 15),
-                            Responsive.h(context, 10),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: Responsive.w(context, 15),
+                            vertical: Responsive.h(context, 2),
                           ),
                           child: NavBarActionButton(
                             onTap: () {

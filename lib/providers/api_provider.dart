@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/services/api_client.dart';
 import 'package:rally/services/cloudinary_repository.dart';
+import 'package:rally/services/rally_repository.dart';
 import 'package:rally/services/user_repository.dart';
+import 'package:rally/utils/image_upload_helper.dart';
 
 /// Provider for the [ApiClient] singleton.
 ///
@@ -27,4 +29,20 @@ final Provider<CloudinaryRepository> cloudinaryRepositoryProvider = Provider<Clo
   Ref ref,
 ) {
   return CloudinaryRepository(ref.watch(apiClientProvider));
+});
+
+/// Provider for the [RallyRepository].
+///
+/// Provides access to rally, event, activity, and participant API operations.
+final Provider<RallyRepository> rallyRepositoryProvider = Provider<RallyRepository>((Ref ref) {
+  return RallyRepository(ref.watch(apiClientProvider));
+});
+
+/// Provider for the [ImageUploadHelper].
+///
+/// Provides consolidated image upload functionality (sign + upload + optional verify).
+final Provider<ImageUploadHelper> imageUploadHelperProvider = Provider<ImageUploadHelper>((
+  Ref ref,
+) {
+  return ImageUploadHelper(ref.watch(cloudinaryRepositoryProvider));
 });

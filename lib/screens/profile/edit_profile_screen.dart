@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:rally/models/cloudinary_signature.dart';
 import 'package:rally/models/responses/availability_response.dart';
 import 'package:rally/screens/auth/widgets/auth_text_field.dart';
-import 'package:rally/services/cloudinary_repository.dart';
+import 'package:rally/utils/image_upload_helper.dart';
 import 'package:rally/widgets/common/app_bottom_sheet.dart';
 
 import '../../i18n/generated/translations.g.dart';
@@ -166,28 +165,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       final AppUser? user = ref.read(appUserProvider).valueOrNull;
       if (user?.id == null) throw Exception('User not found');
 
-      // 2. Get Upload Signature
-      final CloudinaryRepository repo = ref.read(cloudinaryRepositoryProvider);
-      final String folderName = 'rally_avatars';
-      final CloudinarySignature signature = await repo.getUploadSignature(
-        userId: user!.id,
-        folder: folderName,
-      );
+      // 2. Upload and verify avatar using helper
+      final ImageUploadHelper helper = ref.read(imageUploadHelperProvider);
+      await helper.uploadAndVerifyAvatar(file: imageFile, userId: user!.id!);
 
-      // 3. Upload directly to Cloudinary
-      final Map<String, dynamic> result = await repo.uploadImage(
-        file: imageFile,
-        signature: signature,
-        folder: folderName,
-      );
-
-      // 4.
-      await repo.verifyAvatar(
-        publicId: result['public_id'] as String,
-        avatarUrl: result['secure_url'] as String,
-      );
-      // 5. Refresh user provider to confirm new image
-      ref.invalidate(appUserProvider);
+      // 3. Refresh profile provider to confirm new image (not auth provider)
+      ref.invalidate(myProfileProvider);
 
       if (mounted) {
         showSuccessSnackBar(context, 'Avatar updated successfully');
@@ -253,8 +236,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             lastName: _lastNameController.text.trim(),
           );
 
-      // Refresh user state
-      ref.invalidate(appUserProvider);
+      // Refresh profile state (not auth provider)
+      ref.invalidate(myProfileProvider);
 
       if (mounted) {
         showSuccessSnackBar(context, t.settings.saveChanges);

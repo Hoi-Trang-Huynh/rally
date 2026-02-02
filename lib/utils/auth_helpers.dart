@@ -119,9 +119,9 @@ Future<void> handleGoogleSignInWithNavigation({
 
     if (!context.mounted) return;
 
-    // Invalidate the auth provider to ensure we have the latest user data
+    // Invalidate the profile provider to ensure we have the latest user data
     // This is crucial if the user was just registered or their profile updated
-    ref.invalidate(appUserProvider);
+    ref.invalidate(myProfileProvider);
 
     // Existing user - main.dart will handle routing via appUserProvider
   } catch (e) {

@@ -26,6 +26,7 @@
     "submit": "Submit Feedback",
     "success": "Thank you for your feedback!",
     "error": "Failed to submit feedback. Please try again.",
+    "attachments": "Attachments (Optional, max 3)",
     "categories": {
       "uiUx": "UI/UX",
       "bug": "Bug Report",

@@ -26,6 +26,7 @@
     "submit": "Gửi phản hồi",
     "success": "Cảm ơn phản hồi của bạn!",
     "error": "Không thể gửi phản hồi. Vui lòng thử lại.",
+    "attachments": "Tệp đính kèm (Tùy chọn, tối đa 3)",
     "categories": {
       "uiUx": "UI/UX",
       "bug": "Báo lỗi",
