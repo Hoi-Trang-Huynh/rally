@@ -2,6 +2,7 @@ import 'package:rally/models/responses/availability_response.dart';
 import 'package:rally/models/responses/follow_list_response.dart';
 import 'package:rally/models/responses/follow_response.dart';
 import 'package:rally/models/responses/follow_status_response.dart';
+import 'package:rally/models/responses/friend_list_response.dart';
 import 'package:rally/models/responses/login_response.dart';
 import 'package:rally/models/responses/profile_details_response.dart';
 import 'package:rally/models/responses/profile_response.dart';
@@ -222,5 +223,33 @@ class UserRepository {
       queryParams: <String, String>{'page': page.toString(), 'pageSize': pageSize.toString()},
     );
     return FollowListResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Gets a paginated list of mutual friends (users who follow each other).
+  ///
+  /// [userId] The ID of the user to get friends for.
+  /// [query] Optional search query (matches username, first name, or last name).
+  /// [page] The page number (default: 1).
+  /// [pageSize] The number of results per page (default: 20).
+  /// Returns a [FriendListResponse] containing the friends list.
+  Future<FriendListResponse> getFriends({
+    required String userId,
+    String? query,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final Map<String, String> queryParams = <String, String>{
+      'page': page.toString(),
+      'pageSize': pageSize.toString(),
+    };
+    if (query != null && query.isNotEmpty) {
+      queryParams['q'] = query;
+    }
+
+    final dynamic response = await _apiClient.get(
+      '/api/v1/user/$userId/friends',
+      queryParams: queryParams,
+    );
+    return FriendListResponse.fromJson(response as Map<String, dynamic>);
   }
 }

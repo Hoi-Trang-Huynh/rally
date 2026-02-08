@@ -114,19 +114,24 @@ class AppBottomSheet extends StatelessWidget {
   }
 
   Widget _buildDraggableSheet(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: initialChildSize,
-      minChildSize: minChildSize,
-      maxChildSize: maxChildSize,
-      expand: false,
-      builder: (BuildContext context, ScrollController scrollController) {
-        return _SheetContainer(
-          title: title,
-          action: action,
-          showDivider: showDivider,
-          child: Expanded(child: bodyBuilder!(scrollController)),
-        );
-      },
+    final EdgeInsets keyboardInsets = MediaQuery.of(context).viewInsets;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboardInsets.bottom),
+      child: DraggableScrollableSheet(
+        initialChildSize: initialChildSize,
+        minChildSize: minChildSize,
+        maxChildSize: maxChildSize,
+        expand: false,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return _SheetContainer(
+            title: title,
+            action: action,
+            showDivider: showDivider,
+            child: Expanded(child: bodyBuilder!(scrollController)),
+          );
+        },
+      ),
     );
   }
 

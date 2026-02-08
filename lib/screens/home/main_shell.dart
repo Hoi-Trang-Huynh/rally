@@ -10,6 +10,7 @@ import '../../i18n/generated/translations.g.dart';
 import '../../models/nav_item_data.dart';
 import '../../widgets/navigation/app_bottom_nav_bar.dart';
 import '../../widgets/navigation/speed_dial_overlay.dart';
+import '../../widgets/rally/create_rally_bottom_sheet.dart';
 
 /// The main shell screen that hosts the bottom navigation bar.
 ///
@@ -135,13 +136,22 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
+  void _showCreateRallySheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) => const CreateRallyBottomSheet(),
+    );
+  }
+
   List<SpeedDialItem> _buildSpeedDialItems(Translations t) {
     return <SpeedDialItem>[
       SpeedDialItem(
         icon: Icons.flag_rounded,
         label: t.nav.createRally,
         onTap: () {
-          // TODO: Navigate to create rally screen
+          _showCreateRallySheet();
         },
       ),
       SpeedDialItem(

@@ -1,0 +1,6 @@
+[error] Undefined name 'myProfileProvider' (d:\cse\personal projects\rally\lib\widgets\rally\invite_members_sheet.dart:87:49)
+[warning] The type argument(s) of the function 'read' can't be inferred (d:\cse\personal projects\rally\lib\widgets\rally\invite_members_sheet.dart:87:44)
+[error] A value of type 'dynamic' can't be assigned to a variable of type 'ProfileResponse?' (d:\cse\personal projects\rally\lib\widgets\rally\invite_members_sheet.dart:87:40)
+[error] Undefined name 'myProfileProvider' (d:\cse\personal projects\rally\lib\widgets\rally\invite_members_sheet.dart:175:48)
+[warning] The type argument(s) of the function 'watch' can't be inferred (d:\cse\personal projects\rally\lib\widgets\rally\invite_members_sheet.dart:175:42)
+[error] A value of type 'dynamic' can't be assigned to a variable of type 'ProfileResponse?' (d:\cse\personal projects\rally\lib\widgets\rally\invite_members_sheet.dart:175:38)

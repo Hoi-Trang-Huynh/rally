@@ -1,0 +1,59 @@
+{
+  "createRally": {
+    "title": "Tạo Rally",
+    "coverImage": {
+      "title": "Ảnh Bìa",
+      "tapToUpload": "Nhấn để tải lên",
+      "fileFormat": "JPG, PNG (Tối đa 10MB)"
+    },
+    "name": {
+      "title": "Đặt tên Rally",
+      "placeholder": "Nhập tiêu đề Rally của bạn",
+      "maxLength": "{count}/60"
+    },
+    "duration": {
+      "title": "Thời Lượng Rally",
+      "from": "Từ",
+      "to": "Đến",
+      "selectStartDate": "Chọn ngày bắt đầu",
+      "selectEndDate": "Chọn ngày kết thúc",
+      "selectDateHeaderStart": "CHỌN NGÀY BẮT ĐẦU",
+      "selectDateHeaderEnd": "CHỌN NGÀY KẾT THÚC",
+      "today": "Hôm nay"
+    },
+    "inviteMembers": {
+      "title": "Mời Thành Viên",
+      "inviteButton": "Mời",
+      "tapToInvite": "Nhấn để mời thành viên",
+      "memberCount": "{count} thành viên đã mời",
+      "headline": "Mời Bạn Bè Tham Gia Rally",
+      "searchPlaceholder": "Tìm kiếm bạn bè...",
+      "invitedSection": "Đã mời ({count})",
+      "suggestedSection": "Gợi ý",
+      "add": "Thêm",
+      "remove": "Xóa",
+      "added": "Đã thêm",
+      "cancel": "Hủy",
+      "done": "Xong",
+      "noFriends": "Không tìm thấy bạn bè",
+      "noInvitedYet": "Chưa mời thành viên nào"
+    },
+    "description": {
+      "title": "Mô Tả",
+      "placeholder": "Thêm mô tả rally..."
+    },
+    "actions": {
+      "cancel": "Hủy",
+      "create": "Tạo",
+      "continueCreating": "Tiếp tục tạo",
+      "clearDraft": "Xóa bản nháp",
+      "draftRestored": "Đã khôi phục bản nháp"
+    },
+    "validation": {
+      "nameRequired": "Vui lòng nhập tên rally"
+    },
+    "success": {
+      "comingSoon": "Tính năng tạo rally sẽ sớm ra mắt!"
+    }
+  }
+}

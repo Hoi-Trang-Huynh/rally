@@ -1,0 +1,59 @@
+{
+  "createRally": {
+    "title": "Create Rally",
+    "coverImage": {
+      "title": "Cover Image",
+      "tapToUpload": "Tap to upload",
+      "fileFormat": "JPG, PNG (Max 10MB)"
+    },
+    "name": {
+      "title": "Name your Rally",
+      "placeholder": "Enter your Rally title",
+      "maxLength": "{count}/60"
+    },
+    "duration": {
+      "title": "Rally Duration",
+      "from": "From",
+      "to": "To",
+      "selectStartDate": "Select start date",
+      "selectEndDate": "Select end date",
+      "selectDateHeaderStart": "SELECT START DATE",
+      "selectDateHeaderEnd": "SELECT END DATE",
+      "today": "Today"
+    },
+    "inviteMembers": {
+      "title": "Invite Members",
+      "inviteButton": "Invite",
+      "tapToInvite": "Tap to invite members",
+      "memberCount": "{count} member(s) invited",
+      "headline": "Invite Buddies to Rally",
+      "searchPlaceholder": "Search friends...",
+      "invitedSection": "Invited ({count})",
+      "suggestedSection": "Suggested",
+      "add": "Add",
+      "remove": "Remove",
+      "added": "Added",
+      "cancel": "Cancel",
+      "done": "Done",
+      "noFriends": "No friends found",
+      "noInvitedYet": "No members invited yet"
+    },
+    "description": {
+      "title": "Descriptions",
+      "placeholder": "Add rally description..."
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "create": "Create",
+      "continueCreating": "Continue creating",
+      "clearDraft": "Clear draft",
+      "draftRestored": "Draft restored"
+    },
+    "validation": {
+      "nameRequired": "Please enter a rally name"
+    },
+    "success": {
+      "comingSoon": "Rally creation coming soon!"
+    }
+  }
+}

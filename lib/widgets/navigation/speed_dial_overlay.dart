@@ -247,7 +247,7 @@ class _SpeedDialMenuItem extends StatelessWidget {
               height: iconCircleSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: colorScheme.primaryContainer,
+                color: colorScheme.primary,
                 boxShadow: <BoxShadow>[
                   BoxShadow(
                     color: colorScheme.shadow.withValues(alpha: 0.15),
@@ -256,11 +256,7 @@ class _SpeedDialMenuItem extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Icon(
-                item.icon,
-                color: colorScheme.onPrimaryContainer,
-                size: Responsive.w(context, 22),
-              ),
+              child: Icon(item.icon, color: colorScheme.onPrimary, size: Responsive.w(context, 22)),
             ),
           ],
         ),
