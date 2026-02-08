@@ -14,6 +14,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/feedback_repository.dart';
 import '../../utils/image_upload_helper.dart';
 import '../../utils/responsive.dart';
+import '../../utils/validation_constants.dart';
 
 /// Screen for submitting user feedback.
 ///
@@ -41,14 +42,14 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   }
 
   Future<void> _pickImage() async {
-    if (_selectedImages.length >= 3) return;
+    if (_selectedImages.length >= ImageValidation.maxFeedbackImages) return;
 
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
+        maxWidth: ImageValidation.avatarMaxWidth,
+        maxHeight: ImageValidation.avatarMaxHeight,
+        imageQuality: ImageValidation.imageQuality,
       );
 
       if (image != null) {

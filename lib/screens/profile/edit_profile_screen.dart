@@ -15,6 +15,7 @@ import '../../providers/api_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/responsive.dart';
 import '../../utils/ui_helpers.dart';
+import '../../utils/validation_constants.dart';
 import '../../utils/validators.dart';
 import 'widgets/profile_avatar.dart';
 
@@ -142,9 +143,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     try {
       final XFile? image = await _picker.pickImage(
         source: source,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
+        maxWidth: ImageValidation.avatarMaxWidth,
+        maxHeight: ImageValidation.avatarMaxHeight,
+        imageQuality: ImageValidation.imageQuality,
       );
 
       if (image == null) return;

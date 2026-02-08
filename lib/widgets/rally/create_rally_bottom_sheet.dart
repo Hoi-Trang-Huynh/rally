@@ -10,6 +10,7 @@ import 'package:rally/models/rally_draft.dart';
 import 'package:rally/models/responses/follow_list_response.dart';
 import 'package:rally/providers/rally_draft_provider.dart';
 import 'package:rally/utils/responsive.dart';
+import 'package:rally/utils/validation_constants.dart';
 import 'package:rally/widgets/common/app_bottom_sheet.dart';
 import 'package:rally/widgets/common/date_range_picker.dart';
 import 'package:rally/widgets/common/rich_text_editor.dart';
@@ -218,9 +219,9 @@ class _CreateRallyBottomSheetState extends ConsumerState<CreateRallyBottomSheet>
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(
       source: ImageSource.gallery,
-      maxWidth: 1920,
-      maxHeight: 1080,
-      imageQuality: 85,
+      maxWidth: ImageValidation.coverMaxWidth,
+      maxHeight: ImageValidation.coverMaxHeight,
+      imageQuality: ImageValidation.imageQuality,
     );
 
     if (image != null) {
@@ -442,7 +443,7 @@ class _CreateRallyBottomSheetState extends ConsumerState<CreateRallyBottomSheet>
             SizedBox(height: Responsive.h(context, 8)),
             TextField(
               controller: _nameController,
-              maxLength: 60,
+              maxLength: RallyValidation.nameMaxLength,
               buildCounter:
                   (
                     _, {
@@ -654,6 +655,7 @@ class _CreateRallyBottomSheetState extends ConsumerState<CreateRallyBottomSheet>
               focusNode: _descriptionFocusNode,
               hintText: t.rally.createRally.description.placeholder,
               maxLines: 6,
+              maxLength: RallyValidation.descriptionMaxLength,
             ),
 
             SizedBox(height: Responsive.h(context, 32)),

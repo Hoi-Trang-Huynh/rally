@@ -17,6 +17,7 @@ class RichTextEditor extends StatefulWidget {
     this.readOnly = false,
     this.showToolbar = true,
     this.toolbarPosition = ToolbarPosition.top,
+    this.maxLength,
     super.key,
   });
 
@@ -44,6 +45,9 @@ class RichTextEditor extends StatefulWidget {
   /// Position of the toolbar (top or bottom of editor).
   final ToolbarPosition toolbarPosition;
 
+  /// Maximum number of characters allowed.
+  final int? maxLength;
+
   @override
   State<RichTextEditor> createState() => _RichTextEditorState();
 }
@@ -58,9 +62,12 @@ enum ToolbarPosition {
 }
 
 class _RichTextEditorState extends State<RichTextEditor> {
+  int _currentLength = 0;
+
   @override
   void initState() {
     super.initState();
+    _currentLength = widget.controller.document.toPlainText().trim().length;
     // Listen to controller changes to update toolbar button states
     widget.controller.addListener(_onControllerChange);
   }
@@ -71,6 +78,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller.removeListener(_onControllerChange);
       widget.controller.addListener(_onControllerChange);
+      _currentLength = widget.controller.document.toPlainText().trim().length;
     }
   }
 
@@ -81,8 +89,13 @@ class _RichTextEditorState extends State<RichTextEditor> {
   }
 
   void _onControllerChange() {
-    // Trigger rebuild to update toolbar button active states
-    if (mounted) {
+    final int newLength = widget.controller.document.toPlainText().trim().length;
+    if (newLength != _currentLength) {
+      setState(() {
+        _currentLength = newLength;
+      });
+    } else if (mounted) {
+      // Trigger rebuild to update toolbar button active states even if length didn't change
       setState(() {});
     }
   }
@@ -169,68 +182,85 @@ class _RichTextEditorState extends State<RichTextEditor> {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     final bool showToolbarWidget = widget.showToolbar && !widget.readOnly;
+    final bool hasError = widget.maxLength != null && _currentLength > widget.maxLength!;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          // Toolbar at top
-          if (showToolbarWidget && widget.toolbarPosition == ToolbarPosition.top)
-            _buildToolbar(colorScheme),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: <Widget>[
+        Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+            border: hasError ? Border.all(color: colorScheme.error) : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              // Toolbar at top
+              if (showToolbarWidget && widget.toolbarPosition == ToolbarPosition.top)
+                _buildToolbar(colorScheme),
 
-          // Editor
-          Container(
-            constraints: BoxConstraints(
-              minHeight: Responsive.h(context, widget.minLines * 24),
-              maxHeight: Responsive.h(context, widget.maxLines * 24),
-            ),
-            padding: EdgeInsets.symmetric(
-              horizontal: Responsive.w(context, 16),
-              vertical: Responsive.h(context, 12),
-            ),
-            child: QuillEditor.basic(
-              controller: widget.controller,
-              focusNode: widget.focusNode,
-              config: QuillEditorConfig(
-                placeholder: widget.hintText,
-                padding: EdgeInsets.zero,
-                expands: false,
-                autoFocus: false,
-                scrollable: true,
-                customStyles: DefaultStyles(
-                  paragraph: DefaultTextBlockStyle(
-                    textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface) ??
-                        const TextStyle(),
-                    HorizontalSpacing.zero,
-                    VerticalSpacing.zero,
-                    VerticalSpacing.zero,
-                    null,
-                  ),
-                  placeHolder: DefaultTextBlockStyle(
-                    textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                        ) ??
-                        const TextStyle(),
-                    HorizontalSpacing.zero,
-                    VerticalSpacing.zero,
-                    VerticalSpacing.zero,
-                    null,
+              // Editor
+              Container(
+                constraints: BoxConstraints(
+                  minHeight: Responsive.h(context, widget.minLines * 24),
+                  maxHeight: Responsive.h(context, widget.maxLines * 24),
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: Responsive.w(context, 16),
+                  vertical: Responsive.h(context, 12),
+                ),
+                child: QuillEditor.basic(
+                  controller: widget.controller,
+                  focusNode: widget.focusNode,
+                  config: QuillEditorConfig(
+                    placeholder: widget.hintText,
+                    padding: EdgeInsets.zero,
+                    expands: false,
+                    autoFocus: false,
+                    scrollable: true,
+                    customStyles: DefaultStyles(
+                      paragraph: DefaultTextBlockStyle(
+                        textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface) ??
+                            const TextStyle(),
+                        HorizontalSpacing.zero,
+                        VerticalSpacing.zero,
+                        VerticalSpacing.zero,
+                        null,
+                      ),
+                      placeHolder: DefaultTextBlockStyle(
+                        textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                            ) ??
+                            const TextStyle(),
+                        HorizontalSpacing.zero,
+                        VerticalSpacing.zero,
+                        VerticalSpacing.zero,
+                        null,
+                      ),
+                    ),
                   ),
                 ),
               ),
+
+              // Toolbar at bottom
+              if (showToolbarWidget && widget.toolbarPosition == ToolbarPosition.bottom)
+                _buildToolbar(colorScheme),
+            ],
+          ),
+        ),
+        if (widget.maxLength != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4, right: 8),
+            child: Text(
+              '$_currentLength/${widget.maxLength}',
+              style: textTheme.bodySmall?.copyWith(
+                color: hasError ? colorScheme.error : colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
-
-          // Toolbar at bottom
-          if (showToolbarWidget && widget.toolbarPosition == ToolbarPosition.bottom)
-            _buildToolbar(colorScheme),
-        ],
-      ),
+      ],
     );
   }
 }
