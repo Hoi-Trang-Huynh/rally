@@ -1,22 +1,21 @@
 /// Request models for Rally Participant API endpoints.
 library;
 
-/// Request model for inviting a user to a rally.
-///
-/// Used by `POST /api/v1/rallies/{id}/participants`.
+import 'package:rally/models/enums.dart';
+
 class InviteParticipantRequest {
   /// The user ID to invite.
   final String userId;
 
   /// The role to assign (owner, editor, participant).
-  final String? role;
+  final ParticipantRole? role;
 
   /// Creates a new [InviteParticipantRequest].
   const InviteParticipantRequest({required this.userId, this.role});
 
   /// Converts this request to a JSON map.
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{'userId': userId, if (role != null) 'role': role};
+    return <String, dynamic>{'userId': userId, if (role != null) 'role': role!.name};
   }
 }
 
@@ -25,10 +24,10 @@ class InviteParticipantRequest {
 /// Used by `PUT /api/v1/rallies/{id}/participants/{participantId}`.
 class UpdateParticipantRequest {
   /// Updated role (owner, editor, participant).
-  final String? role;
+  final ParticipantRole? role;
 
   /// Updated status (invited, joined).
-  final String? status;
+  final ParticipationStatus? status;
 
   /// Creates a new [UpdateParticipantRequest].
   const UpdateParticipantRequest({this.role, this.status});
@@ -36,6 +35,9 @@ class UpdateParticipantRequest {
   /// Converts this request to a JSON map.
   /// Only includes non-null fields.
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{if (role != null) 'role': role, if (status != null) 'status': status};
+    return <String, dynamic>{
+      if (role != null) 'role': role!.name,
+      if (status != null) 'status': status!.name,
+    };
   }
 }

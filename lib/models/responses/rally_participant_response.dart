@@ -1,3 +1,5 @@
+import 'package:rally/models/enums.dart';
+
 /// Response model for rally participant endpoints.
 ///
 /// Returned by `POST /api/v1/rallies/{id}/participants`
@@ -13,10 +15,10 @@ class RallyParticipantResponse {
   final String userId;
 
   /// The participant's role (owner, editor, participant).
-  final String role;
+  final ParticipantRole role;
 
   /// The participant's status (invited, joined).
-  final String status;
+  final ParticipationStatus status;
 
   /// The user ID of who invited this participant.
   final String? invitedBy;
@@ -32,8 +34,8 @@ class RallyParticipantResponse {
     required this.id,
     required this.rallyId,
     required this.userId,
-    this.role = 'participant',
-    this.status = 'invited',
+    this.role = ParticipantRole.participant,
+    this.status = ParticipationStatus.invited,
     this.invitedBy,
     this.invitedAt,
     this.joinedAt,
@@ -45,8 +47,8 @@ class RallyParticipantResponse {
       id: json['id'] as String? ?? '',
       rallyId: json['rallyId'] as String? ?? '',
       userId: json['userId'] as String? ?? '',
-      role: json['role'] as String? ?? 'participant',
-      status: json['status'] as String? ?? 'invited',
+      role: ParticipantRole.fromString(json['role'] as String? ?? 'participant'),
+      status: ParticipationStatus.fromString(json['status'] as String? ?? 'invited'),
       invitedBy: json['invitedBy'] as String?,
       invitedAt: json['invitedAt'] != null ? DateTime.tryParse(json['invitedAt'] as String) : null,
       joinedAt: json['joinedAt'] != null ? DateTime.tryParse(json['joinedAt'] as String) : null,
@@ -59,8 +61,8 @@ class RallyParticipantResponse {
       'id': id,
       'rallyId': rallyId,
       'userId': userId,
-      'role': role,
-      'status': status,
+      'role': role.name,
+      'status': status.name,
       'invitedBy': invitedBy,
       'invitedAt': invitedAt?.toIso8601String(),
       'joinedAt': joinedAt?.toIso8601String(),
@@ -69,6 +71,6 @@ class RallyParticipantResponse {
 
   @override
   String toString() {
-    return 'RallyParticipantResponse(id: $id, userId: $userId, role: $role, status: $status)';
+    return 'RallyParticipantResponse(id: $id, userId: $userId, role: ${role.name}, status: ${status.name})';
   }
 }

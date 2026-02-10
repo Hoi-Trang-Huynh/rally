@@ -1,6 +1,8 @@
 /// Request models for Rally API endpoints.
 library;
 
+import 'package:rally/models/enums.dart';
+
 /// Request model for creating a new rally.
 ///
 /// Used by `POST /api/v1/rallies`.
@@ -44,6 +46,7 @@ class CreateRallyRequest {
 /// Request model for updating an existing rally.
 ///
 /// Used by `PUT /api/v1/rallies/{id}`.
+
 class UpdateRallyRequest {
   /// Updated rally name.
   final String? name;
@@ -61,7 +64,7 @@ class UpdateRallyRequest {
   final String? endDate;
 
   /// Updated status (draft, active, completed, etc.).
-  final String? status;
+  final RallyStatus? status;
 
   /// Creates a new [UpdateRallyRequest].
   const UpdateRallyRequest({
@@ -82,7 +85,7 @@ class UpdateRallyRequest {
       if (coverImageUrl != null) 'coverImageUrl': coverImageUrl,
       if (startDate != null) 'startDate': startDate,
       if (endDate != null) 'endDate': endDate,
-      if (status != null) 'status': status,
+      if (status != null) 'status': status!.name,
     };
   }
 }

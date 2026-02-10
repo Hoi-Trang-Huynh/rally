@@ -1,3 +1,5 @@
+import 'package:rally/models/enums.dart';
+
 /// Response model for rally endpoints.
 ///
 /// Returned by `POST /api/v1/rallies` and `PUT /api/v1/rallies/{id}`.
@@ -18,7 +20,7 @@ class RallyResponse {
   final String ownerId;
 
   /// Status of the rally (draft, active, completed, etc.).
-  final String status;
+  final RallyStatus status;
 
   /// When the rally starts.
   final DateTime? startDate;
@@ -39,7 +41,7 @@ class RallyResponse {
     this.description,
     this.coverImageUrl,
     required this.ownerId,
-    this.status = 'draft',
+    this.status = RallyStatus.draft,
     this.startDate,
     this.endDate,
     this.createdAt,
@@ -54,7 +56,7 @@ class RallyResponse {
       description: json['description'] as String?,
       coverImageUrl: json['coverImageUrl'] as String?,
       ownerId: json['ownerId'] as String? ?? '',
-      status: json['status'] as String? ?? 'draft',
+      status: RallyStatus.fromString(json['status'] as String? ?? 'draft'),
       startDate: json['startDate'] != null ? DateTime.tryParse(json['startDate'] as String) : null,
       endDate: json['endDate'] != null ? DateTime.tryParse(json['endDate'] as String) : null,
       createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'] as String) : null,
@@ -70,7 +72,7 @@ class RallyResponse {
       'description': description,
       'coverImageUrl': coverImageUrl,
       'ownerId': ownerId,
-      'status': status,
+      'status': status.name,
       'startDate': startDate?.toIso8601String(),
       'endDate': endDate?.toIso8601String(),
       'createdAt': createdAt?.toIso8601String(),
@@ -80,6 +82,6 @@ class RallyResponse {
 
   @override
   String toString() {
-    return 'RallyResponse(id: $id, name: $name, status: $status)';
+    return 'RallyResponse(id: $id, name: $name, status: ${status.name})';
   }
 }
