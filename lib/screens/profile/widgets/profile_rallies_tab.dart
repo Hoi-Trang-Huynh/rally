@@ -116,43 +116,43 @@ class _ProfileRalliesTabState extends ConsumerState<ProfileRalliesTab> {
             SizedBox(height: Responsive.h(context, 16)),
 
             // Filter + Sort Row
-            ralliesAsync.when(
-              data:
-                  (UserRalliesResponse data) => Row(
-                    children: <Widget>[
-                      // Filter button (toggles expansion)
-                      _buildFilterChip(
-                        context,
-                        label: t.rally.filter.label,
-                        icon: Icons.tune,
-                        isActive: _isFilterExpanded,
-                        onTap: () {
-                          setState(() {
-                            _isFilterExpanded = !_isFilterExpanded;
-                          });
-                        },
-                      ),
-                      SizedBox(width: Responsive.w(context, 12)),
-                      // Sort toggle (Latest <-> Oldest)
-                      _buildFilterChip(
-                        context,
-                        label: _sortLatest ? t.rally.filter.latest : t.rally.filter.oldest,
-                        icon: Icons.swap_vert,
-                        onTap: () {
-                          setState(() {
-                            _sortLatest = !_sortLatest;
-                          });
-                        },
-                      ),
-                      const Spacer(),
-                      Text(
+            Row(
+              children: <Widget>[
+                // Filter button (toggles expansion)
+                _buildFilterChip(
+                  context,
+                  label: t.rally.filter.label,
+                  icon: Icons.tune,
+                  isActive: _isFilterExpanded,
+                  onTap: () {
+                    setState(() {
+                      _isFilterExpanded = !_isFilterExpanded;
+                    });
+                  },
+                ),
+                SizedBox(width: Responsive.w(context, 12)),
+                // Sort toggle (Latest <-> Oldest)
+                _buildFilterChip(
+                  context,
+                  label: _sortLatest ? t.rally.filter.latest : t.rally.filter.oldest,
+                  icon: _sortLatest ? Icons.arrow_downward : Icons.arrow_upward,
+                  onTap: () {
+                    setState(() {
+                      _sortLatest = !_sortLatest;
+                    });
+                  },
+                ),
+                const Spacer(),
+                ralliesAsync.when(
+                  data:
+                      (UserRalliesResponse data) => Text(
                         '${data.rallies.length} / ${data.total}',
                         style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                       ),
-                    ],
-                  ),
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+              ],
             ),
 
             // Expanded Filter Status Chips
