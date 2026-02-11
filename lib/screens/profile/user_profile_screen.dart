@@ -6,6 +6,7 @@ import 'package:rally/models/responses/follow_status_response.dart';
 import 'package:rally/models/responses/user_public_profile_response.dart';
 import 'package:rally/providers/user_provider.dart';
 import 'package:rally/screens/profile/widgets/profile_content.dart';
+import 'package:rally/screens/profile/widgets/profile_rallies_tab.dart';
 import 'package:rally/screens/profile/widgets/profile_tab_bar.dart';
 import 'package:rally/services/user_repository.dart';
 import 'package:rally/utils/responsive.dart';
@@ -228,24 +229,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                   ),
                 ),
 
-                // Tab content placeholder
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: Responsive.h(context, 100)),
-                    child: EmptyState(
-                      icon:
-                          _selectedTabId == 'posts'
-                              ? Icons.format_quote_outlined
-                              : Icons.map_outlined,
-                      title: _selectedTabId == 'posts' ? t.profile.noPosts : t.profile.noRallies,
-                      subtitle:
-                          _selectedTabId == 'posts'
-                              ? t.profile.noPostsSubtitle
-                              : t.profile.noRalliesSubtitle,
-                    ),
-                  ),
-                ),
+                // Tab Content
+                _buildTabContent(t),
               ],
             ),
           );
@@ -289,6 +274,25 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                 ),
               ),
             ),
+      ),
+    );
+  }
+
+  Widget _buildTabContent(Translations t) {
+    if (_selectedTabId == 'rallies') {
+      return ProfileRalliesTab(userId: widget.userId);
+    }
+
+    // Default: Posts (placeholder for now)
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: Responsive.h(context, 100)),
+        child: EmptyState(
+          icon: Icons.format_quote_outlined,
+          title: t.profile.noPosts,
+          subtitle: t.profile.noPostsSubtitle,
+        ),
       ),
     );
   }
