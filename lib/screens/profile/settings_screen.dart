@@ -179,7 +179,7 @@ class SettingsScreen extends ConsumerWidget {
       loading: () => const SecondaryShell(body: Center(child: CircularProgressIndicator())),
       error:
           (Object error, StackTrace stack) =>
-              SecondaryShell(body: Center(child: Text('Error: $error'))),
+              SecondaryShell(body: Center(child: Text(t.common.errorGenericDisplay(error: error)))),
     );
   }
 

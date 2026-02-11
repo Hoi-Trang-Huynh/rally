@@ -9,8 +9,10 @@ import 'package:rally/screens/profile/widgets/profile_content.dart';
 import 'package:rally/screens/profile/widgets/profile_tab_bar.dart';
 import 'package:rally/services/user_repository.dart';
 import 'package:rally/utils/responsive.dart';
+import 'package:rally/utils/ui_helpers.dart';
 import 'package:rally/widgets/common/empty_state.dart';
 import 'package:rally/widgets/common/shimmer_loading.dart';
+import 'package:rally/widgets/common/sticky_tab_bar_delegate.dart';
 import 'package:rally/widgets/navigation/secondary_shell.dart';
 
 import '../../i18n/generated/translations.g.dart';
@@ -68,15 +70,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                 ? t.profile.errorUnfollow(error: e)
                 : t.profile.errorFollow(error: e);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              errorMessage,
-              style: TextStyle(color: Theme.of(context).colorScheme.onError),
-            ),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        showErrorSnackBar(context, errorMessage);
       }
     } finally {
       if (mounted) {
@@ -215,7 +209,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                 // Sticky Tab Bar
                 SliverPersistentHeader(
                   pinned: true,
-                  delegate: _StickyTabBarDelegate(
+                  delegate: StickyTabBarDelegate(
                     child: Container(
                       color: colorScheme.surface,
                       padding: EdgeInsets.only(bottom: Responsive.h(context, 16)),
@@ -297,32 +291,5 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
             ),
       ),
     );
-  }
-}
-
-/// Helper delegate for sticky tab bar.
-class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-  final double maxHeight;
-  final double minHeight;
-
-  _StickyTabBarDelegate({required this.child, required this.maxHeight, required this.minHeight});
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return SizedBox.expand(child: child);
-  }
-
-  @override
-  double get maxExtent => maxHeight;
-
-  @override
-  double get minExtent => minHeight;
-
-  @override
-  bool shouldRebuild(_StickyTabBarDelegate oldDelegate) {
-    return maxHeight != oldDelegate.maxExtent ||
-        minHeight != oldDelegate.minExtent ||
-        child != oldDelegate.child;
   }
 }

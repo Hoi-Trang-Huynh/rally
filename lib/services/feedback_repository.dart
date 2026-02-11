@@ -1,6 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/models/responses/feedback_response.dart';
-import 'package:rally/providers/api_provider.dart';
 import 'package:rally/services/api_client.dart';
 
 /// Repository for feedback-related API calls.
@@ -39,11 +37,3 @@ class FeedbackRepository {
     return FeedbackResponse.fromJson(response as Map<String, dynamic>);
   }
 }
-
-/// Provider for [FeedbackRepository].
-final Provider<FeedbackRepository> feedbackRepositoryProvider = Provider<FeedbackRepository>((
-  Ref ref,
-) {
-  final ApiClient apiClient = ref.watch(apiClientProvider);
-  return FeedbackRepository(apiClient: apiClient);
-});

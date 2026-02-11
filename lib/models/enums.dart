@@ -9,13 +9,10 @@ enum ParticipantRole {
   /// Can only view and experience the rally.
   participant;
 
-  /// Returns the string representation of the enum.
-  String get name => toString().split('.').last;
-
   /// Creates a [ParticipantRole] from a string.
   static ParticipantRole fromString(String value) {
     return ParticipantRole.values.firstWhere(
-      (e) => e.name == value,
+      (ParticipantRole e) => e.name == value,
       orElse: () => ParticipantRole.participant,
     );
   }
@@ -35,13 +32,10 @@ enum ParticipationStatus {
   /// User has left the rally.
   left;
 
-  /// Returns the string representation of the enum.
-  String get name => toString().split('.').last;
-
   /// Creates a [ParticipationStatus] from a string.
   static ParticipationStatus fromString(String value) {
     return ParticipationStatus.values.firstWhere(
-      (e) => e.name == value,
+      (ParticipationStatus e) => e.name == value,
       orElse: () => ParticipationStatus.invited,
     );
   }
@@ -64,11 +58,11 @@ enum RallyStatus {
   /// Rally has been archived.
   archived;
 
-  /// Returns the string representation of the enum.
-  String get name => toString().split('.').last;
-
   /// Creates a [RallyStatus] from a string.
   static RallyStatus fromString(String value) {
-    return RallyStatus.values.firstWhere((e) => e.name == value, orElse: () => RallyStatus.draft);
+    return RallyStatus.values.firstWhere(
+      (RallyStatus e) => e.name == value,
+      orElse: () => RallyStatus.draft,
+    );
   }
 }

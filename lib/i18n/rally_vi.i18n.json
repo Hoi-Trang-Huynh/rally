@@ -55,5 +55,52 @@
     "success": {
       "comingSoon": "Tính năng tạo rally sẽ sớm ra mắt!"
     }
+  },
+  "status": {
+    "draft": "Nháp",
+    "active": "Đang diễn ra",
+    "inactive": "Không hoạt động",
+    "completed": "Đã kết thúc",
+    "archived": "Đã lưu trữ"
+  },
+  "filter": {
+    "label": "Bộ lọc",
+    "latest": "Mới nhất",
+    "oldest": "Cũ nhất",
+    "all": "Tất cả",
+    "searchPlaceholder": "Tìm kiếm..."
+  },
+  "common": {
+    "noDates": "Không có ngày",
+    "unknown": "Không rõ",
+    "language": {
+      "english": "Tiếng Anh",
+      "vietnamese": "Tiếng Việt"
+    },
+    "timeAgo": {
+      "years": "Cập nhật {count} năm trước",
+      "months": "{count} tháng trước",
+      "days": "{count} ngày trước",
+      "hours": "{count} giờ trước",
+      "minutes": "{count} phút trước",
+      "justNow": "vừa xong"
+    },
+    "greeting": {
+      "morning": "Chào buổi sáng",
+      "afternoon": "Chào buổi chiều",
+      "evening": "Chào buổi tối"
+    },
+    "fallback": {
+      "traveler": "Khách"
+    },
+    "error": {
+      "sessionExpired": "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
+      "permissionDenied": "Bạn không có quyền thực hiện thao tác này.",
+      "notFound": "Không tìm thấy mục yêu cầu.",
+      "tooManyRequests": "Quá nhiều yêu cầu. Vui lòng thử lại sau.",
+      "serverError": "Lỗi máy chủ. Vui lòng thử lại sau.",
+      "timeout": "Hết thời gian chờ. Vui lòng kiểm tra kết nối.",
+      "generic": "Đã có lỗi xảy ra. Vui lòng thử lại."
+    }
   }
 }

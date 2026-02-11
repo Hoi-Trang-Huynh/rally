@@ -278,15 +278,9 @@ class _DateRangePickerState extends State<DateRangePicker> {
                     ),
                   ),
                 ),
-                TextButton(
+                IconButton(
                   onPressed: widget.onCancel,
-                  child: Text(
-                    t.rally.createRally.actions.cancel,
-                    style: textTheme.labelLarge?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  icon: Icon(Icons.check, color: colorScheme.onSurface),
                 ),
               ],
             ),

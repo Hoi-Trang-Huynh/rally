@@ -23,5 +23,6 @@
   "errorLoadingProfile": "Không thể tải hồ sơ",
   "goBack": "Quay lại",
   "retry": "Thử lại",
-  "tapAgainToExit": "Nhấn lại để thoát"
+  "tapAgainToExit": "Nhấn lại để thoát",
+  "errorGenericDisplay": "Lỗi: $error"
 }

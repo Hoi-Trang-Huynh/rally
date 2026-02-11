@@ -408,7 +408,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ),
             ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (Object error, StackTrace stack) => Center(child: Text('Error: $error')),
+        error:
+            (Object error, StackTrace stack) =>
+                Center(child: Text(t.common.errorGenericDisplay(error: error))),
       ),
     );
   }

@@ -6,10 +6,18 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/models/app_user.dart';
+import 'package:rally/models/enums.dart';
 import 'package:rally/models/rally_draft.dart';
+import 'package:rally/models/requests/participant_requests.dart';
+import 'package:rally/models/requests/rally_requests.dart';
 import 'package:rally/models/responses/follow_list_response.dart';
+import 'package:rally/providers/api_provider.dart';
+import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/rally_draft_provider.dart';
+import 'package:rally/utils/image_upload_helper.dart';
 import 'package:rally/utils/responsive.dart';
+import 'package:rally/utils/storage_constants.dart';
 import 'package:rally/utils/validation_constants.dart';
 import 'package:rally/widgets/common/app_bottom_sheet.dart';
 import 'package:rally/widgets/common/date_range_picker.dart';
@@ -51,6 +59,7 @@ class _CreateRallyBottomSheetState extends ConsumerState<CreateRallyBottomSheet>
   bool _showingInviteMembers = false;
   bool _draftLoaded = false;
   bool _isClearing = false;
+  bool _isCreating = false;
 
   @override
   void initState() {
@@ -258,10 +267,10 @@ class _CreateRallyBottomSheetState extends ConsumerState<CreateRallyBottomSheet>
         } else {
           _endDate = date;
         }
+      } else if (_activeDateSelection == _ActiveDateSelection.start) {
+        // Auto-switch to end date after start date selection
+        _activeDateSelection = _ActiveDateSelection.end;
       }
-      // Keep selection active to allow changing, or close it?
-      // User said "click on either... will show a calendar", implies toggle.
-      // Usually users might want to close after picking. I'll keep it open for better UX if they mistapped.
     });
     _saveDraft();
   }
@@ -286,7 +295,9 @@ class _CreateRallyBottomSheetState extends ConsumerState<CreateRallyBottomSheet>
     _saveDraft();
   }
 
-  void _createRally() {
+  Future<void> _createRally() async {
+    if (_isCreating) return;
+
     final Translations t = Translations.of(context);
     if (_nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(
@@ -295,13 +306,65 @@ class _CreateRallyBottomSheetState extends ConsumerState<CreateRallyBottomSheet>
       return;
     }
 
-    // TODO: Implement rally creation with RallyRepository
-    // Clear draft on successful creation
-    ref.read(rallyDraftProvider.notifier).clearDraft();
-    Navigator.of(context).pop();
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(t.rally.createRally.success.comingSoon)));
+    setState(() {
+      _isCreating = true;
+    });
+
+    try {
+      String? coverImageUrl;
+      if (_coverImagePath != null) {
+        final ImageUploadHelper uploadHelper = ref.read(imageUploadHelperProvider);
+        final AppUser? user = ref.read(appUserProvider).valueOrNull;
+
+        if (user?.id != null) {
+          final List<ImageUploadResult> results = await uploadHelper.uploadMultipleImages(
+            files: <File>[File(_coverImagePath!)],
+            folder: StorageConstants.rallyCoverFolder,
+            userId: user!.id!,
+          );
+          if (results.isNotEmpty) {
+            coverImageUrl = results.first.secureUrl;
+          }
+        }
+      }
+
+      // TODO: Add role
+      final CreateRallyRequest request = CreateRallyRequest(
+        name: _nameController.text.trim(),
+        description: jsonEncode(_descriptionController.document.toDelta().toJson()),
+        coverImageUrl: coverImageUrl,
+        startDate: _startDate?.toUtc().toIso8601String(),
+        endDate: _endDate?.toUtc().toIso8601String(),
+        participants:
+            _invitedMembers
+                .map(
+                  (FollowUserItem m) =>
+                      InviteParticipantRequest(userId: m.id, role: ParticipantRole.participant),
+                )
+                .toList(),
+      );
+
+      await ref.read(rallyRepositoryProvider).createRally(request);
+
+      if (mounted) {
+        // Clear draft on successful creation
+        ref.read(rallyDraftProvider.notifier).clearDraft();
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(t.rally.createRally.success.comingSoon)));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCreating = false;
+        });
+      }
+    }
   }
 
   Widget _buildInviteMembersPage(ColorScheme colorScheme) {
@@ -360,355 +423,373 @@ class _CreateRallyBottomSheetState extends ConsumerState<CreateRallyBottomSheet>
       minChildSize: 0.5,
       maxChildSize: 0.95,
       bodyBuilder: (ScrollController scrollController) {
-        return ListView(
-          controller: scrollController,
-          padding: EdgeInsets.only(
-            left: Responsive.w(context, 24),
-            right: Responsive.w(context, 24),
-            top: Responsive.h(context, 16),
-            bottom: Responsive.h(context, 24) + MediaQuery.of(context).padding.bottom,
-          ),
-          children: <Widget>[
-            // Cover Image Section
-            Text(
-              t.rally.createRally.coverImage.title,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
+        return GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          behavior: HitTestBehavior.opaque,
+          child: ListView(
+            controller: scrollController,
+            padding: EdgeInsets.only(
+              left: Responsive.w(context, 24),
+              right: Responsive.w(context, 24),
+              top: Responsive.h(context, 16),
+              bottom: Responsive.h(context, 24) + MediaQuery.of(context).padding.bottom,
             ),
-            SizedBox(height: Responsive.h(context, 12)),
-            GestureDetector(
-              onTap: _pickCoverImage,
-              child: Container(
-                width: double.infinity,
-                height: Responsive.h(context, 160),
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
-                  border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
-                ),
-                child:
-                    _coverImagePath == null
-                        ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(
-                              Icons.add_photo_alternate_outlined,
-                              size: Responsive.w(context, 48),
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            SizedBox(height: Responsive.h(context, 8)),
-                            Text(
-                              t.rally.createRally.coverImage.tapToUpload,
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            SizedBox(height: Responsive.h(context, 4)),
-                            Text(
-                              t.rally.createRally.coverImage.fileFormat,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                              ),
-                            ),
-                          ],
-                        )
-                        : ClipRRect(
-                          borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
-                          child: Image.file(
-                            File(_coverImagePath!),
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (_, __, ___) => Icon(
-                                  Icons.image_outlined,
-                                  size: Responsive.w(context, 48),
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                          ),
-                        ),
-              ),
-            ),
-
-            SizedBox(height: Responsive.h(context, 24)),
-
-            // Rally Name Section
-            Text(
-              t.rally.createRally.name.title,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            SizedBox(height: Responsive.h(context, 8)),
-            TextField(
-              controller: _nameController,
-              maxLength: RallyValidation.nameMaxLength,
-              buildCounter:
-                  (
-                    _, {
-                    required int currentLength,
-                    required int? maxLength,
-                    required bool isFocused,
-                  }) => null,
-              decoration: InputDecoration(
-                hintText: t.rally.createRally.name.placeholder,
-                hintStyle: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                ),
-                filled: true,
-                fillColor: colorScheme.surfaceContainerHighest,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: Responsive.w(context, 16),
-                  vertical: Responsive.h(context, 14),
-                ),
-                counter: Text(
-                  t.rally.createRally.name.maxLength.replaceAll(
-                    '{count}',
-                    '${_nameController.text.length}',
-                  ),
-                  style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+            children: <Widget>[
+              // Cover Image Section
+              Text(
+                t.rally.createRally.coverImage.title,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
                 ),
               ),
-              style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
-            ),
-
-            SizedBox(height: Responsive.h(context, 24)),
-
-            // Session Duration Section
-            Text(
-              t.rally.createRally.duration.title,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            SizedBox(height: Responsive.h(context, 8)),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: _DateSelectorButton(
-                    label: t.rally.createRally.duration.from,
-                    hint: t.rally.createRally.duration.selectStartDate,
-                    date: _startDate,
-                    onTap: () => _toggleDateSelection(_ActiveDateSelection.start),
-                    isActive: _activeDateSelection == _ActiveDateSelection.start,
-                  ),
-                ),
-                SizedBox(width: Responsive.w(context, 12)),
-                Expanded(
-                  child: _DateSelectorButton(
-                    label: t.rally.createRally.duration.to,
-                    hint: t.rally.createRally.duration.selectEndDate,
-                    date: _endDate,
-                    onTap: () => _toggleDateSelection(_ActiveDateSelection.end),
-                    isActive: _activeDateSelection == _ActiveDateSelection.end,
-                  ),
-                ),
-              ],
-            ),
-            if (_activeDateSelection != _ActiveDateSelection.none) ...<Widget>[
               SizedBox(height: Responsive.h(context, 12)),
-              DateRangePicker(
-                startDate: _startDate,
-                endDate: _endDate,
-                firstDate:
-                    _activeDateSelection == _ActiveDateSelection.start
-                        ? DateTime.now()
-                        : (_startDate ?? DateTime.now()),
-                lastDate: DateTime.now().add(const Duration(days: 365)),
-                isSelectingStart: _activeDateSelection == _ActiveDateSelection.start,
-                onDateSelected: _onDateChanged,
-                onCancel: () => _toggleDateSelection(_ActiveDateSelection.none),
-                onTodayPressed: () => _onDateChanged(DateTime.now()),
-              ),
-            ],
-
-            SizedBox(height: Responsive.h(context, 24)),
-
-            // Invite Members Section
-            Text(
-              t.rally.createRally.inviteMembers.title,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            SizedBox(height: Responsive.h(context, 12)),
-            // Conditional layout based on invited members
-            if (_invitedMembers.isEmpty)
-              // Empty state: Full-width tappable container
               GestureDetector(
-                onTap: _showInviteMembersSheet,
+                onTap: _pickCoverImage,
                 child: Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(
+                  height: Responsive.h(context, 160),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+                    border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+                  ),
+                  child:
+                      _coverImagePath == null
+                          ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(
+                                Icons.add_photo_alternate_outlined,
+                                size: Responsive.w(context, 48),
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                              SizedBox(height: Responsive.h(context, 8)),
+                              Text(
+                                t.rally.createRally.coverImage.tapToUpload,
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              SizedBox(height: Responsive.h(context, 4)),
+                              Text(
+                                t.rally.createRally.coverImage.fileFormat,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ],
+                          )
+                          : ClipRRect(
+                            borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+                            child: Image.file(
+                              File(_coverImagePath!),
+                              fit: BoxFit.cover,
+                              errorBuilder:
+                                  (_, __, ___) => Icon(
+                                    Icons.image_outlined,
+                                    size: Responsive.w(context, 48),
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ),
+                ),
+              ),
+
+              SizedBox(height: Responsive.h(context, 24)),
+
+              // Rally Name Section
+              Text(
+                t.rally.createRally.name.title,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              SizedBox(height: Responsive.h(context, 8)),
+              TextField(
+                controller: _nameController,
+                maxLength: RallyValidation.nameMaxLength,
+                buildCounter:
+                    (
+                      _, {
+                      required int currentLength,
+                      required int? maxLength,
+                      required bool isFocused,
+                    }) => null,
+                decoration: InputDecoration(
+                  hintText: t.rally.createRally.name.placeholder,
+                  hintStyle: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  ),
+                  filled: true,
+                  fillColor: colorScheme.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
                     horizontal: Responsive.w(context, 16),
                     vertical: Responsive.h(context, 14),
                   ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
-                    border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
-                  ),
-                  child: Row(
-                    children: <Widget>[
-                      Icon(
-                        Icons.person_add_outlined,
-                        size: Responsive.w(context, 22),
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      SizedBox(width: Responsive.w(context, 12)),
-                      Expanded(
-                        child: Text(
-                          t.rally.createRally.inviteMembers.tapToInvite,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right,
-                        size: Responsive.w(context, 20),
-                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                      ),
-                    ],
+                  counter: Text(
+                    t.rally.createRally.name.maxLength.replaceAll(
+                      '{count}',
+                      '${_nameController.text.length}',
+                    ),
+                    style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                 ),
-              )
-            else
-              // With members: Tappable row showing avatars + count
-              GestureDetector(
-                onTap: _showInviteMembersSheet,
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: Responsive.w(context, 12),
-                    vertical: Responsive.h(context, 10),
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
-                    border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
-                  ),
-                  child: Row(
-                    children: <Widget>[
-                      // Stacked avatars
-                      StackedAvatars(
-                        items:
-                            _invitedMembers
-                                .map(
-                                  (FollowUserItem member) => StackedAvatarItem(
-                                    id: member.id,
-                                    imageUrl: member.avatarUrl,
-                                    fallbackText: member.displayName,
-                                  ),
-                                )
-                                .toList(),
-                        maxVisible: 4,
-                        avatarRadius: 16,
-                        overlapFactor: 0.6,
-                      ),
-                      SizedBox(width: Responsive.w(context, 12)),
-                      // Member count text
-                      Expanded(
-                        child: Text(
-                          t.rally.createRally.inviteMembers.memberCount.replaceAll(
-                            '{count}',
-                            _invitedMembers.length.toString(),
-                          ),
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      // Edit indicator
-                      Icon(
-                        Icons.edit_outlined,
-                        size: Responsive.w(context, 18),
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ],
-                  ),
-                ),
+                style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
               ),
 
-            SizedBox(height: Responsive.h(context, 24)),
+              SizedBox(height: Responsive.h(context, 24)),
 
-            // Description Section
-            Text(
-              t.rally.createRally.description.title,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            SizedBox(height: Responsive.h(context, 12)),
-            RichTextEditor(
-              key: _descriptionKey,
-              controller: _descriptionController,
-              focusNode: _descriptionFocusNode,
-              hintText: t.rally.createRally.description.placeholder,
-              maxLines: 6,
-              maxLength: RallyValidation.descriptionMaxLength,
-            ),
-
-            SizedBox(height: Responsive.h(context, 32)),
-
-            // Action Buttons
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 16)),
-                      side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.3)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
-                      ),
-                    ),
-                    child: Text(
-                      t.rally.createRally.actions.cancel,
-                      style: textTheme.labelLarge?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+              // Session Duration Section
+              Text(
+                t.rally.createRally.duration.title,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
                 ),
-                SizedBox(width: Responsive.w(context, 12)),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton(
-                    onPressed: _createRally,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                      padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 16)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
-                      ),
-                    ),
-                    child: Text(
-                      t.rally.createRally.actions.create,
-                      style: textTheme.labelLarge?.copyWith(
-                        color: colorScheme.onPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
+              ),
+              SizedBox(height: Responsive.h(context, 8)),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: _DateSelectorButton(
+                      label: t.rally.createRally.duration.from,
+                      hint: t.rally.createRally.duration.selectStartDate,
+                      date: _startDate,
+                      onTap: () => _toggleDateSelection(_ActiveDateSelection.start),
+                      isActive: _activeDateSelection == _ActiveDateSelection.start,
                     ),
                   ),
+                  SizedBox(width: Responsive.w(context, 12)),
+                  Expanded(
+                    child: _DateSelectorButton(
+                      label: t.rally.createRally.duration.to,
+                      hint: t.rally.createRally.duration.selectEndDate,
+                      date: _endDate,
+                      onTap: () => _toggleDateSelection(_ActiveDateSelection.end),
+                      isActive: _activeDateSelection == _ActiveDateSelection.end,
+                    ),
+                  ),
+                ],
+              ),
+              if (_activeDateSelection != _ActiveDateSelection.none) ...<Widget>[
+                SizedBox(height: Responsive.h(context, 12)),
+                DateRangePicker(
+                  startDate: _startDate,
+                  endDate: _endDate,
+                  firstDate:
+                      _activeDateSelection == _ActiveDateSelection.start
+                          ? DateTime.now()
+                          : (_startDate ?? DateTime.now()),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                  isSelectingStart: _activeDateSelection == _ActiveDateSelection.start,
+                  onDateSelected: _onDateChanged,
+                  onCancel: () => _toggleDateSelection(_ActiveDateSelection.none),
+                  onTodayPressed: () => _onDateChanged(DateTime.now()),
                 ),
               ],
-            ),
 
-            SizedBox(height: Responsive.h(context, 24)),
-          ],
+              SizedBox(height: Responsive.h(context, 24)),
+
+              // Invite Members Section
+              Text(
+                t.rally.createRally.inviteMembers.title,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              SizedBox(height: Responsive.h(context, 12)),
+              // Conditional layout based on invited members
+              if (_invitedMembers.isEmpty)
+                // Empty state: Full-width tappable container
+                GestureDetector(
+                  onTap: _showInviteMembersSheet,
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Responsive.w(context, 16),
+                      vertical: Responsive.h(context, 14),
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+                      border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.person_add_outlined,
+                          size: Responsive.w(context, 22),
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        SizedBox(width: Responsive.w(context, 12)),
+                        Expanded(
+                          child: Text(
+                            t.rally.createRally.inviteMembers.tapToInvite,
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          size: Responsive.w(context, 20),
+                          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                // With members: Tappable row showing avatars + count
+                GestureDetector(
+                  onTap: _showInviteMembersSheet,
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Responsive.w(context, 12),
+                      vertical: Responsive.h(context, 10),
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+                      border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        // Stacked avatars
+                        StackedAvatars(
+                          items:
+                              _invitedMembers
+                                  .map(
+                                    (FollowUserItem member) => StackedAvatarItem(
+                                      id: member.id,
+                                      imageUrl: member.avatarUrl,
+                                      fallbackText: member.displayName,
+                                    ),
+                                  )
+                                  .toList(),
+                          maxVisible: 4,
+                          avatarRadius: 16,
+                          overlapFactor: 0.6,
+                        ),
+                        SizedBox(width: Responsive.w(context, 12)),
+                        // Member count text
+                        Expanded(
+                          child: Text(
+                            t.rally.createRally.inviteMembers.memberCount.replaceAll(
+                              '{count}',
+                              _invitedMembers.length.toString(),
+                            ),
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        // Edit indicator
+                        Icon(
+                          Icons.edit_outlined,
+                          size: Responsive.w(context, 18),
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              SizedBox(height: Responsive.h(context, 24)),
+
+              // Description Section
+              Text(
+                t.rally.createRally.description.title,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              SizedBox(height: Responsive.h(context, 12)),
+              RichTextEditor(
+                key: _descriptionKey,
+                controller: _descriptionController,
+                focusNode: _descriptionFocusNode,
+                hintText: t.rally.createRally.description.placeholder,
+                maxLines: 6,
+                maxLength: RallyValidation.descriptionMaxLength,
+              ),
+
+              SizedBox(height: Responsive.h(context, 32)),
+
+              // Action Buttons
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 16)),
+                        side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.3)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+                        ),
+                      ),
+                      child: Text(
+                        t.rally.createRally.actions.cancel,
+                        style: textTheme.labelLarge?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: Responsive.w(context, 12)),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: _isCreating ? null : _createRally,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                        disabledBackgroundColor: colorScheme.primary,
+                        disabledForegroundColor: colorScheme.onPrimary,
+                        padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+                        ),
+                      ),
+                      child:
+                          _isCreating
+                              ? SizedBox(
+                                height: Responsive.h(context, 20),
+                                width: Responsive.h(context, 20),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: colorScheme.onPrimary,
+                                ),
+                              )
+                              : Text(
+                                t.rally.createRally.actions.create,
+                                style: textTheme.labelLarge?.copyWith(
+                                  color: colorScheme.onPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: Responsive.h(context, 24)),
+            ],
+          ),
         );
       },
     );

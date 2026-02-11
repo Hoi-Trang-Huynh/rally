@@ -11,9 +11,9 @@ import '../../models/app_user.dart';
 import '../../models/feedback_category.dart';
 import '../../providers/api_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../services/feedback_repository.dart';
 import '../../utils/image_upload_helper.dart';
 import '../../utils/responsive.dart';
+import '../../utils/storage_constants.dart';
 import '../../utils/validation_constants.dart';
 
 /// Screen for submitting user feedback.
@@ -83,7 +83,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 
       results = await helper.uploadMultipleImages(
         files: files,
-        folder: 'rally_feedback',
+        folder: StorageConstants.feedbackFolder,
         userId: userId,
       );
     } finally {

@@ -55,5 +55,52 @@
     "success": {
       "comingSoon": "Rally creation coming soon!"
     }
+  },
+  "status": {
+    "draft": "Draft",
+    "active": "Active",
+    "inactive": "Inactive",
+    "completed": "Completed",
+    "archived": "Archived"
+  },
+  "filter": {
+    "label": "Filter",
+    "latest": "Latest",
+    "oldest": "Oldest",
+    "all": "All",
+    "searchPlaceholder": "Search..."
+  },
+  "common": {
+    "noDates": "No dates",
+    "unknown": "Unknown",
+    "language": {
+      "english": "English",
+      "vietnamese": "Vietnamese"
+    },
+    "timeAgo": {
+      "years": "Updated {count}y ago",
+      "months": "{count}mo ago",
+      "days": "{count}d ago",
+      "hours": "{count}h ago",
+      "minutes": "{count}m ago",
+      "justNow": "just now"
+    },
+    "greeting": {
+      "morning": "Good Morning",
+      "afternoon": "Good Afternoon",
+      "evening": "Good Evening"
+    },
+    "fallback": {
+      "traveler": "Traveler"
+    },
+    "error": {
+      "sessionExpired": "Session expired. Please log in again.",
+      "permissionDenied": "You don't have permission to do this.",
+      "notFound": "The requested item was not found.",
+      "tooManyRequests": "Too many requests. Please wait a moment.",
+      "serverError": "Server error. Please try again later.",
+      "timeout": "Request timed out. Please check your connection.",
+      "generic": "Something went wrong. Please try again."
+    }
   }
 }

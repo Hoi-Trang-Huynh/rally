@@ -8,6 +8,7 @@ import 'package:rally/models/responses/profile_details_response.dart';
 import 'package:rally/models/responses/profile_response.dart';
 import 'package:rally/models/responses/register_response.dart';
 import 'package:rally/models/responses/user_public_profile_response.dart';
+import 'package:rally/models/responses/user_rallies_response.dart';
 import 'package:rally/models/responses/user_search_response.dart';
 import 'package:rally/services/api_client.dart';
 
@@ -251,5 +252,40 @@ class UserRepository {
       queryParams: queryParams,
     );
     return FriendListResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  // ============================================
+  // Rally Endpoints
+  // ============================================
+
+  /// Gets a filtered and sorted list of rallies where the user is a participant.
+  ///
+  /// Returns only rallies where the user has joined status.
+  /// [userId] The ID of the user to get rallies for.
+  /// [name] Optional filter by rally name (case-insensitive partial match).
+  /// [status] Optional filter by rally status (draft, active, inactive, completed, archived).
+  /// [sort] Sort order for start date ('asc' or 'desc', default: 'asc').
+  /// Returns a [UserRalliesResponse] containing the rallies list.
+  Future<UserRalliesResponse> getUserRallies({
+    required String userId,
+    String? name,
+    String? status,
+    String sort = 'asc',
+  }) async {
+    final Map<String, String> queryParams = <String, String>{
+      'sort': sort,
+    };
+    if (name != null && name.isNotEmpty) {
+      queryParams['name'] = name;
+    }
+    if (status != null && status.isNotEmpty) {
+      queryParams['status'] = status;
+    }
+
+    final dynamic response = await _apiClient.get(
+      '/api/v1/user/$userId/rallies',
+      queryParams: queryParams,
+    );
+    return UserRalliesResponse.fromJson(response as Map<String, dynamic>);
   }
 }

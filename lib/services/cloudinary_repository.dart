@@ -20,9 +20,7 @@ class CloudinaryRepository {
       if (folder != null) 'folder': folder,
       if (userId != null) 'user_id': userId,
     };
-    // Removed print('Body: $body');
     final dynamic response = await _apiClient.post('/api/v1/media/sign', body: body);
-    // Removed print('Cloudinary: Signature received: $response');
     return CloudinarySignature.fromJson(response as Map<String, dynamic>);
   }
 

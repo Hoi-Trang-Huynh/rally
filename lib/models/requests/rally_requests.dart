@@ -2,6 +2,7 @@
 library;
 
 import 'package:rally/models/enums.dart';
+import 'package:rally/models/requests/participant_requests.dart';
 
 /// Request model for creating a new rally.
 ///
@@ -22,6 +23,9 @@ class CreateRallyRequest {
   /// When the rally ends (ISO 8601 format).
   final String? endDate;
 
+  /// List of participants to invite immediately.
+  final List<InviteParticipantRequest>? participants;
+
   /// Creates a new [CreateRallyRequest].
   const CreateRallyRequest({
     required this.name,
@@ -29,6 +33,7 @@ class CreateRallyRequest {
     this.coverImageUrl,
     this.startDate,
     this.endDate,
+    this.participants,
   });
 
   /// Converts this request to a JSON map.
@@ -39,6 +44,8 @@ class CreateRallyRequest {
       if (coverImageUrl != null) 'coverImageUrl': coverImageUrl,
       if (startDate != null) 'startDate': startDate,
       if (endDate != null) 'endDate': endDate,
+      if (participants != null)
+        'participants': participants!.map((InviteParticipantRequest e) => e.toJson()).toList(),
     };
   }
 }

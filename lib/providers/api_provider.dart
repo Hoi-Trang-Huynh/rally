@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/services/api_client.dart';
 import 'package:rally/services/cloudinary_repository.dart';
+import 'package:rally/services/feedback_repository.dart';
 import 'package:rally/services/rally_repository.dart';
 import 'package:rally/services/user_repository.dart';
 import 'package:rally/utils/image_upload_helper.dart';
@@ -36,6 +37,15 @@ final Provider<CloudinaryRepository> cloudinaryRepositoryProvider = Provider<Clo
 /// Provides access to rally, event, activity, and participant API operations.
 final Provider<RallyRepository> rallyRepositoryProvider = Provider<RallyRepository>((Ref ref) {
   return RallyRepository(ref.watch(apiClientProvider));
+});
+
+/// Provider for the [FeedbackRepository].
+///
+/// Provides access to feedback submission operations.
+final Provider<FeedbackRepository> feedbackRepositoryProvider = Provider<FeedbackRepository>((
+  Ref ref,
+) {
+  return FeedbackRepository(apiClient: ref.watch(apiClientProvider));
 });
 
 /// Provider for the [ImageUploadHelper].
