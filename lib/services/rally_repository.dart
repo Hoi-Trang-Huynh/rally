@@ -1,9 +1,11 @@
+import 'package:rally/models/enums.dart';
 import 'package:rally/models/requests/activity_requests.dart';
 import 'package:rally/models/requests/event_requests.dart';
 import 'package:rally/models/requests/participant_requests.dart';
 import 'package:rally/models/requests/rally_requests.dart';
 import 'package:rally/models/responses/activity_response.dart';
 import 'package:rally/models/responses/event_response.dart';
+import 'package:rally/models/responses/participant_list_response.dart';
 import 'package:rally/models/responses/rally_participant_response.dart';
 import 'package:rally/models/responses/rally_response.dart';
 import 'package:rally/services/api_client.dart';
@@ -21,6 +23,17 @@ class RallyRepository {
   // ============================================
   // Rally Operations
   // ============================================
+
+  /// Fetches a single rally by ID.
+  ///
+  /// [id] The ID of the rally to fetch.
+  /// Returns a [RallyResponse] containing full rally data.
+  ///
+  /// TODO: Replace with streaming/WebSocket listener for real-time updates.
+  Future<RallyResponse> getRally(String id) async {
+    final dynamic response = await _apiClient.get('/api/v1/rallies/$id');
+    return RallyResponse.fromJson(response as Map<String, dynamic>);
+  }
 
   /// Creates a new rally.
   ///
@@ -104,7 +117,34 @@ class RallyRepository {
   // Participant Operations
   // ============================================
 
-  /// Invites a user to join a rally.
+  /// Gets a paginated list of participants for a rally.
+  ///
+  /// [rallyId] The ID of the rally.
+  /// [page] The page number to fetch.
+  /// [pageSize] The number of items per page.
+  /// [role] Optional role to filter by.
+  /// Returns a [ParticipantListResponse] containing the participants data.
+  Future<ParticipantListResponse> getParticipants(
+    String rallyId, {
+    int page = 1,
+    int pageSize = 20,
+    ParticipantRole? role,
+  }) async {
+    final Map<String, String> queryParams = <String, String>{
+      'page': page.toString(),
+      'pageSize': pageSize.toString(),
+    };
+    if (role != null) {
+      queryParams['role'] = role.name;
+    }
+
+    final dynamic response = await _apiClient.get(
+      '/api/v1/rallies/$rallyId/participants',
+      queryParams: queryParams,
+    );
+    return ParticipantListResponse.fromJson(response as Map<String, dynamic>);
+  }
+
   ///
   /// [rallyId] The ID of the rally.
   /// [request] The invite payload containing user ID and optional role.

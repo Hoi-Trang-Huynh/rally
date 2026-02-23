@@ -73,6 +73,17 @@
   "common": {
     "noDates": "No dates",
     "unknown": "Unknown",
+    "events": "Events",
+    "participants": "Participants",
+    "noParticipantsYet": "No participants yet",
+    "invitedByLabel": "invited",
+    "loadMore": "Load more",
+    "inviteMembersButton": "Invite Members",
+    "chat": "Chat",
+    "timeline": "Timeline",
+    "media": "Media",
+    "overview": "Overview",
+    "errorLoadingRally": "Failed to load rally",
     "language": {
       "english": "English",
       "vietnamese": "Vietnamese"
@@ -92,6 +103,20 @@
     },
     "fallback": {
       "traveler": "Traveler"
+    },
+    "role": {
+      "owner": "Owner",
+      "editor": "Editor",
+      "participant": "Participant",
+      "owners": "Owners",
+      "editors": "Editors",
+      "participants": "Participants"
+    },
+    "participationStatus": {
+      "invited": "Invited",
+      "joined": "Joined",
+      "declined": "Declined",
+      "left": "Left"
     },
     "error": {
       "sessionExpired": "Session expired. Please log in again.",

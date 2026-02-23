@@ -73,6 +73,17 @@
   "common": {
     "noDates": "Không có ngày",
     "unknown": "Không rõ",
+    "events": "Sự kiện",
+    "participants": "Thành viên",
+    "noParticipantsYet": "Chưa có người tham gia",
+    "invitedByLabel": "đã mời",
+    "loadMore": "Xem thêm",
+    "inviteMembersButton": "Mời thành viên",
+    "chat": "Trò chuyện",
+    "timeline": "Lịch trình",
+    "media": "Hình ảnh",
+    "overview": "Tổng quan",
+    "errorLoadingRally": "Không thể tải rally",
     "language": {
       "english": "Tiếng Anh",
       "vietnamese": "Tiếng Việt"
@@ -92,6 +103,20 @@
     },
     "fallback": {
       "traveler": "Khách"
+    },
+    "role": {
+      "owner": "Chủ phòng",
+      "editor": "Quản trị viên",
+      "participant": "Thành viên",
+      "owners": "Chủ phòng",
+      "editors": "Quản trị viên",
+      "participants": "Thành viên"
+    },
+    "participationStatus": {
+      "invited": "Đã mời",
+      "joined": "Đã tham gia",
+      "declined": "Từ chối",
+      "left": "Đã rời"
     },
     "error": {
       "sessionExpired": "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",

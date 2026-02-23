@@ -17,6 +17,7 @@ import 'package:rally/screens/profile/feedback_screen.dart';
 import 'package:rally/screens/profile/profile_screen.dart';
 import 'package:rally/screens/profile/settings_screen.dart';
 import 'package:rally/screens/profile/user_profile_screen.dart';
+import 'package:rally/screens/rally/rally_screen.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -63,6 +64,12 @@ class AppRoutes {
 
   /// Feedback route (full screen, no shell).
   static const String feedback = '/feedback';
+
+  /// Rally detail route (standalone, pushes onto stack).
+  static const String rallyPath = '/rally/:rallyId';
+
+  /// Helper to build rally detail route path.
+  static String rally(String rallyId) => '/rally/$rallyId';
 }
 
 /// Notifier that triggers router refresh when auth state changes.
@@ -75,8 +82,9 @@ class _AuthChangeNotifier extends ChangeNotifier {
 }
 
 /// Provider for the auth change notifier.
-final Provider<_AuthChangeNotifier> _authChangeNotifierProvider =
-    Provider<_AuthChangeNotifier>((Ref ref) {
+final Provider<_AuthChangeNotifier> _authChangeNotifierProvider = Provider<_AuthChangeNotifier>((
+  Ref ref,
+) {
   return _AuthChangeNotifier(ref);
 });
 
@@ -93,8 +101,7 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
       final AsyncValue<AppUser?> authState = ref.read(appUserProvider);
       final bool isLoading = authState.isLoading;
       final bool isLoggedIn = authState.valueOrNull != null;
-      final bool needsProfileCompletion =
-          authState.valueOrNull?.needsProfileCompletion ?? false;
+      final bool needsProfileCompletion = authState.valueOrNull?.needsProfileCompletion ?? false;
 
       final bool isOnSplash = state.matchedLocation == AppRoutes.splash;
       final bool isOnAuthRoute =
@@ -190,6 +197,14 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
         builder: (BuildContext context, GoRouterState state) {
           final String userId = state.pathParameters['userId'] ?? '';
           return UserProfileScreen(userId: userId);
+        },
+      ),
+      // Rally Detail (full screen, outside shell - pushes onto stack)
+      GoRoute(
+        path: AppRoutes.rallyPath,
+        builder: (BuildContext context, GoRouterState state) {
+          final String rallyId = state.pathParameters['rallyId'] ?? '';
+          return RallyScreen(rallyId: rallyId);
         },
       ),
 
