@@ -9,6 +9,7 @@ import 'package:rally/models/responses/participant_list_response.dart';
 import 'package:rally/models/responses/rally_participant_response.dart';
 import 'package:rally/models/responses/rally_response.dart';
 import 'package:rally/services/api_client.dart';
+import 'package:rally/utils/validation_constants.dart';
 
 /// Repository for rally-related API calls.
 ///
@@ -127,7 +128,7 @@ class RallyRepository {
   Future<ParticipantListResponse> getParticipants(
     String rallyId, {
     int page = 1,
-    int pageSize = 20,
+    int pageSize = PaginationDefaults.defaultPageSize,
     ParticipantRole? role,
   }) async {
     final Map<String, String> queryParams = <String, String>{

@@ -116,3 +116,19 @@ class RallyValidation {
 /// Email validation regex pattern.
 /// This is a simplified pattern that covers most common email formats.
 final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+
+/// Pagination default constants for API calls.
+///
+/// Centralizes page size values used across repositories and providers
+/// to ensure consistency and easy adjustment.
+class PaginationDefaults {
+  /// Default page size for most paginated API calls
+  /// (search, followers, following, friends, participants).
+  static const int defaultPageSize = 20;
+
+  /// Page size for the participants tab (smaller for initial load).
+  static const int participantsPageSize = 5;
+
+  /// Page size when loading all friends for invite selection (large batch).
+  static const int inviteFriendsPageSize = 100;
+}

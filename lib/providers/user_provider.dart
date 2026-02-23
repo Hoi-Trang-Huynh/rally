@@ -6,6 +6,7 @@ import 'package:rally/models/responses/user_rallies_response.dart';
 import 'package:rally/models/responses/user_search_response.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/services/user_repository.dart';
+import 'package:rally/utils/validation_constants.dart';
 
 // Export the repository provider from api_provider to maintain backward compatibility
 export 'package:rally/providers/api_provider.dart' show userRepositoryProvider;
@@ -26,7 +27,7 @@ final AutoDisposeFutureProviderFamily<UserSearchResponse, String> userSearchProv
       if (query.isEmpty) {
         return const UserSearchResponse(
           page: 1,
-          pageSize: 20,
+          pageSize: PaginationDefaults.defaultPageSize,
           total: 0,
           totalPages: 0,
           users: <ProfileResponse>[],

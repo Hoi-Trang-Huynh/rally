@@ -8,6 +8,7 @@ import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/user_provider.dart';
 import 'package:rally/services/user_repository.dart';
 import 'package:rally/utils/responsive.dart';
+import 'package:rally/utils/validation_constants.dart';
 
 /// An internal page widget for inviting members to a rally.
 ///
@@ -97,7 +98,7 @@ class _InviteMembersPageState extends ConsumerState<InviteMembersPage> {
 
       final FriendListResponse response = await userRepo.getFriends(
         userId: profile.id!,
-        pageSize: 100,
+        pageSize: PaginationDefaults.inviteFriendsPageSize,
       );
 
       if (mounted) {

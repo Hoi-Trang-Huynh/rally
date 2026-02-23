@@ -5,6 +5,7 @@ import 'package:rally/models/enums.dart';
 import 'package:rally/models/responses/participant_list_response.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/services/rally_repository.dart';
+import 'package:rally/utils/validation_constants.dart';
 
 /// Provider for fetching the participants of a specific rally by role.
 /// Supports pagination.
@@ -26,7 +27,6 @@ class RallyParticipantsByRoleNotifier
           ({String rallyId, ParticipantRole role})
         > {
   int _currentPage = 1;
-  static const int _pageSize = 5;
   bool _isFetchingMore = false;
 
   @override
@@ -37,7 +37,7 @@ class RallyParticipantsByRoleNotifier
       args.rallyId,
       role: args.role,
       page: _currentPage,
-      pageSize: _pageSize,
+      pageSize: PaginationDefaults.participantsPageSize,
     );
   }
 
@@ -62,7 +62,7 @@ class RallyParticipantsByRoleNotifier
         arg.rallyId,
         role: arg.role,
         page: _currentPage,
-        pageSize: _pageSize,
+        pageSize: PaginationDefaults.participantsPageSize,
       );
 
       state = AsyncValue<ParticipantListResponse>.data(
@@ -73,7 +73,7 @@ class RallyParticipantsByRoleNotifier
           ],
           total: nextPageData.total,
           page: _currentPage,
-          pageSize: _pageSize,
+          pageSize: PaginationDefaults.participantsPageSize,
           totalPages: nextPageData.totalPages,
         ),
       );

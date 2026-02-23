@@ -11,6 +11,7 @@ import 'package:rally/models/responses/user_public_profile_response.dart';
 import 'package:rally/models/responses/user_rallies_response.dart';
 import 'package:rally/models/responses/user_search_response.dart';
 import 'package:rally/services/api_client.dart';
+import 'package:rally/utils/validation_constants.dart';
 
 /// Repository for user-related API calls.
 ///
@@ -146,7 +147,7 @@ class UserRepository {
   Future<UserSearchResponse> searchUsers({
     required String query,
     int page = 1,
-    int pageSize = 20,
+    int pageSize = PaginationDefaults.defaultPageSize,
   }) async {
     final dynamic response = await _apiClient.get(
       '/api/v1/user/search',
@@ -199,7 +200,7 @@ class UserRepository {
   Future<FollowListResponse> getFollowers({
     required String userId,
     int page = 1,
-    int pageSize = 20,
+    int pageSize = PaginationDefaults.defaultPageSize,
   }) async {
     final dynamic response = await _apiClient.get(
       '/api/v1/user/$userId/followers',
@@ -217,7 +218,7 @@ class UserRepository {
   Future<FollowListResponse> getFollowing({
     required String userId,
     int page = 1,
-    int pageSize = 20,
+    int pageSize = PaginationDefaults.defaultPageSize,
   }) async {
     final dynamic response = await _apiClient.get(
       '/api/v1/user/$userId/following',
@@ -237,7 +238,7 @@ class UserRepository {
     required String userId,
     String? query,
     int page = 1,
-    int pageSize = 20,
+    int pageSize = PaginationDefaults.defaultPageSize,
   }) async {
     final Map<String, String> queryParams = <String, String>{
       'page': page.toString(),
@@ -272,9 +273,7 @@ class UserRepository {
     String? status,
     String sort = 'asc',
   }) async {
-    final Map<String, String> queryParams = <String, String>{
-      'sort': sort,
-    };
+    final Map<String, String> queryParams = <String, String>{'sort': sort};
     if (name != null && name.isNotEmpty) {
       queryParams['name'] = name;
     }
