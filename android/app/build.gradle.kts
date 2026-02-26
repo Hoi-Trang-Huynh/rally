@@ -49,6 +49,8 @@ android {
         targetSdk = 36
         versionCode = flutterVersionCode?.toIntOrNull() ?: 1
         versionName = flutterVersionName ?: "1.0"
+        
+        manifestPlaceholders["mapsApiKey"] = localProperties.getProperty("MAPS_API_KEY") ?: ""
     }
 
     signingConfigs {

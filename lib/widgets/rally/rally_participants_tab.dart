@@ -2,17 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/models/enums.dart';
-import 'package:rally/models/requests/participant_requests.dart';
-import 'package:rally/models/responses/follow_list_response.dart';
 import 'package:rally/models/responses/participant_list_response.dart';
-import 'package:rally/providers/api_provider.dart';
 import 'package:rally/providers/rally_participants_provider.dart';
-import 'package:rally/services/rally_repository.dart';
 import 'package:rally/utils/participation_status_helper.dart';
 import 'package:rally/utils/responsive.dart';
-import 'package:rally/utils/ui_helpers.dart';
 import 'package:rally/widgets/common/collapsible_section.dart';
-import 'package:rally/widgets/rally/invite_members_sheet.dart';
+import 'package:rally/widgets/rally/rally_invite_members_sheet.dart';
 
 /// A tab that displays the list of participants in a rally, grouped by role.
 class RallyParticipantsTab extends ConsumerStatefulWidget {
@@ -31,8 +26,6 @@ class _RallyParticipantsTabState extends ConsumerState<RallyParticipantsTab> {
   bool _isOwnersExpanded = true;
   bool _isEditorsExpanded = true;
   bool _isParticipantsExpanded = true;
-
-  bool _isInviting = false;
 
   void _showInviteMembersBottomSheet() {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -56,63 +49,13 @@ class _RallyParticipantsTabState extends ConsumerState<RallyParticipantsTab> {
                   color: colorScheme.surface,
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                 ),
-                child: InviteMembersPage(
-                  initialInvitedMembers: const <FollowUserItem>[],
-                  onBack: () => Navigator.of(context).pop(),
-                  onDone: (List<FollowUserItem> invitedMembers) {
-                    Navigator.of(context).pop();
-                    _inviteSelectedMembers(invitedMembers);
-                  },
-                ),
+                child: RallyInviteMembersSheet(rallyId: widget.rallyId),
               );
             },
           ),
         );
       },
     );
-  }
-
-  Future<void> _inviteSelectedMembers(List<FollowUserItem> members) async {
-    if (members.isEmpty) return;
-
-    setState(() => _isInviting = true);
-
-    final Translations t = Translations.of(context);
-    try {
-      final RallyRepository repository = ref.read(rallyRepositoryProvider);
-      for (final FollowUserItem member in members) {
-        await repository.inviteParticipant(
-          widget.rallyId,
-          InviteParticipantRequest(userId: member.id),
-        );
-      }
-
-      // Refresh all participant lists
-      ref.invalidate(
-        rallyParticipantsByRoleProvider((rallyId: widget.rallyId, role: ParticipantRole.owner)),
-      );
-      ref.invalidate(
-        rallyParticipantsByRoleProvider((rallyId: widget.rallyId, role: ParticipantRole.editor)),
-      );
-      ref.invalidate(
-        rallyParticipantsByRoleProvider((
-          rallyId: widget.rallyId,
-          role: ParticipantRole.participant,
-        )),
-      );
-
-      if (mounted) {
-        showSuccessSnackBar(context, t.rally.createRally.inviteMembers.memberCount);
-      }
-    } catch (e) {
-      if (mounted) {
-        showErrorSnackBar(context, e.toString());
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isInviting = false);
-      }
-    }
   }
 
   @override
@@ -188,18 +131,11 @@ class _RallyParticipantsTabState extends ConsumerState<RallyParticipantsTab> {
           children: <Widget>[
             // Invite button
             FilledButton(
-              onPressed: _isInviting ? null : _showInviteMembersBottomSheet,
+              onPressed: _showInviteMembersBottomSheet,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  if (_isInviting)
-                    SizedBox(
-                      width: Responsive.w(context, 16),
-                      height: Responsive.w(context, 16),
-                      child: const CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  else
-                    Icon(Icons.person_add_alt_1, size: Responsive.w(context, 18)),
+                  Icon(Icons.person_add_alt_1, size: Responsive.w(context, 18)),
                   SizedBox(width: Responsive.w(context, 8)),
                   Text(t.rally.common.inviteMembersButton),
                 ],

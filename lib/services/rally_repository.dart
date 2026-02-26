@@ -1,10 +1,14 @@
 import 'package:rally/models/enums.dart';
 import 'package:rally/models/requests/activity_requests.dart';
 import 'package:rally/models/requests/event_requests.dart';
+import 'package:rally/models/requests/invite_link_request.dart';
 import 'package:rally/models/requests/participant_requests.dart';
 import 'package:rally/models/requests/rally_requests.dart';
 import 'package:rally/models/responses/activity_response.dart';
 import 'package:rally/models/responses/event_response.dart';
+import 'package:rally/models/responses/friend_list_response.dart';
+import 'package:rally/models/responses/invite_link_response.dart';
+import 'package:rally/models/responses/join_via_link_response.dart';
 import 'package:rally/models/responses/participant_list_response.dart';
 import 'package:rally/models/responses/rally_participant_response.dart';
 import 'package:rally/models/responses/rally_response.dart';
@@ -179,5 +183,102 @@ class RallyRepository {
       body: request.toJson(),
     );
     return RallyParticipantResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Gets a paginated list of friends who can be invited to a rally.
+  ///
+  /// Returns only friends who are **not** already participants
+  /// (any status: invited, joined, etc.) of the specified rally.
+  ///
+  /// [rallyId] The ID of the rally.
+  /// [query] Optional search query to filter by name or username.
+  /// [page] The page number (default: 1).
+  /// [pageSize] The number of results per page.
+  /// Returns a [FriendListResponse] containing the invitable friends list.
+  Future<FriendListResponse> getInvitableFriends(
+    String rallyId, {
+    String? query,
+    int page = 1,
+    int pageSize = PaginationDefaults.invitableFriendsPageSize,
+  }) async {
+    final Map<String, String> queryParams = <String, String>{
+      'page': page.toString(),
+      'pageSize': pageSize.toString(),
+    };
+    if (query != null && query.isNotEmpty) {
+      queryParams['q'] = query;
+    }
+
+    final dynamic response = await _apiClient.get(
+      '/api/v1/rallies/$rallyId/invitable-friends',
+      queryParams: queryParams,
+    );
+    return FriendListResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  // ============================================
+  // Invite Link Operations
+  // ============================================
+
+  /// Generates a new invite link token for a rally.
+  ///
+  /// [rallyId] The ID of the rally.
+  /// [request] Optional configuration for role, expiry, and max uses.
+  /// Requires owner or editor role.
+  /// Returns an [InviteLinkItem] containing the created invite link data.
+  Future<InviteLinkItem> createInviteLink(
+    String rallyId, {
+    CreateInviteLinkRequest? request,
+  }) async {
+    final dynamic response = await _apiClient.post(
+      '/api/v1/rallies/$rallyId/invite-links',
+      body: request?.toJson(),
+    );
+    return InviteLinkItem.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Gets all active invite links for a rally.
+  ///
+  /// [rallyId] The ID of the rally.
+  /// Requires owner or editor role.
+  /// Returns an [InviteLinkListResponse] containing the list of invite links.
+  Future<InviteLinkListResponse> getInviteLinks(String rallyId) async {
+    final dynamic response = await _apiClient.get('/api/v1/rallies/$rallyId/invite-links');
+    return InviteLinkListResponse.fromJson(response);
+  }
+
+  /// Revokes (deletes) an invite link token.
+  ///
+  /// [rallyId] The ID of the rally.
+  /// [token] The token to revoke.
+  /// Requires owner or editor role.
+  Future<void> revokeInviteLink(String rallyId, String token) async {
+    await _apiClient.delete('/api/v1/rallies/$rallyId/invite-links/$token');
+  }
+
+  // ============================================
+  // Join Via Link Operations
+  // ============================================
+
+  /// Previews an invite link token without consuming it.
+  ///
+  /// Returns rally information so the user can decide whether to join.
+  /// Endpoint: `GET /api/v1/rallies/invite-links/{token}/preview`
+  Future<InvitePreviewResponse> getInvitePreview(String token) async {
+    final dynamic response = await _apiClient.get('/api/v1/rallies/invite-links/$token/preview');
+    return InvitePreviewResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Joins a rally using an invite link token.
+  ///
+  /// Endpoint: `POST /api/v1/rallies/join-via-link`
+  /// Body: `{"token": "..."}`.
+  /// The backend adds the user as a participant with `invited` status.
+  Future<JoinViaLinkResponse> joinViaLink(String token) async {
+    final dynamic response = await _apiClient.post(
+      '/api/v1/rallies/join-via-link',
+      body: <String, dynamic>{'token': token},
+    );
+    return JoinViaLinkResponse.fromJson(response as Map<String, dynamic>);
   }
 }

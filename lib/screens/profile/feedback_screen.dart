@@ -116,8 +116,9 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 
     try {
       final AppUser? user = ref.read(appUserProvider).valueOrNull;
-      if (user == null || user.id == null || user.username == null || user.username!.isEmpty)
+      if (user == null || user.id == null || user.username == null || user.username!.isEmpty) {
         return;
+      }
 
       // Upload images first
       List<String> attachmentUrls = <String>[];

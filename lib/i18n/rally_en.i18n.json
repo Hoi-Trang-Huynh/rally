@@ -127,5 +127,57 @@
       "timeout": "Request timed out. Please check your connection.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "rallyInvite": {
+    "title": "Invite Members",
+    "headline": "Invite Friends to Rally",
+    "searchPlaceholder": "Search friends...",
+    "invite": "Invite",
+    "invited": "Invited",
+    "noFriends": "No friends available to invite",
+    "cancel": "Cancel",
+    "done": "Send Invites",
+    "inviteLink": {
+      "generateButton": "Generate Invite Link",
+      "generating": "Generating...",
+      "noLinksYet": "No invite links yet. Generate one to share!",
+      "shareTitle": "Rally Invite",
+      "shareMessage": "Join my rally! Use invite token: {token}",
+      "copyToken": "Copy Token",
+      "tokenCopied": "Token copied to clipboard",
+      "revokeButton": "Revoke",
+      "revokeConfirmTitle": "Revoke Invite Link",
+      "revokeConfirmMessage": "This will prevent anyone from using this QR code. Continue?",
+      "revokeConfirmYes": "Revoke",
+      "revokeConfirmNo": "Cancel",
+      "revokeSuccess": "Invite link revoked",
+      "revokeError": "Failed to revoke invite link",
+      "generateError": "Failed to generate invite link",
+      "uses": "{current}/{max} uses",
+      "usesUnlimited": "{current} uses",
+      "expiresAt": "Expires {date}",
+      "expired": "Expired",
+      "activeLinks": "Active Invite Links",
+      "saveToGallery": "Save to Gallery",
+      "savedToGallery": "QR code saved to gallery",
+      "saveError": "Failed to save QR code"
+    },
+    "inviteSuccess": "Invitations sent successfully",
+    "inviteError": "Failed to send invitations",
+    "joinViaLink": {
+      "title": "Rally Invitation",
+      "loading": "Loading invite details...",
+      "invalidLink": "This invite link is invalid or has expired.",
+      "errorLoading": "Could not load invite details. Please try again.",
+      "roleLabel": "You're invited as",
+      "participantsLabel": "{count} participants",
+      "organizedBy": "Organized by {name}",
+      "acceptButton": "Accept Invitation",
+      "declineButton": "Decline",
+      "accepting": "Joining...",
+      "acceptSuccess": "Invitation accepted! You've been added to the rally.",
+      "acceptError": "Failed to accept invitation. Please try again.",
+      "loginRequired": "Please log in to accept this invitation."
+    }
   }
 }

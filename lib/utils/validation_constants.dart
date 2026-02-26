@@ -131,4 +131,7 @@ class PaginationDefaults {
 
   /// Page size when loading all friends for invite selection (large batch).
   static const int inviteFriendsPageSize = 100;
+
+  /// Page size for the invitable-friends list in the rally invite sheet.
+  static const int invitableFriendsPageSize = 20;
 }

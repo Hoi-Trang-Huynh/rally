@@ -10,6 +10,7 @@ import 'package:rally/screens/chat/chat_screen.dart';
 import 'package:rally/screens/discovery/discovery_screen.dart';
 import 'package:rally/screens/home/home_screen.dart';
 import 'package:rally/screens/home/main_shell.dart';
+import 'package:rally/screens/invite/invite_confirmation_screen.dart';
 import 'package:rally/screens/loading/app_loading.dart';
 import 'package:rally/screens/onboarding/onboarding_screen.dart';
 import 'package:rally/screens/profile/edit_profile_screen.dart';
@@ -70,6 +71,12 @@ class AppRoutes {
 
   /// Helper to build rally detail route path.
   static String rally(String rallyId) => '/rally/$rallyId';
+
+  /// Invite deep link route.
+  static const String invitePath = '/invite/:token';
+
+  /// Helper to build invite route path.
+  static String invite(String token) => '/invite/$token';
 }
 
 /// Notifier that triggers router refresh when auth state changes.
@@ -109,11 +116,13 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
           state.matchedLocation.startsWith('/signup') ||
           state.matchedLocation.startsWith('/onboarding') ||
           state.matchedLocation.startsWith('/profile-completion');
+      final bool isOnInviteRoute = state.matchedLocation.startsWith('/invite');
 
       // While auth is loading, show splash screen (only during initial boot)
       // If already on auth routes (login/signup), stay there during login process
+      // DO NOT overwrite deep links (like invite paths) during loading
       if (isLoading) {
-        if (isOnSplash || isOnAuthRoute) {
+        if (isOnSplash || isOnAuthRoute || isOnInviteRoute) {
           return null; // Stay on current screen
         }
         return AppRoutes.splash;
@@ -131,7 +140,12 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
       }
 
       // If not logged in and not on auth route, redirect to onboarding/login
+      // Keep invite route info so user can be redirected after login
       if (!isLoggedIn && !isOnAuthRoute) {
+        if (isOnInviteRoute) {
+          // Store the invite path so we can redirect after login
+          return '${AppRoutes.login}?redirect=${Uri.encodeComponent(state.uri.toString())}';
+        }
         final SharedPreferences? prefs = ref.read(sharedPrefsServiceProvider);
         final bool onboardingSeen = prefs?.getBool(SharedPrefKeys.onboardingSeen) ?? false;
         return onboardingSeen ? AppRoutes.login : AppRoutes.onboarding;
@@ -205,6 +219,14 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
         builder: (BuildContext context, GoRouterState state) {
           final String rallyId = state.pathParameters['rallyId'] ?? '';
           return RallyScreen(rallyId: rallyId);
+        },
+      ),
+      // Invite Deep Link (full screen, outside shell)
+      GoRoute(
+        path: AppRoutes.invitePath,
+        builder: (BuildContext context, GoRouterState state) {
+          final String token = state.pathParameters['token'] ?? '';
+          return InviteConfirmationScreen(token: token);
         },
       ),
 

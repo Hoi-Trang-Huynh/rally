@@ -8,7 +8,9 @@ import 'package:rally/utils/date_time_utils.dart';
 import 'package:rally/utils/rally_status_helpers.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/common/rally_rich_text_viewer.dart';
+import 'package:rally/widgets/common/app_bottom_sheet.dart';
 import 'package:rally/widgets/common/shimmer_loading.dart';
+import 'package:rally/widgets/rally/rally_map_view.dart';
 import 'package:rally/widgets/navigation/rally_shell.dart';
 import 'package:rally/widgets/rally/rally_participants_tab.dart';
 
@@ -112,61 +114,8 @@ class _RallyScreenState extends ConsumerState<RallyScreen> {
           data: (RallyResponse rallyData) {
             return TabBarView(
               children: <Widget>[
-                // Overview Tab
-                RefreshIndicator(
-                  onRefresh: () => ref.read(currentRallyProvider.notifier).refresh(),
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                    padding: EdgeInsets.all(Responsive.w(context, 24)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        if (rallyData.coverImageUrl != null &&
-                            rallyData.coverImageUrl!.isNotEmpty) ...<Widget>[
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(Responsive.w(context, 16)),
-                            child: AspectRatio(
-                              aspectRatio: 16 / 9,
-                              child: Image.network(
-                                rallyData.coverImageUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder:
-                                    (_, __, ___) => Container(
-                                      color: colorScheme.surfaceContainerHighest,
-                                      child: Icon(
-                                        Icons.image_not_supported_outlined,
-                                        size: Responsive.w(context, 48),
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: Responsive.h(context, 20)),
-                        ],
-
-                        if (rallyData.description != null && rallyData.description!.isNotEmpty)
-                          RallyRichTextViewer(
-                            content: rallyData.description!,
-                            style: textTheme.bodyLarge?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              height: 1.5,
-                            ),
-                          )
-                        else
-                          Text(
-                            t.rally.common.unknown, // Placeholder if no description
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant.withOpacity(0.5),
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-
-                        SizedBox(height: Responsive.h(context, 100)),
-                      ],
-                    ),
-                  ),
-                ),
+                // Overview Tab - Map with persistent bottom sheet
+                _buildOverviewTab(context, rallyData, colorScheme, textTheme, t),
 
                 // Timeline Tab (TODO)
                 _buildPlaceholderTab(context, t.rally.common.timeline),
@@ -183,6 +132,75 @@ class _RallyScreenState extends ConsumerState<RallyScreen> {
           error: (Object error, StackTrace stack) => _buildErrorState(context, error, t),
         ),
       ),
+    );
+  }
+
+  Widget _buildOverviewTab(
+    BuildContext context,
+    RallyResponse rallyData,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    Translations t,
+  ) {
+    return Stack(
+      children: <Widget>[
+        const Positioned.fill(
+          child: RallyMapView(),
+        ),
+        AppBottomSheet.persistent(
+          title: t.rally.common.overview,
+          bodyBuilder: (ScrollController _) {
+            return Padding(
+              padding: EdgeInsets.all(Responsive.w(context, 24)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  if (rallyData.coverImageUrl != null &&
+                      rallyData.coverImageUrl!.isNotEmpty) ...<Widget>[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(Responsive.w(context, 16)),
+                      child: AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: Image.network(
+                          rallyData.coverImageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder:
+                              (_, __, ___) => Container(
+                                color: colorScheme.surfaceContainerHighest,
+                                child: Icon(
+                                  Icons.image_not_supported_outlined,
+                                  size: Responsive.w(context, 48),
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: Responsive.h(context, 20)),
+                  ],
+                  if (rallyData.description != null &&
+                      rallyData.description!.isNotEmpty)
+                    RallyRichTextViewer(
+                      content: rallyData.description!,
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        height: 1.5,
+                      ),
+                    )
+                  else
+                    Text(
+                      t.rally.common.unknown,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -209,7 +227,7 @@ class _RallyScreenState extends ConsumerState<RallyScreen> {
         vertical: Responsive.h(context, 6),
       ),
       decoration: BoxDecoration(
-        color: autoBadgeBg.withOpacity(0.2), // Softer look
+        color: autoBadgeBg.withValues(alpha: 0.2), // Softer look
         borderRadius: BorderRadius.circular(Responsive.w(context, 20)), // More pill-like
       ),
       child: Text(

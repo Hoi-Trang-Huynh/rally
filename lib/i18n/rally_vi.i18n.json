@@ -127,5 +127,57 @@
       "timeout": "Hết thời gian chờ. Vui lòng kiểm tra kết nối.",
       "generic": "Đã có lỗi xảy ra. Vui lòng thử lại."
     }
+  },
+  "rallyInvite": {
+    "title": "Mời Thành Viên",
+    "headline": "Mời Bạn Bè Tham Gia Rally",
+    "searchPlaceholder": "Tìm kiếm bạn bè...",
+    "invite": "Mời",
+    "invited": "Đã mời",
+    "noFriends": "Không có bạn bè nào có thể mời",
+    "cancel": "Hủy",
+    "done": "Gửi Lời Mời",
+    "inviteLink": {
+      "generateButton": "Tạo liên kết mời",
+      "generating": "Đang tạo...",
+      "noLinksYet": "Chưa có liên kết mời. Tạo một liên kết để chia sẻ!",
+      "shareTitle": "Lời mời Rally",
+      "shareMessage": "Tham gia rally của tôi! Dùng mã mời: {token}",
+      "copyToken": "Sao chép mã",
+      "tokenCopied": "Đã sao chép mã vào bộ nhớ tạm",
+      "revokeButton": "Thu hồi",
+      "revokeConfirmTitle": "Thu hồi liên kết mời",
+      "revokeConfirmMessage": "Thao tác này sẽ vô hiệu hóa mã QR này. Tiếp tục?",
+      "revokeConfirmYes": "Thu hồi",
+      "revokeConfirmNo": "Hủy",
+      "revokeSuccess": "Đã thu hồi liên kết mời",
+      "revokeError": "Không thể thu hồi liên kết mời",
+      "generateError": "Không thể tạo liên kết mời",
+      "uses": "{current}/{max} lượt dùng",
+      "usesUnlimited": "{current} lượt dùng",
+      "expiresAt": "Hết hạn {date}",
+      "expired": "Đã hết hạn",
+      "activeLinks": "Liên kết mời đang hoạt động",
+      "saveToGallery": "Lưu vào thư viện",
+      "savedToGallery": "Đã lưu mã QR vào thư viện",
+      "saveError": "Không thể lưu mã QR"
+    },
+    "inviteSuccess": "Gửi lời mời thành công",
+    "inviteError": "Gửi lời mời thất bại",
+    "joinViaLink": {
+      "title": "Lời mời Rally",
+      "loading": "Đang tải thông tin lời mời...",
+      "invalidLink": "Liên kết mời không hợp lệ hoặc đã hết hạn.",
+      "errorLoading": "Không thể tải thông tin lời mời. Vui lòng thử lại.",
+      "roleLabel": "Bạn được mời với vai trò",
+      "participantsLabel": "{count} thành viên",
+      "organizedBy": "Tổ chức bởi {name}",
+      "acceptButton": "Chấp nhận lời mời",
+      "declineButton": "Từ chối",
+      "accepting": "Đang tham gia...",
+      "acceptSuccess": "Đã chấp nhận lời mời! Bạn đã được thêm vào rally.",
+      "acceptError": "Không thể chấp nhận lời mời. Vui lòng thử lại.",
+      "loginRequired": "Vui lòng đăng nhập để chấp nhận lời mời."
+    }
   }
 }
