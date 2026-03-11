@@ -16,8 +16,8 @@ import 'package:rally/widgets/common/shimmer_loading.dart';
 import 'package:rally/widgets/common/sticky_tab_bar_delegate.dart';
 import 'package:rally/widgets/navigation/secondary_shell.dart';
 
-import '../../i18n/generated/translations.g.dart';
-import 'widgets/follow_list_sheet.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/screens/profile/widgets/follow_list_sheet.dart';
 
 /// Screen to display another user's public profile.
 ///

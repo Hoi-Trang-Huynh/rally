@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/common/scale_button.dart';
 
-import '../../../../i18n/generated/translations.g.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 
 /// A reusable widget to display user bio.
 class ProfileBio extends StatelessWidget {

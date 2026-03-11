@@ -6,15 +6,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../i18n/generated/translations.g.dart';
-import '../../models/app_user.dart';
-import '../../models/feedback_category.dart';
-import '../../providers/api_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../utils/image_upload_helper.dart';
-import '../../utils/responsive.dart';
-import '../../utils/storage_constants.dart';
-import '../../utils/validation_constants.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/models/app_user.dart';
+import 'package:rally/models/feedback_category.dart';
+import 'package:rally/providers/api_provider.dart';
+import 'package:rally/providers/auth_provider.dart';
+import 'package:rally/utils/image_upload_helper.dart';
+import 'package:rally/utils/responsive.dart';
+import 'package:rally/utils/storage_constants.dart';
+import 'package:rally/utils/validation_constants.dart';
 
 /// Screen for submitting user feedback.
 ///
@@ -59,9 +59,10 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       }
     } catch (e) {
       if (!mounted) return;
+      final Translations t = Translations.of(context);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error picking image: $e')));
+      ).showSnackBar(SnackBar(content: Text(t.settings.feedback.errorPickingImage(error: e))));
     }
   }
 
@@ -422,7 +423,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                               ),
                               SizedBox(width: Responsive.w(context, 12)),
                               Text(
-                                _isUploading ? 'Uploading images...' : 'Submitting...',
+                                _isUploading ? t.settings.feedback.uploadingImages : t.settings.feedback.submitting,
                                 style: textTheme.titleMedium?.copyWith(
                                   color: colorScheme.onPrimary,
                                   fontWeight: FontWeight.w600,

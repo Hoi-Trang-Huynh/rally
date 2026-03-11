@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/utils/responsive.dart';
 
-import '../../i18n/generated/translations.g.dart';
-import '../../providers/locale_provider.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/providers/locale_provider.dart';
 
 /// Screen for selecting app language.
 ///

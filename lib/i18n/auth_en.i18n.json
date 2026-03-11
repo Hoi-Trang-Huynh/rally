@@ -10,6 +10,7 @@
     "alreadyHaveAccountQuestion": "Already have an account?",
     "alreadyHaveAccountAction": "Log in"
   },
+  "appIntro": "App Intro",
   "signup": {
     "username": "Username",
     "firstName": "First Name",

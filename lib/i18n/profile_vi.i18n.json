@@ -26,5 +26,11 @@
   "noAchievements": "Chưa có thành tựu",
   "noAchievementsSubtitle": "Tham gia rallies để nhận huy hiệu!",
   "noOwnPosts": "Chưa có bài viết",
-  "noOwnPostsSubtitle": "Chia sẻ trải nghiệm rally của bạn với cộng đồng."
+  "noOwnPostsSubtitle": "Chia sẻ trải nghiệm rally của bạn với cộng đồng.",
+  "noRalliesFound": "Không tìm thấy rallies",
+  "noRalliesFoundSubtitle": "Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm",
+  "failedToLoadRallies": "Không thể tải rallies",
+  "failedToPickImage": "Không thể chọn ảnh: $error",
+  "avatarUpdatedSuccessfully": "Cập nhật ảnh đại diện thành công",
+  "failedToUploadAvatar": "Không thể tải lên ảnh đại diện: $error"
 }

@@ -175,10 +175,10 @@ class _ProfileRalliesTabState extends ConsumerState<ProfileRalliesTab> {
                 if (data.rallies.isEmpty) {
                   return Padding(
                     padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 48)),
-                    child: const EmptyState(
+                    child: EmptyState(
                       icon: Icons.explore_outlined,
-                      title: 'No rallies found',
-                      subtitle: 'Try adjusting your filters or search terms',
+                      title: t.profile.noRalliesFound,
+                      subtitle: t.profile.noRalliesFoundSubtitle,
                     ),
                   );
                 }
@@ -227,7 +227,7 @@ class _ProfileRalliesTabState extends ConsumerState<ProfileRalliesTab> {
                     padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 48)),
                     child: EmptyState(
                       icon: Icons.error_outline,
-                      title: 'Failed to load rallies',
+                      title: t.profile.failedToLoadRallies,
                       subtitle: error.toString(),
                     ),
                   ),

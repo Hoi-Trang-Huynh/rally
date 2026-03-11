@@ -27,6 +27,9 @@
     "success": "Thank you for your feedback!",
     "error": "Failed to submit feedback. Please try again.",
     "attachments": "Attachments (Optional, max 3)",
+    "uploadingImages": "Uploading images...",
+    "submitting": "Submitting...",
+    "errorPickingImage": "Error picking image: $error",
     "categories": {
       "uiUx": "UI/UX",
       "bug": "Bug Report",

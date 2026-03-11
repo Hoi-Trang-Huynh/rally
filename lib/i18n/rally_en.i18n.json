@@ -70,6 +70,12 @@
     "all": "All",
     "searchPlaceholder": "Search..."
   },
+  "home": {
+    "activeRallies": "Active Rallies",
+    "placesVisited": "Places Visited",
+    "newFriends": "New Friends",
+    "recentActivity": "Recent Activity"
+  },
   "common": {
     "noDates": "No dates",
     "unknown": "Unknown",

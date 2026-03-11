@@ -61,7 +61,7 @@ class LanguageSelector extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Icon(Icons.language, size: Responsive.w(context, 18), color: colorScheme.onSurface),
-            const SizedBox(width: 8),
+            SizedBox(width: Responsive.w(context, 8)),
             Text(
               localeState.locale.languageCode.toUpperCase(),
               style: textTheme.labelLarge?.copyWith(
@@ -69,7 +69,7 @@ class LanguageSelector extends ConsumerWidget {
                 color: colorScheme.onSurface,
               ),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: Responsive.w(context, 4)),
             Icon(
               Icons.keyboard_arrow_down,
               size: Responsive.w(context, 18),

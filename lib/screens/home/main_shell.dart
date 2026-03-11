@@ -6,11 +6,11 @@ import 'package:rally/router/app_router.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/navigation/sliver_app_header.dart';
 
-import '../../i18n/generated/translations.g.dart';
-import '../../models/nav_item_data.dart';
-import '../../widgets/navigation/app_bottom_nav_bar.dart';
-import '../../widgets/navigation/speed_dial_overlay.dart';
-import '../../widgets/rally/create_rally_bottom_sheet.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/models/nav_item_data.dart';
+import 'package:rally/widgets/navigation/app_bottom_nav_bar.dart';
+import 'package:rally/widgets/navigation/speed_dial_overlay.dart';
+import 'package:rally/widgets/rally/create_rally_bottom_sheet.dart';
 
 /// The main shell screen that hosts the bottom navigation bar.
 ///

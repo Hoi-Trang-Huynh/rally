@@ -27,6 +27,9 @@
     "success": "Cảm ơn phản hồi của bạn!",
     "error": "Không thể gửi phản hồi. Vui lòng thử lại.",
     "attachments": "Tệp đính kèm (Tùy chọn, tối đa 3)",
+    "uploadingImages": "Đang tải ảnh lên...",
+    "submitting": "Đang gửi...",
+    "errorPickingImage": "Lỗi chọn ảnh: $error",
     "categories": {
       "uiUx": "UI/UX",
       "bug": "Báo lỗi",

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../models/app_user.dart';
-import '../../../../utils/responsive.dart';
-import 'profile_avatar.dart';
+import 'package:rally/models/app_user.dart';
+import 'package:rally/utils/responsive.dart';
+import 'package:rally/screens/profile/widgets/profile_avatar.dart';
 
 /// A modern header for the profile screen.
 ///

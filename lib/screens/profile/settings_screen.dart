@@ -5,18 +5,18 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import '../../i18n/generated/translations.g.dart';
-import '../../models/app_user.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/locale_provider.dart';
-import '../../providers/theme_provider.dart';
-import '../../router/app_router.dart';
-import '../../utils/responsive.dart';
-import '../../widgets/navigation/secondary_shell.dart';
-import 'language_screen.dart';
-import 'widgets/modern_settings_tile.dart';
-import 'widgets/profile_avatar.dart';
-import 'widgets/settings_group.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/models/app_user.dart';
+import 'package:rally/providers/auth_provider.dart';
+import 'package:rally/providers/locale_provider.dart';
+import 'package:rally/providers/theme_provider.dart';
+import 'package:rally/router/app_router.dart';
+import 'package:rally/utils/responsive.dart';
+import 'package:rally/widgets/navigation/secondary_shell.dart';
+import 'package:rally/screens/profile/language_screen.dart';
+import 'package:rally/screens/profile/widgets/modern_settings_tile.dart';
+import 'package:rally/screens/profile/widgets/profile_avatar.dart';
+import 'package:rally/screens/profile/widgets/settings_group.dart';
 
 /// Settings screen displaying user options and preferences.
 ///

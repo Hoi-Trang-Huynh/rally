@@ -70,6 +70,12 @@
     "all": "Tất cả",
     "searchPlaceholder": "Tìm kiếm..."
   },
+  "home": {
+    "activeRallies": "Rally đang hoạt động",
+    "placesVisited": "Địa điểm đã đến",
+    "newFriends": "Bạn bè mới",
+    "recentActivity": "Hoạt động gần đây"
+  },
   "common": {
     "noDates": "Không có ngày",
     "unknown": "Không rõ",

@@ -9,15 +9,15 @@ import 'package:rally/screens/auth/widgets/auth_text_field.dart';
 import 'package:rally/utils/image_upload_helper.dart';
 import 'package:rally/widgets/common/app_bottom_sheet.dart';
 
-import '../../i18n/generated/translations.g.dart';
-import '../../models/app_user.dart';
-import '../../providers/api_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../utils/responsive.dart';
-import '../../utils/ui_helpers.dart';
-import '../../utils/validation_constants.dart';
-import '../../utils/validators.dart';
-import 'widgets/profile_avatar.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/models/app_user.dart';
+import 'package:rally/providers/api_provider.dart';
+import 'package:rally/providers/auth_provider.dart';
+import 'package:rally/utils/responsive.dart';
+import 'package:rally/utils/ui_helpers.dart';
+import 'package:rally/utils/validation_constants.dart';
+import 'package:rally/utils/validators.dart';
+import 'package:rally/screens/profile/widgets/profile_avatar.dart';
 
 /// Screen for editing user profile.
 ///
@@ -121,12 +121,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         child: Row(
           children: <Widget>[
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(Responsive.w(context, 10)),
               decoration: BoxDecoration(
                 color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: colorScheme.primary, size: 24),
+              child: Icon(icon, color: colorScheme.primary, size: Responsive.w(context, 24)),
             ),
             SizedBox(width: Responsive.w(context, 16)),
             Text(
@@ -152,7 +152,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
       await _uploadAvatar(File(image.path));
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, 'Failed to pick image: $e');
+      if (mounted) {
+        final Translations t = Translations.of(context);
+        showErrorSnackBar(context, t.profile.failedToPickImage(error: e));
+      }
     }
   }
 
@@ -174,10 +177,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       ref.invalidate(myProfileProvider);
 
       if (mounted) {
-        showSuccessSnackBar(context, 'Avatar updated successfully');
+        final Translations t = Translations.of(context);
+        showSuccessSnackBar(context, t.profile.avatarUpdatedSuccessfully);
       }
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, 'Failed to upload avatar: $e');
+      if (mounted) {
+        final Translations t = Translations.of(context);
+        showErrorSnackBar(context, t.profile.failedToUploadAvatar(error: e));
+      }
     } finally {
       if (mounted) setState(() => _isUploadingAvatar = false);
     }
@@ -321,7 +328,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           right: 4,
                           bottom: 4,
                           child: Container(
-                            padding: const EdgeInsets.all(10),
+                            padding: EdgeInsets.all(Responsive.w(context, 10)),
                             decoration: BoxDecoration(
                               color: colorScheme.primary,
                               shape: BoxShape.circle,
@@ -336,7 +343,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             ),
                             child: Icon(
                               Icons.camera_alt_rounded,
-                              size: 20,
+                              size: Responsive.w(context, 20),
                               color: colorScheme.onPrimary,
                             ),
                           ),

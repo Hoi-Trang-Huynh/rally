@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:rally/themes/app_colors.dart';
 import 'package:rally/utils/responsive.dart';
@@ -11,15 +12,15 @@ import 'package:rally/widgets/search/user_search_bar.dart';
 ///
 /// Shows curated travel templates and popular destinations with
 /// interactive cards, pull-to-refresh, and bookmark functionality.
-class DiscoveryScreen extends StatefulWidget {
+class DiscoveryScreen extends ConsumerStatefulWidget {
   /// Creates a new [DiscoveryScreen].
   const DiscoveryScreen({super.key});
 
   @override
-  State<DiscoveryScreen> createState() => _DiscoveryScreenState();
+  ConsumerState<DiscoveryScreen> createState() => _DiscoveryScreenState();
 }
 
-class _DiscoveryScreenState extends State<DiscoveryScreen> {
+class _DiscoveryScreenState extends ConsumerState<DiscoveryScreen> {
   // Track bookmarked templates
   final Set<int> _bookmarkedTemplates = <int>{};
 
@@ -351,8 +352,8 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                       children: <Widget>[
                         Row(
                           children: <Widget>[
-                            const Icon(Icons.star_rounded, size: 16, color: Colors.amber),
-                            const SizedBox(width: 4),
+                            Icon(Icons.star_rounded, size: Responsive.w(context, 16), color: Colors.amber),
+                            SizedBox(width: Responsive.w(context, 4)),
                             Text(
                               '${template['rating']}',
                               style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
@@ -531,9 +532,9 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                             Icon(
                               Icons.location_on_rounded,
                               color: Colors.white.withValues(alpha: 0.9),
-                              size: 16,
+                              size: Responsive.w(context, 16),
                             ),
-                            const SizedBox(width: 4),
+                            SizedBox(width: Responsive.w(context, 4)),
                             Text(
                               dest['location'] as String,
                               style: textTheme.bodyMedium?.copyWith(
@@ -555,19 +556,20 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
   }
 
   Color _getCategoryColor(String category) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     switch (category.toLowerCase()) {
       case 'cultural':
-        return const Color(0xFF9C27B0); // Purple
+        return colorScheme.tertiary;
       case 'adventure':
-        return const Color(0xFF4CAF50); // Green
+        return colorScheme.primary;
       case 'relaxation':
-        return const Color(0xFF03A9F4); // Light Blue
+        return colorScheme.secondary;
       case 'romantic':
-        return const Color(0xFFE91E63); // Pink
+        return colorScheme.error;
       case 'nature':
-        return const Color(0xFF8BC34A); // Light Green
+        return colorScheme.primary;
       default:
-        return const Color(0xFF607D8B); // Blue Grey
+        return colorScheme.onSurfaceVariant;
     }
   }
 

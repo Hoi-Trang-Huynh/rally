@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:rally/themes/app_colors.dart';
 import 'package:rally/utils/responsive.dart';
@@ -11,15 +12,15 @@ import 'package:rally/widgets/common/swipe_action_background.dart';
 ///
 /// Features swipe-to-action gestures, pinned chats, session thumbnails,
 /// status badges, and animated unread indicators.
-class ChatScreen extends StatefulWidget {
+class ChatScreen extends ConsumerStatefulWidget {
   /// Creates a new [ChatScreen].
   const ChatScreen({super.key});
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   // Track pinned chats
   final Set<String> _pinnedChats = <String>{};
 
@@ -345,7 +346,7 @@ class _ChatScreenState extends State<ChatScreen> {
       background: SwipeActionBackground(
         icon: isPinned ? Icons.push_pin_outlined : Icons.push_pin_rounded,
         label: isPinned ? 'Unpin' : 'Pin',
-        color: const Color(0xFF2196F3),
+        color: Theme.of(context).colorScheme.primary,
         isLeft: true,
       ),
       secondaryBackground: SwipeActionBackground.archive(isLeft: false),
@@ -553,17 +554,18 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   (Color, IconData) _getStatusData(String status) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     switch (status) {
       case 'Active':
-        return (const Color(0xFF4CAF50), Icons.flight_takeoff_rounded);
+        return (colorScheme.primary, Icons.flight_takeoff_rounded);
       case 'Planning':
-        return (const Color(0xFFFF9800), Icons.edit_note_rounded);
+        return (colorScheme.tertiary, Icons.edit_note_rounded);
       case 'Cancelled':
-        return (const Color(0xFF9E9E9E), Icons.cancel_rounded);
+        return (colorScheme.outline, Icons.cancel_rounded);
       case 'Completed':
-        return (const Color(0xFF2196F3), Icons.check_circle_rounded);
+        return (colorScheme.secondary, Icons.check_circle_rounded);
       default:
-        return (const Color(0xFF607D8B), Icons.circle);
+        return (colorScheme.onSurfaceVariant, Icons.circle);
     }
   }
 }

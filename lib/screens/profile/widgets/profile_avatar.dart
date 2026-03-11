@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../utils/responsive.dart';
+import 'package:rally/utils/responsive.dart';
 
 /// Reusable profile avatar widget with optional online indicator.
 ///
@@ -80,7 +80,7 @@ class ProfileAvatar extends StatelessWidget {
               height: size * 0.15,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isOnline ? const Color(0xFF22C55E) : colorScheme.outline,
+                color: isOnline ? colorScheme.primary : colorScheme.outline,
                 border: Border.all(color: colorScheme.surface, width: Responsive.w(context, 2)),
               ),
             ),

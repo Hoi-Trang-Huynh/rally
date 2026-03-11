@@ -11,7 +11,7 @@ import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/common/app_bottom_sheet.dart';
 import 'package:rally/widgets/common/shimmer_loading.dart';
 
-import 'profile_avatar.dart';
+import 'package:rally/screens/profile/widgets/profile_avatar.dart';
 
 /// The initial tab to display in the follow list sheet.
 enum FollowListTab {

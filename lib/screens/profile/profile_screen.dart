@@ -12,16 +12,16 @@ import 'package:rally/widgets/common/empty_state.dart';
 import 'package:rally/widgets/common/shimmer_loading.dart';
 import 'package:rally/widgets/common/sticky_tab_bar_delegate.dart';
 
-import '../../i18n/generated/translations.g.dart';
-import '../../models/app_user.dart';
-import '../../providers/api_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../utils/responsive.dart';
-import 'widgets/follow_list_sheet.dart';
-import 'widgets/profile_avatar.dart';
-import 'widgets/profile_content.dart';
-import 'widgets/profile_rallies_tab.dart';
-import 'widgets/profile_tab_bar.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/models/app_user.dart';
+import 'package:rally/providers/api_provider.dart';
+import 'package:rally/providers/auth_provider.dart';
+import 'package:rally/utils/responsive.dart';
+import 'package:rally/screens/profile/widgets/follow_list_sheet.dart';
+import 'package:rally/screens/profile/widgets/profile_avatar.dart';
+import 'package:rally/screens/profile/widgets/profile_content.dart';
+import 'package:rally/screens/profile/widgets/profile_rallies_tab.dart';
+import 'package:rally/screens/profile/widgets/profile_tab_bar.dart';
 
 /// The main profile screen displaying user information.
 ///
