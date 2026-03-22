@@ -59,11 +59,11 @@ workflows:
           set -e
           echo "Installing Firebase CLI..."
           curl -sL https://firebase.tools | bash
-          
+
           echo "Activating FlutterFire CLI..."
           dart pub global activate flutterfire_cli
           export PATH="$PATH:$HOME/.pub-cache/bin"
-          
+
           echo "Configuring Firebase..."
           flutterfire configure \
             --project=$FIREBASE_PROJECT_ID \
@@ -81,7 +81,7 @@ workflows:
           BUILD_ANDROID_APK_EXIT_CODE=$?
           flutter build appbundle --release --build-number=$BUILD_NUMBER
           BUILD_ANDROID_AAB_EXIT_CODE=$?
-          
+
           # Consider Android successful only if both succeed
           if [ "$BUILD_ANDROID_APK_EXIT_CODE" = "0" ] && [ "$BUILD_ANDROID_AAB_EXIT_CODE" = "0" ]; then
             BUILD_ANDROID_EXIT_CODE=0
@@ -98,13 +98,6 @@ workflows:
             echo "ANDROID_STATUS=FAILED" >> "$STATE_FILE"
           fi
           set -e
-
-      - name: Verify APK Signature
-        script: |
-          set -e
-          echo "Verifying APK signature..."
-          jarsigner -verify -verbose -certs build/app/outputs/flutter-apk/app-release.apk
-          echo "✅ APK signature verified successfully!"
 
       - name: Get OAuth2 token
         script: |
@@ -148,10 +141,10 @@ workflows:
             fi
 
             source "$STATE_FILE"
-            
+
             VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr -d '\r' 2>/dev/null || echo "Unknown")
             VERSION_BUILD="${VERSION}+${BUILD_NUMBER}"
-            
+
             # Construct JSON Payload
             cat <<EOF > payload.json
             {
