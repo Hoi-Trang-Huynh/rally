@@ -61,8 +61,11 @@ class InvitePreviewResponse {
   /// Owner of the rally.
   final InvitePreviewOwner owner;
 
-  /// ID of the participant record created for the invitation.
+  /// ID of the participant record (if user was already invited/joined).
   final String participantId;
+
+  /// The user's current participation status (empty if no existing record).
+  final String participantStatus;
 
   /// ID of the rally.
   final String rallyId;
@@ -89,6 +92,7 @@ class InvitePreviewResponse {
     required this.memberCount,
     required this.owner,
     required this.participantId,
+    this.participantStatus = '',
     required this.rallyId,
     required this.rallyName,
     required this.roleOffered,
@@ -122,6 +126,7 @@ class InvitePreviewResponse {
                 username: '',
               ),
       participantId: json['participantId'] as String? ?? '',
+      participantStatus: json['participantStatus'] as String? ?? '',
       rallyId: json['rallyId'] as String? ?? '',
       rallyName: json['rallyName'] as String? ?? '',
       roleOffered: json['roleOffered'] as String? ?? 'participant',

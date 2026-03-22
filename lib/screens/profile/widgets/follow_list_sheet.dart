@@ -67,14 +67,22 @@ class _FollowListSheetState extends ConsumerState<FollowListSheet>
       vsync: this,
       initialIndex: widget.initialTab == FollowListTab.followers ? 0 : 1,
     );
+    _tabController.addListener(_onTabChanged);
     _loadFollowers();
     _loadFollowing();
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging) {
+      setState(() {});
+    }
   }
 
   Future<void> _loadFollowers({bool loadMore = false}) async {
@@ -181,14 +189,14 @@ class _FollowListSheetState extends ConsumerState<FollowListSheet>
           widget.initialTab == FollowListTab.followers
               ? t.profile.followersTitle
               : t.profile.followingTitle,
-      initialChildSize: 0.6,
+      initialChildSize: 0.5,
       minChildSize: 0.3,
-      maxChildSize: 0.9,
+      maxChildSize: 0.95,
       bodyBuilder: (ScrollController scrollController) {
-        return Column(
-          children: <Widget>[
-            // Tab Bar
-            Container(
+        return <Widget>[
+          // Tab Bar
+          SliverToBoxAdapter(
+            child: Container(
               margin: EdgeInsets.symmetric(
                 horizontal: Responsive.w(context, 24),
                 vertical: Responsive.h(context, 8),
@@ -216,43 +224,38 @@ class _FollowListSheetState extends ConsumerState<FollowListSheet>
                 ],
               ),
             ),
-            // Tab Content
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: <Widget>[
-                  _buildFollowersList(scrollController, t),
-                  _buildFollowingList(scrollController, t),
-                ],
-              ),
-            ),
-          ],
-        );
+          ),
+          // Tab Content
+          if (_tabController.index == 0)
+            ..._buildFollowersSlivers(t)
+          else
+            ..._buildFollowingSlivers(t),
+        ];
       },
     );
   }
 
-  Widget _buildFollowersList(ScrollController scrollController, Translations t) {
+  List<Widget> _buildFollowersSlivers(Translations t) {
     if (_isLoadingFollowers && _followers.isEmpty) {
-      return _buildLoadingList();
+      return <Widget>[SliverToBoxAdapter(child: _buildLoadingList())];
     }
 
     if (_followers.isEmpty) {
-      return _buildEmptyState(t.profile.noFollowers);
+      return <Widget>[
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: _buildEmptyState(t.profile.noFollowers),
+        ),
+      ];
     }
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification notification) {
-        if (notification is ScrollEndNotification && notification.metrics.extentAfter < 200) {
-          _loadMoreFollowers();
-        }
-        return false;
-      },
-      child: ListView.builder(
-        controller: scrollController,
-        padding: EdgeInsets.only(bottom: Responsive.h(context, 24)),
+    return <Widget>[
+      SliverList.builder(
         itemCount: _followers.length + (_hasMoreFollowers ? 1 : 0),
         itemBuilder: (BuildContext context, int index) {
+          if (index >= _followers.length - 2 && _hasMoreFollowers) {
+            _loadMoreFollowers();
+          }
           if (index >= _followers.length) {
             return _buildLoadingIndicator();
           }
@@ -262,30 +265,33 @@ class _FollowListSheetState extends ConsumerState<FollowListSheet>
           );
         },
       ),
-    );
+      SliverToBoxAdapter(
+        child: SizedBox(height: Responsive.h(context, 24)),
+      ),
+    ];
   }
 
-  Widget _buildFollowingList(ScrollController scrollController, Translations t) {
+  List<Widget> _buildFollowingSlivers(Translations t) {
     if (_isLoadingFollowing && _following.isEmpty) {
-      return _buildLoadingList();
+      return <Widget>[SliverToBoxAdapter(child: _buildLoadingList())];
     }
 
     if (_following.isEmpty) {
-      return _buildEmptyState(t.profile.noFollowing);
+      return <Widget>[
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: _buildEmptyState(t.profile.noFollowing),
+        ),
+      ];
     }
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification notification) {
-        if (notification is ScrollEndNotification && notification.metrics.extentAfter < 200) {
-          _loadMoreFollowing();
-        }
-        return false;
-      },
-      child: ListView.builder(
-        controller: scrollController,
-        padding: EdgeInsets.only(bottom: Responsive.h(context, 24)),
+    return <Widget>[
+      SliverList.builder(
         itemCount: _following.length + (_hasMoreFollowing ? 1 : 0),
         itemBuilder: (BuildContext context, int index) {
+          if (index >= _following.length - 2 && _hasMoreFollowing) {
+            _loadMoreFollowing();
+          }
           if (index >= _following.length) {
             return _buildLoadingIndicator();
           }
@@ -295,14 +301,15 @@ class _FollowListSheetState extends ConsumerState<FollowListSheet>
           );
         },
       ),
-    );
+      SliverToBoxAdapter(
+        child: SizedBox(height: Responsive.h(context, 24)),
+      ),
+    ];
   }
 
   Widget _buildLoadingList() {
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 8)),
-      itemCount: 5,
-      itemBuilder: (BuildContext context, int index) {
+    return Column(
+      children: List<Widget>.generate(5, (int index) {
         return Padding(
           padding: EdgeInsets.symmetric(
             horizontal: Responsive.w(context, 24),
@@ -337,7 +344,7 @@ class _FollowListSheetState extends ConsumerState<FollowListSheet>
             ],
           ),
         );
-      },
+      }),
     );
   }
 

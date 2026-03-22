@@ -74,10 +74,22 @@ class UserRalliesResponse {
   /// Total number of rallies matching the filter.
   final int total;
 
+  /// The current page number.
+  final int page;
+
+  /// The number of results per page.
+  final int pageSize;
+
+  /// The total number of pages.
+  final int totalPages;
+
   /// Creates a new [UserRalliesResponse].
   const UserRalliesResponse({
     required this.rallies,
     required this.total,
+    required this.page,
+    required this.pageSize,
+    required this.totalPages,
   });
 
   /// Creates a [UserRalliesResponse] from a JSON map.
@@ -88,6 +100,9 @@ class UserRalliesResponse {
               .toList() ??
           <UserRallyItem>[],
       total: json['total'] as int? ?? 0,
+      page: json['page'] as int? ?? 1,
+      pageSize: json['pageSize'] as int? ?? 20,
+      totalPages: json['totalPages'] as int? ?? 0,
     );
   }
 
@@ -96,11 +111,14 @@ class UserRalliesResponse {
     return <String, dynamic>{
       'rallies': rallies.map((UserRallyItem e) => e.toJson()).toList(),
       'total': total,
+      'page': page,
+      'pageSize': pageSize,
+      'totalPages': totalPages,
     };
   }
 
   @override
   String toString() {
-    return 'UserRalliesResponse(total: $total, rallies: ${rallies.length})';
+    return 'UserRalliesResponse(total: $total, page: $page, rallies: ${rallies.length})';
   }
 }

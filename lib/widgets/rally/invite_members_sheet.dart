@@ -176,211 +176,164 @@ class _InviteMembersPageState extends ConsumerState<InviteMembersPage> {
     final Translations t = Translations.of(context);
     final ProfileResponse? profile = ref.watch(myProfileProvider).valueOrNull;
 
-    return Column(
-      children: <Widget>[
-        // Header with back button
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: Responsive.w(context, 8),
-            vertical: Responsive.h(context, 8),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          SizedBox(height: Responsive.h(context, 16)),
+
+          // Current user avatar
+          CircleAvatar(
+            radius: Responsive.w(context, 40),
+            backgroundColor: colorScheme.primaryContainer,
+            backgroundImage:
+                profile?.avatarUrl != null ? NetworkImage(profile!.avatarUrl!) : null,
+            child:
+                profile?.avatarUrl == null
+                    ? Icon(
+                      Icons.person,
+                      size: Responsive.w(context, 40),
+                      color: colorScheme.onPrimaryContainer,
+                    )
+                    : null,
           ),
-          child: Row(
-            children: <Widget>[
-              IconButton(
-                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-                onPressed: widget.onBack,
-              ),
-              Expanded(
-                child: Text(
-                  t.rally.createRally.inviteMembers.title,
-                  textAlign: TextAlign.center,
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-              ),
-              // Spacer for symmetry
-              SizedBox(width: Responsive.w(context, 48)),
-            ],
+
+          SizedBox(height: Responsive.h(context, 16)),
+
+          // Headline
+          Text(
+            t.rally.createRally.inviteMembers.headline,
+            style: textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
           ),
-        ),
 
-        // Scrollable content
-        Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(height: Responsive.h(context, 16)),
+          SizedBox(height: Responsive.h(context, 24)),
 
-                // Current user avatar
-                CircleAvatar(
-                  radius: Responsive.w(context, 40),
-                  backgroundColor: colorScheme.primaryContainer,
-                  backgroundImage:
-                      profile?.avatarUrl != null ? NetworkImage(profile!.avatarUrl!) : null,
-                  child:
-                      profile?.avatarUrl == null
-                          ? Icon(
-                            Icons.person,
-                            size: Responsive.w(context, 40),
-                            color: colorScheme.onPrimaryContainer,
-                          )
-                          : null,
-                ),
-
-                SizedBox(height: Responsive.h(context, 16)),
-
-                // Headline
-                Text(
-                  t.rally.createRally.inviteMembers.headline,
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-
-                SizedBox(height: Responsive.h(context, 24)),
-
-                // INVITED SECTION (Collapsible)
-                _CollapsibleSection(
-                  title: t.rally.createRally.inviteMembers.invitedSection.replaceAll(
-                    '{count}',
-                    _invitedMembersList.length.toString(),
-                  ),
-                  isExpanded: _isInvitedExpanded,
-                  onToggle: () => setState(() => _isInvitedExpanded = !_isInvitedExpanded),
-                  child:
-                      _invitedMembersList.isEmpty
-                          ? Padding(
-                            padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 16)),
-                            child: Text(
-                              t.rally.createRally.inviteMembers.noInvitedYet,
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          )
-                          : Column(
-                            children:
-                                _invitedMembersList
-                                    .map(
-                                      (FollowUserItem member) => Padding(
-                                        padding: EdgeInsets.only(bottom: Responsive.h(context, 8)),
-                                        child: _MemberListItem(
-                                          member: member,
-                                          isInvited: true,
-                                          onTap: () => _removeMember(member),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                          ),
-                ),
-
-                SizedBox(height: Responsive.h(context, 16)),
-
-                // SUGGESTED SECTION (Collapsible)
-                _CollapsibleSection(
-                  title: t.rally.createRally.inviteMembers.suggestedSection,
-                  isExpanded: _isSuggestedExpanded,
-                  onToggle: () => setState(() => _isSuggestedExpanded = !_isSuggestedExpanded),
-                  child: Column(
-                    children: <Widget>[
-                      // Search field inside the section
-                      TextField(
-                        controller: _searchController,
-                        onChanged: _onSearchChanged,
-                        decoration: InputDecoration(
-                          hintText: t.rally.createRally.inviteMembers.searchPlaceholder,
-                          hintStyle: textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                          ),
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                          ),
-                          filled: true,
-                          fillColor: colorScheme.surfaceContainerHighest,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: Responsive.w(context, 16),
-                            vertical: Responsive.h(context, 12),
-                          ),
+          // INVITED SECTION (Collapsible)
+          _CollapsibleSection(
+            title: t.rally.createRally.inviteMembers.invitedSection.replaceAll(
+              '{count}',
+              _invitedMembersList.length.toString(),
+            ),
+            isExpanded: _isInvitedExpanded,
+            onToggle: () => setState(() => _isInvitedExpanded = !_isInvitedExpanded),
+            child:
+                _invitedMembersList.isEmpty
+                    ? Padding(
+                      padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 16)),
+                      child: Text(
+                        t.rally.createRally.inviteMembers.noInvitedYet,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
                         ),
-                        style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
                       ),
+                    )
+                    : Column(
+                      children:
+                          _invitedMembersList
+                              .map(
+                                (FollowUserItem member) => Padding(
+                                  padding: EdgeInsets.only(bottom: Responsive.h(context, 8)),
+                                  child: _MemberListItem(
+                                    member: member,
+                                    isInvited: true,
+                                    onTap: () => _removeMember(member),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                    ),
+          ),
 
-                      SizedBox(height: Responsive.h(context, 12)),
+          SizedBox(height: Responsive.h(context, 16)),
 
-                      // Friends list
-                      if (_isLoading)
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 24)),
-                          child: const CircularProgressIndicator(),
-                        )
-                      else if (_errorMessage != null)
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 24)),
-                          child: Text(
-                            _errorMessage!,
-                            style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
-                          ),
-                        )
-                      else if (_filteredSuggestedFriends.isEmpty)
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 24)),
-                          child: Text(
-                            t.rally.createRally.inviteMembers.noFriends,
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        )
-                      else
-                        Column(
-                          children:
-                              _filteredSuggestedFriends
-                                  .map(
-                                    (FollowUserItem friend) => Padding(
-                                      padding: EdgeInsets.only(bottom: Responsive.h(context, 8)),
-                                      child: _MemberListItem(
-                                        member: friend,
-                                        isInvited: false,
-                                        onTap: () => _addMember(friend),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                        ),
-                    ],
+          // SUGGESTED SECTION (Collapsible)
+          _CollapsibleSection(
+            title: t.rally.createRally.inviteMembers.suggestedSection,
+            isExpanded: _isSuggestedExpanded,
+            onToggle: () => setState(() => _isSuggestedExpanded = !_isSuggestedExpanded),
+            child: Column(
+              children: <Widget>[
+                // Search field inside the section
+                TextField(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  decoration: InputDecoration(
+                    hintText: t.rally.createRally.inviteMembers.searchPlaceholder,
+                    hintStyle: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    ),
+                    filled: true,
+                    fillColor: colorScheme.surfaceContainerHighest,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: Responsive.w(context, 16),
+                      vertical: Responsive.h(context, 12),
+                    ),
                   ),
+                  style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
                 ),
 
-                SizedBox(height: Responsive.h(context, 24)),
+                SizedBox(height: Responsive.h(context, 12)),
+
+                // Friends list
+                if (_isLoading)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 24)),
+                    child: const CircularProgressIndicator(),
+                  )
+                else if (_errorMessage != null)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 24)),
+                    child: Text(
+                      _errorMessage!,
+                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
+                    ),
+                  )
+                else if (_filteredSuggestedFriends.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 24)),
+                    child: Text(
+                      t.rally.createRally.inviteMembers.noFriends,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  )
+                else
+                  Column(
+                    children:
+                        _filteredSuggestedFriends
+                            .map(
+                              (FollowUserItem friend) => Padding(
+                                padding: EdgeInsets.only(bottom: Responsive.h(context, 8)),
+                                child: _MemberListItem(
+                                  member: friend,
+                                  isInvited: false,
+                                  onTap: () => _addMember(friend),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                  ),
               ],
             ),
           ),
-        ),
 
-        // Bottom action buttons
-        Container(
-          padding: EdgeInsets.only(
-            left: Responsive.w(context, 24),
-            right: Responsive.w(context, 24),
-            top: Responsive.h(context, 16),
-            bottom: Responsive.h(context, 24) + MediaQuery.of(context).padding.bottom,
-          ),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            border: Border(top: BorderSide(color: colorScheme.outline.withValues(alpha: 0.1))),
-          ),
-          child: Row(
+          SizedBox(height: Responsive.h(context, 24)),
+
+          // Bottom action buttons
+          Row(
             children: <Widget>[
               Expanded(
                 child: OutlinedButton(
@@ -436,8 +389,10 @@ class _InviteMembersPageState extends ConsumerState<InviteMembersPage> {
               ),
             ],
           ),
-        ),
-      ],
+
+          SizedBox(height: Responsive.h(context, 24) + MediaQuery.of(context).padding.bottom),
+        ],
+      ),
     );
   }
 }

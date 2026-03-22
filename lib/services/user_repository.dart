@@ -1,4 +1,5 @@
 import 'package:rally/models/responses/availability_response.dart';
+import 'package:rally/models/responses/pending_invitation_response.dart';
 import 'package:rally/models/responses/follow_list_response.dart';
 import 'package:rally/models/responses/follow_response.dart';
 import 'package:rally/models/responses/follow_status_response.dart';
@@ -286,5 +287,18 @@ class UserRepository {
       queryParams: queryParams,
     );
     return UserRalliesResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  // ============================================
+  // Invitation Endpoints
+  // ============================================
+
+  /// Gets all pending rally invitations for the current user.
+  ///
+  /// TODO: Temporary endpoint until realtime notifications are implemented.
+  /// Returns a [PendingInvitationsResponse] containing the invitations list.
+  Future<PendingInvitationsResponse> getPendingInvitations() async {
+    final dynamic response = await _apiClient.get('/api/v1/user/me/invitations');
+    return PendingInvitationsResponse.fromJson(response as Map<String, dynamic>);
   }
 }

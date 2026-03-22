@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/models/responses/follow_status_response.dart';
-import 'package:rally/models/responses/profile_response.dart';
+import 'package:rally/models/responses/pending_invitation_response.dart';
 import 'package:rally/models/responses/user_public_profile_response.dart';
 import 'package:rally/models/responses/user_rallies_response.dart';
 import 'package:rally/models/responses/user_search_response.dart';
+import 'package:rally/models/responses/user_search_result.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/services/user_repository.dart';
 import 'package:rally/utils/validation_constants.dart';
@@ -30,7 +31,7 @@ final AutoDisposeFutureProviderFamily<UserSearchResponse, String> userSearchProv
           pageSize: PaginationDefaults.defaultPageSize,
           total: 0,
           totalPages: 0,
-          users: <ProfileResponse>[],
+          users: <UserSearchResult>[],
         );
       }
       final UserRepository repository = ref.watch(userRepositoryProvider);
@@ -86,4 +87,14 @@ final AutoDisposeFutureProviderFamily<UserRalliesResponse, UserRalliesParams> us
         status: params.status,
         sort: params.sort,
       );
+    });
+
+/// Provider for pending rally invitations for the current user.
+///
+/// TODO: Temporary until realtime notifications are implemented.
+/// Auto-disposes when no longer watched.
+final AutoDisposeFutureProvider<PendingInvitationsResponse> pendingInvitationsProvider =
+    FutureProvider.autoDispose<PendingInvitationsResponse>((Ref ref) async {
+      final UserRepository repository = ref.watch(userRepositoryProvider);
+      return repository.getPendingInvitations();
     });

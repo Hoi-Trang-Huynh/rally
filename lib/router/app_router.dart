@@ -10,6 +10,7 @@ import 'package:rally/screens/chat/chat_screen.dart';
 import 'package:rally/screens/discovery/discovery_screen.dart';
 import 'package:rally/screens/home/home_screen.dart';
 import 'package:rally/screens/home/main_shell.dart';
+import 'package:rally/screens/invite/invitation_detail_screen.dart';
 import 'package:rally/screens/invite/invite_confirmation_screen.dart';
 import 'package:rally/screens/loading/app_loading.dart';
 import 'package:rally/screens/onboarding/onboarding_screen.dart';
@@ -77,6 +78,13 @@ class AppRoutes {
 
   /// Helper to build invite route path.
   static String invite(String token) => '/invite/$token';
+
+  /// In-app invitation detail route.
+  static const String invitationDetailPath = '/invitation/:rallyId/:participantId';
+
+  /// Helper to build invitation detail route path.
+  static String invitationDetail(String rallyId, String participantId) =>
+      '/invitation/$rallyId/$participantId';
 }
 
 /// Notifier that triggers router refresh when auth state changes.
@@ -227,6 +235,15 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
         builder: (BuildContext context, GoRouterState state) {
           final String token = state.pathParameters['token'] ?? '';
           return InviteConfirmationScreen(token: token);
+        },
+      ),
+      // In-app invitation detail (full screen, fetches invitation data)
+      GoRoute(
+        path: AppRoutes.invitationDetailPath,
+        builder: (BuildContext context, GoRouterState state) {
+          final String rallyId = state.pathParameters['rallyId'] ?? '';
+          final String participantId = state.pathParameters['participantId'] ?? '';
+          return InvitationDetailScreen(rallyId: rallyId, participantId: participantId);
         },
       ),
 

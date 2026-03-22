@@ -6,6 +6,7 @@ import 'package:rally/models/responses/participant_list_response.dart';
 import 'package:rally/providers/rally_participants_provider.dart';
 import 'package:rally/utils/participation_status_helper.dart';
 import 'package:rally/utils/responsive.dart';
+import 'package:rally/widgets/common/app_bottom_sheet.dart';
 import 'package:rally/widgets/common/collapsible_section.dart';
 import 'package:rally/widgets/rally/rally_invite_members_sheet.dart';
 
@@ -28,33 +29,24 @@ class _RallyParticipantsTabState extends ConsumerState<RallyParticipantsTab> {
   bool _isParticipantsExpanded = true;
 
   void _showInviteMembersBottomSheet() {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Translations t = Translations.of(context);
 
-    showModalBottomSheet<void>(
+    showAppBottomSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext sheetContext) {
-        final EdgeInsets keyboardInsets = MediaQuery.of(sheetContext).viewInsets;
-        return Padding(
-          padding: EdgeInsets.only(bottom: keyboardInsets.bottom),
-          child: DraggableScrollableSheet(
-            initialChildSize: 0.9,
-            minChildSize: 0.5,
-            maxChildSize: 0.95,
-            expand: false,
-            builder: (BuildContext context, ScrollController scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                ),
-                child: RallyInviteMembersSheet(rallyId: widget.rallyId),
-              );
-            },
-          ),
-        );
-      },
+      sheet: AppBottomSheet.draggable(
+        title: t.rally.rallyInvite.title,
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        bodyBuilder: (ScrollController scrollController) {
+          return <Widget>[
+            SliverFillRemaining(
+              hasScrollBody: true,
+              child: RallyInviteMembersSheet(rallyId: widget.rallyId),
+            ),
+          ];
+        },
+      ),
     );
   }
 

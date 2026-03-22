@@ -17,6 +17,7 @@ import 'package:rally/utils/responsive.dart';
 class AppBottomSheet extends StatelessWidget {
   const AppBottomSheet._({
     required this.title,
+    this.leading,
     this.action,
     this.body,
     this.bodyBuilder,
@@ -34,19 +35,28 @@ class AppBottomSheet extends StatelessWidget {
   /// Creates a draggable bottom sheet for scrollable content.
   ///
   /// Use this for content that needs to scroll, like notifications or lists.
-  /// The [bodyBuilder] receives a [ScrollController] that must be attached
-  /// to the scrollable widget for proper drag behavior.
+  /// The [bodyBuilder] returns a list of **sliver** widgets that are placed
+  /// inside a [CustomScrollView]. The header is pinned so dragging anywhere
+  /// on the sheet (header or body) resizes it.
+  ///
+  /// When [snap] is true the sheet snaps to [minChildSize], each value in
+  /// [snapSizes], and [maxChildSize]. If [snapSizes] is omitted it defaults
+  /// to `[initialChildSize]`, giving three snap positions.
   factory AppBottomSheet.draggable({
     required String title,
+    Widget? leading,
     Widget? action,
-    required Widget Function(ScrollController scrollController) bodyBuilder,
+    required List<Widget> Function(ScrollController scrollController) bodyBuilder,
     bool showDivider = true,
     double initialChildSize = 0.7,
     double minChildSize = 0.4,
     double maxChildSize = 0.95,
+    bool snap = true,
+    List<double>? snapSizes,
   }) {
     return AppBottomSheet._(
       title: title,
+      leading: leading,
       action: action,
       bodyBuilder: bodyBuilder,
       showDivider: showDivider,
@@ -54,6 +64,8 @@ class AppBottomSheet extends StatelessWidget {
       initialChildSize: initialChildSize,
       minChildSize: minChildSize,
       maxChildSize: maxChildSize,
+      snap: snap,
+      snapSizes: snapSizes ?? <double>[initialChildSize],
     );
   }
 
@@ -89,7 +101,7 @@ class AppBottomSheet extends StatelessWidget {
   factory AppBottomSheet.persistent({
     required String title,
     Widget? action,
-    required Widget Function(ScrollController scrollController) bodyBuilder,
+    required List<Widget> Function(ScrollController scrollController) bodyBuilder,
     bool showDivider = true,
     double initialChildSize = 0.35,
     double minChildSize = 0.15,
@@ -114,14 +126,19 @@ class AppBottomSheet extends StatelessWidget {
   /// The title displayed in the header.
   final String title;
 
+  /// Optional widget displayed on the left side of the header, before the title.
+  final Widget? leading;
+
   /// Optional action widget displayed on the right side of the header.
   final Widget? action;
 
   /// The body content for fixed sheets.
   final Widget? body;
 
-  /// Builder for the body content in draggable sheets.
-  final Widget Function(ScrollController scrollController)? bodyBuilder;
+  /// Builder for sliver body content in draggable and persistent sheets.
+  ///
+  /// Returns a list of sliver widgets placed inside a [CustomScrollView].
+  final List<Widget> Function(ScrollController scrollController)? bodyBuilder;
 
   /// Whether to show a divider after the header.
   final bool showDivider;
@@ -172,9 +189,6 @@ class AppBottomSheet extends StatelessWidget {
       snap: snap,
       snapSizes: snapSizes,
       builder: (BuildContext context, ScrollController scrollController) {
-        // A single CustomScrollView with the scrollController drives both
-        // sheet dragging and content scrolling. The header is pinned via
-        // SliverPersistentHeader so it never scrolls away.
         return Material(
           elevation: 8,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -185,8 +199,9 @@ class AppBottomSheet extends StatelessWidget {
             slivers: <Widget>[
               SliverPersistentHeader(
                 pinned: true,
-                delegate: _PersistentSheetHeaderDelegate(
+                delegate: _SheetHeaderDelegate(
                   title: title,
+                  leading: leading,
                   action: action,
                   showDivider: showDivider,
                   colorScheme: colorScheme,
@@ -194,7 +209,7 @@ class AppBottomSheet extends StatelessWidget {
                   context: context,
                 ),
               ),
-              SliverToBoxAdapter(child: bodyBuilder!(scrollController)),
+              ...bodyBuilder!(scrollController),
             ],
           ),
         );
@@ -203,6 +218,8 @@ class AppBottomSheet extends StatelessWidget {
   }
 
   Widget _buildDraggableSheet(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     final EdgeInsets keyboardInsets = MediaQuery.of(context).viewInsets;
 
     return Padding(
@@ -212,12 +229,30 @@ class AppBottomSheet extends StatelessWidget {
         minChildSize: minChildSize,
         maxChildSize: maxChildSize,
         expand: false,
+        snap: snap,
+        snapSizes: snapSizes,
         builder: (BuildContext context, ScrollController scrollController) {
-          return _SheetContainer(
-            title: title,
-            action: action,
-            showDivider: showDivider,
-            child: Expanded(child: bodyBuilder!(scrollController)),
+          return Material(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            color: colorScheme.surface,
+            clipBehavior: Clip.antiAlias,
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: <Widget>[
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _SheetHeaderDelegate(
+                    title: title,
+                    action: action,
+                    showDivider: showDivider,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    context: context,
+                  ),
+                ),
+                ...bodyBuilder!(scrollController),
+              ],
+            ),
           );
         },
       ),
@@ -242,9 +277,10 @@ class AppBottomSheet extends StatelessWidget {
 }
 
 /// Delegate for the pinned header in persistent bottom sheets.
-class _PersistentSheetHeaderDelegate extends SliverPersistentHeaderDelegate {
-  _PersistentSheetHeaderDelegate({
+class _SheetHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _SheetHeaderDelegate({
     required this.title,
+    this.leading,
     this.action,
     required this.showDivider,
     required this.colorScheme,
@@ -253,6 +289,7 @@ class _PersistentSheetHeaderDelegate extends SliverPersistentHeaderDelegate {
   });
 
   final String title;
+  final Widget? leading;
   final Widget? action;
   final bool showDivider;
   final ColorScheme colorScheme;
@@ -288,8 +325,9 @@ class _PersistentSheetHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _headerHeight;
 
   @override
-  bool shouldRebuild(covariant _PersistentSheetHeaderDelegate oldDelegate) {
+  bool shouldRebuild(covariant _SheetHeaderDelegate oldDelegate) {
     return title != oldDelegate.title ||
+        leading != oldDelegate.leading ||
         action != oldDelegate.action ||
         showDivider != oldDelegate.showDivider;
   }
@@ -320,6 +358,10 @@ class _PersistentSheetHeaderDelegate extends SliverPersistentHeaderDelegate {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
+                if (leading != null) ...<Widget>[
+                  leading!,
+                  SizedBox(width: Responsive.w(context, 12)),
+                ],
                 Expanded(
                   child: Text(
                     title,
@@ -348,7 +390,6 @@ class _SheetContainer extends StatelessWidget {
     required this.showDivider,
     required this.child,
     this.isFixed = false,
-    this.hasElevation = false,
   });
 
   final String title;
@@ -356,7 +397,6 @@ class _SheetContainer extends StatelessWidget {
   final bool showDivider;
   final Widget child;
   final bool isFixed;
-  final bool hasElevation;
 
   @override
   Widget build(BuildContext context) {
@@ -364,7 +404,6 @@ class _SheetContainer extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Material(
-      elevation: hasElevation ? 8 : 0,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       color: colorScheme.surface,
       child: Column(
@@ -386,7 +425,7 @@ class _SheetContainer extends StatelessWidget {
               Responsive.w(context, 24),
               Responsive.h(context, 16),
               Responsive.w(context, 24),
-              0,
+              Responsive.h(context, 12),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -400,22 +439,10 @@ class _SheetContainer extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (action != null) action!,
               ],
             ),
           ),
-          if (action != null)
-            Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  Responsive.w(context, 24),
-                  0,
-                  Responsive.w(context, 24),
-                  0,
-                ),
-                child: action!,
-              ),
-            ),
           if (showDivider) const Divider(height: 1),
           // Body - wrapped in Flexible to prevent overflow
           if (isFixed) Flexible(child: SingleChildScrollView(child: child)) else child,

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rally/models/app_user.dart';
-import 'package:rally/models/responses/profile_response.dart';
 import 'package:rally/models/responses/user_search_response.dart';
+import 'package:rally/models/responses/user_search_result.dart';
 import 'package:rally/providers/auth_provider.dart';
 import 'package:rally/providers/user_provider.dart';
 import 'package:rally/router/app_router.dart';
@@ -136,7 +136,7 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                                   ).colorScheme.outline.withValues(alpha: 0.1),
                                 ),
                             itemBuilder: (BuildContext context, int index) {
-                              final ProfileResponse user = response.users[index];
+                              final UserSearchResult user = response.users[index];
                               return ListTile(
                                 leading: CircleAvatar(
                                   radius: Responsive.w(context, 16),
@@ -145,13 +145,13 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                                   child:
                                       user.avatarUrl == null
                                           ? Text(
-                                            (user.username ?? '?').characters.first.toUpperCase(),
+                                            user.username.characters.first.toUpperCase(),
                                             style: Theme.of(context).textTheme.labelMedium,
                                           )
                                           : null,
                                 ),
                                 title: Text(
-                                  '@${user.username ?? 'Unknown'}',
+                                  '@${user.username}',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -177,7 +177,7 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                                     context.go(AppRoutes.profile);
                                   } else {
                                     // Push to user profile (maintains back stack)
-                                    context.push(AppRoutes.userProfile(user.id ?? ''));
+                                    context.push(AppRoutes.userProfile(user.id));
                                   }
                                 },
                               );

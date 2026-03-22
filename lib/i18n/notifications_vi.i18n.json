@@ -3,5 +3,15 @@
   "markAllAsRead": "Đánh dấu đã đọc tất cả",
   "newSection": "Mới",
   "earlier": "Trước đó",
-  "noNotifications": "Không có thông báo"
+  "noNotifications": "Không có thông báo",
+  "invitations": {
+    "sectionTitle": "Lời mời",
+    "invitedBy": "Được mời bởi $name",
+    "accept": "Chấp nhận",
+    "decline": "Từ chối",
+    "noInvitations": "Không có lời mời nào",
+    "acceptSuccess": "Bạn đã tham gia rally!",
+    "acceptError": "Không thể tham gia rally",
+    "declineSuccess": "Đã từ chối lời mời"
+  }
 }

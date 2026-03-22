@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/models/enums.dart';
-import 'package:rally/models/responses/rally_response.dart';
+import 'package:rally/models/responses/rally_join_response.dart';
 import 'package:rally/providers/current_rally_provider.dart';
 import 'package:rally/utils/date_time_utils.dart';
 import 'package:rally/utils/rally_status_helpers.dart';
@@ -13,6 +13,7 @@ import 'package:rally/widgets/common/shimmer_loading.dart';
 import 'package:rally/widgets/rally/rally_map_view.dart';
 import 'package:rally/widgets/navigation/rally_shell.dart';
 import 'package:rally/widgets/rally/rally_participants_tab.dart';
+import 'package:rally/widgets/rally/rally_timeline_tab.dart';
 
 /// Screen for viewing a single rally's details.
 ///
@@ -42,13 +43,13 @@ class _RallyScreenState extends ConsumerState<RallyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<RallyResponse> rallyAsync = ref.watch(currentRallyProvider);
+    final AsyncValue<RallyJoinResponse> rallyAsync = ref.watch(currentRallyProvider);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
     final Translations t = Translations.of(context);
 
     // Get rally data safely for the header
-    final RallyResponse? rally = rallyAsync.valueOrNull;
+    final RallyJoinResponse? rally = rallyAsync.valueOrNull;
     final String rallyName = rally?.name ?? '';
     final String dateRange =
         (rally?.startDate != null && rally?.endDate != null)
@@ -111,14 +112,17 @@ class _RallyScreenState extends ConsumerState<RallyScreen> {
           ],
         ),
         body: rallyAsync.when(
-          data: (RallyResponse rallyData) {
+          data: (RallyJoinResponse rallyData) {
             return TabBarView(
               children: <Widget>[
                 // Overview Tab - Map with persistent bottom sheet
                 _buildOverviewTab(context, rallyData, colorScheme, textTheme, t),
 
-                // Timeline Tab (TODO)
-                _buildPlaceholderTab(context, t.rally.common.timeline),
+                // Timeline Tab
+                RallyTimelineTab(
+                  startDate: rallyData.startDate ?? DateTime.now(),
+                  endDate: rallyData.endDate ?? DateTime.now().add(const Duration(days: 7)),
+                ),
 
                 // Participants Tab
                 RallyParticipantsTab(rallyId: widget.rallyId),
@@ -137,7 +141,7 @@ class _RallyScreenState extends ConsumerState<RallyScreen> {
 
   Widget _buildOverviewTab(
     BuildContext context,
-    RallyResponse rallyData,
+    RallyJoinResponse rallyData,
     ColorScheme colorScheme,
     TextTheme textTheme,
     Translations t,
@@ -149,55 +153,61 @@ class _RallyScreenState extends ConsumerState<RallyScreen> {
         ),
         AppBottomSheet.persistent(
           title: t.rally.common.overview,
+          initialChildSize: 0.4,
+          snapSizes: const <double>[0.15, 0.4],
           bodyBuilder: (ScrollController _) {
-            return Padding(
-              padding: EdgeInsets.all(Responsive.w(context, 24)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  if (rallyData.coverImageUrl != null &&
-                      rallyData.coverImageUrl!.isNotEmpty) ...<Widget>[
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(Responsive.w(context, 16)),
-                      child: AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: Image.network(
-                          rallyData.coverImageUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder:
-                              (_, __, ___) => Container(
-                                color: colorScheme.surfaceContainerHighest,
-                                child: Icon(
-                                  Icons.image_not_supported_outlined,
-                                  size: Responsive.w(context, 48),
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
+            return <Widget>[
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(Responsive.w(context, 24)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      if (rallyData.coverImageUrl != null &&
+                          rallyData.coverImageUrl!.isNotEmpty) ...<Widget>[
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(Responsive.w(context, 16)),
+                          child: AspectRatio(
+                            aspectRatio: 16 / 9,
+                            child: Image.network(
+                              rallyData.coverImageUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder:
+                                  (_, __, ___) => Container(
+                                    color: colorScheme.surfaceContainerHighest,
+                                    child: Icon(
+                                      Icons.image_not_supported_outlined,
+                                      size: Responsive.w(context, 48),
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    SizedBox(height: Responsive.h(context, 20)),
-                  ],
-                  if (rallyData.description != null &&
-                      rallyData.description!.isNotEmpty)
-                    RallyRichTextViewer(
-                      content: rallyData.description!,
-                      style: textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        height: 1.5,
-                      ),
-                    )
-                  else
-                    Text(
-                      t.rally.common.unknown,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                ],
+                        SizedBox(height: Responsive.h(context, 20)),
+                      ],
+                      if (rallyData.description != null &&
+                          rallyData.description!.isNotEmpty)
+                        RallyRichTextViewer(
+                          content: rallyData.description!,
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            height: 1.5,
+                          ),
+                        )
+                      else
+                        Text(
+                          t.rally.common.unknown,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
-            );
+            ];
           },
         ),
       ],

@@ -6,6 +6,7 @@ import 'package:rally/models/requests/participant_requests.dart';
 import 'package:rally/models/requests/rally_requests.dart';
 import 'package:rally/models/responses/activity_response.dart';
 import 'package:rally/models/responses/event_response.dart';
+import 'package:rally/models/responses/rally_join_response.dart';
 import 'package:rally/models/responses/friend_list_response.dart';
 import 'package:rally/models/responses/invite_link_response.dart';
 import 'package:rally/models/responses/join_via_link_response.dart';
@@ -32,12 +33,13 @@ class RallyRepository {
   /// Fetches a single rally by ID.
   ///
   /// [id] The ID of the rally to fetch.
-  /// Returns a [RallyResponse] containing full rally data.
+  /// Returns a [RallyJoinResponse] containing full rally data plus the
+  /// current user's role and participation status.
   ///
   /// TODO: Replace with streaming/WebSocket listener for real-time updates.
-  Future<RallyResponse> getRally(String id) async {
+  Future<RallyJoinResponse> getRally(String id) async {
     final dynamic response = await _apiClient.get('/api/v1/rallies/$id');
-    return RallyResponse.fromJson(response as Map<String, dynamic>);
+    return RallyJoinResponse.fromJson(response as Map<String, dynamic>);
   }
 
   /// Creates a new rally.

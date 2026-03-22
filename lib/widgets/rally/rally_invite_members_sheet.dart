@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gal/gal.dart';
 import 'package:intl/intl.dart';
@@ -306,9 +306,6 @@ class _RallyInviteMembersSheetState extends ConsumerState<RallyInviteMembersShee
 
     return Column(
       children: <Widget>[
-        // ── Header ──────────────────────────────────────────────────────
-        _buildHeader(colorScheme, textTheme, t),
-
         // ── Scrollable body ─────────────────────────────────────────────
         Expanded(
           child: SingleChildScrollView(
@@ -347,35 +344,6 @@ class _RallyInviteMembersSheetState extends ConsumerState<RallyInviteMembersShee
   // Sub-builders
   // ---------------------------------------------------------------------------
 
-  Widget _buildHeader(ColorScheme colorScheme, TextTheme textTheme, Translations t) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: Responsive.w(context, 8),
-        vertical: Responsive.h(context, 8),
-      ),
-      child: Row(
-        children: <Widget>[
-          IconButton(
-            icon: Icon(Icons.close, color: colorScheme.onSurface),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          Expanded(
-            child: Text(
-              t.rally.rallyInvite.title,
-              textAlign: TextAlign.center,
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
-            ),
-          ),
-          // Spacer for symmetry with the close button
-          SizedBox(width: Responsive.w(context, 48)),
-        ],
-      ),
-    );
-  }
-
   /// Invite link / QR code section.
   ///
   /// Shows existing invite links as QR cards with actions, plus a
@@ -388,9 +356,9 @@ class _RallyInviteMembersSheetState extends ConsumerState<RallyInviteMembersShee
     return Container(
       padding: EdgeInsets.all(Responsive.w(context, 16)),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(Responsive.w(context, 16)),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.15)),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -398,25 +366,44 @@ class _RallyInviteMembersSheetState extends ConsumerState<RallyInviteMembersShee
           // Section header
           Row(
             children: <Widget>[
-              Icon(
-                Icons.qr_code_2_rounded,
-                size: Responsive.w(context, 22),
-                color: colorScheme.primary,
+              Container(
+                padding: EdgeInsets.all(Responsive.w(context, 8)),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(Responsive.w(context, 10)),
+                ),
+                child: Icon(
+                  Icons.qr_code_2_rounded,
+                  size: Responsive.w(context, 20),
+                  color: colorScheme.primary,
+                ),
               ),
-              SizedBox(width: Responsive.w(context, 8)),
+              SizedBox(width: Responsive.w(context, 10)),
               Expanded(
-                child: Text(
-                  t.rally.rallyInvite.inviteLink.activeLinks,
-                  style: textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      t.rally.rallyInvite.inviteLink.activeLinks,
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    SizedBox(height: Responsive.h(context, 2)),
+                    Text(
+                      t.rally.rallyInvite.inviteLink.sectionDescription,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
 
-          SizedBox(height: Responsive.h(context, 12)),
+          SizedBox(height: Responsive.h(context, 16)),
 
           // Links content
           linksAsync.when(
@@ -442,13 +429,23 @@ class _RallyInviteMembersSheetState extends ConsumerState<RallyInviteMembersShee
             data: (List<InviteLinkItem> links) {
               if (links.isEmpty) {
                 return Padding(
-                  padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 8)),
-                  child: Text(
-                    t.rally.rallyInvite.inviteLink.noLinksYet,
-                    textAlign: TextAlign.center,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                    ),
+                  padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 12)),
+                  child: Column(
+                    children: <Widget>[
+                      Icon(
+                        Icons.link_rounded,
+                        size: Responsive.w(context, 32),
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                      ),
+                      SizedBox(height: Responsive.h(context, 8)),
+                      Text(
+                        t.rally.rallyInvite.inviteLink.noLinksYet,
+                        textAlign: TextAlign.center,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               }
@@ -458,7 +455,7 @@ class _RallyInviteMembersSheetState extends ConsumerState<RallyInviteMembersShee
                     links
                         .map(
                           (InviteLinkItem link) => Padding(
-                            padding: EdgeInsets.only(bottom: Responsive.h(context, 12)),
+                            padding: EdgeInsets.only(bottom: Responsive.h(context, 10)),
                             child: _InviteLinkCard(
                               link: link,
                               onRevoke: () => _revokeInviteLink(link.token),
@@ -470,17 +467,20 @@ class _RallyInviteMembersSheetState extends ConsumerState<RallyInviteMembersShee
             },
           ),
 
-          SizedBox(height: Responsive.h(context, 8)),
+          SizedBox(height: Responsive.h(context, 4)),
 
           // Generate button
-          OutlinedButton.icon(
+          FilledButton.icon(
             onPressed: _isGeneratingLink ? null : _generateInviteLink,
             icon:
                 _isGeneratingLink
                     ? SizedBox(
                       width: Responsive.w(context, 16),
                       height: Responsive.w(context, 16),
-                      child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.primary),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: colorScheme.onPrimary,
+                      ),
                     )
                     : Icon(Icons.add_link_rounded, size: Responsive.w(context, 18)),
             label: Text(
@@ -488,9 +488,9 @@ class _RallyInviteMembersSheetState extends ConsumerState<RallyInviteMembersShee
                   ? t.rally.rallyInvite.inviteLink.generating
                   : t.rally.rallyInvite.inviteLink.generateButton,
             ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: colorScheme.primary,
-              side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.5)),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
               ),
@@ -749,28 +749,29 @@ class _InviteLinkCard extends StatelessWidget {
       );
     }
 
-    return Container(
-      padding: EdgeInsets.all(Responsive.w(context, 12)),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.12)),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          // QR Code (tappable to expand)
-          GestureDetector(
-            onTap: () => _showQrDetail(context, link),
-            child: Container(
-              padding: EdgeInsets.all(Responsive.w(context, 6)),
+    final ParticipantRole role = ParticipantRole.fromString(link.role);
+
+    return GestureDetector(
+      onTap: () => _showQrDetail(context, link),
+      child: Container(
+        padding: EdgeInsets.all(Responsive.w(context, 12)),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(Responsive.w(context, 14)),
+          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.08)),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: colorScheme.shadow.withValues(alpha: 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: <Widget>[
+            // QR Code thumbnail
+            Container(
+              padding: EdgeInsets.all(Responsive.w(context, 4)),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(Responsive.w(context, 8)),
@@ -778,7 +779,7 @@ class _InviteLinkCard extends StatelessWidget {
               child: QrImageView(
                 data: 'https://rally-go.com/invite/${link.token}',
                 version: QrVersions.auto,
-                size: Responsive.w(context, 80),
+                size: Responsive.w(context, 56),
                 eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Colors.black),
                 dataModuleStyle: const QrDataModuleStyle(
                   dataModuleShape: QrDataModuleShape.square,
@@ -786,132 +787,130 @@ class _InviteLinkCard extends StatelessWidget {
                 ),
                 embeddedImage: const AssetImage('assets/images/rally_logo_transparent.png'),
                 embeddedImageStyle: QrEmbeddedImageStyle(
-                  size: Size(Responsive.w(context, 20), Responsive.w(context, 20)),
+                  size: Size(Responsive.w(context, 14), Responsive.w(context, 14)),
                 ),
                 errorCorrectionLevel: QrErrorCorrectLevel.H,
               ),
             ),
-          ),
 
-          SizedBox(width: Responsive.w(context, 12)),
+            SizedBox(width: Responsive.w(context, 10)),
 
-          // Info & actions
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                // Role badge using ParticipantRoleHelper
-                Builder(
-                  builder: (BuildContext context) {
-                    final ParticipantRole role = ParticipantRole.fromString(link.role);
-                    return Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: Responsive.w(context, 8),
-                        vertical: Responsive.h(context, 2),
-                      ),
-                      decoration: BoxDecoration(
-                        color: ParticipantRoleHelper.roleColor(role, colorScheme),
-                        borderRadius: BorderRadius.circular(Responsive.w(context, 6)),
-                      ),
-                      child: Text(
-                        ParticipantRoleHelper.roleLabel(role, t),
-                        style: textTheme.labelSmall?.copyWith(
-                          color: ParticipantRoleHelper.roleTextColor(role, colorScheme),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-
-                SizedBox(height: Responsive.h(context, 6)),
-
-                // Usage stats
-                Text(
-                  usageText,
-                  style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-                ),
-
-                // Expiry (only if present)
-                if (expiryText != null)
-                  Padding(
-                    padding: EdgeInsets.only(top: Responsive.h(context, 2)),
+            // Info column
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  // Role badge
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Responsive.w(context, 8),
+                      vertical: Responsive.h(context, 3),
+                    ),
+                    decoration: BoxDecoration(
+                      color: ParticipantRoleHelper.roleColor(role, colorScheme),
+                      borderRadius: BorderRadius.circular(Responsive.w(context, 6)),
+                    ),
                     child: Text(
-                      expiryText,
-                      style: textTheme.bodySmall?.copyWith(
-                        color:
-                            link.isExpired
-                                ? colorScheme.error
-                                : colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                      ParticipantRoleHelper.roleLabel(role, t),
+                      style: textTheme.labelSmall?.copyWith(
+                        color: ParticipantRoleHelper.roleTextColor(role, colorScheme),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 10,
                       ),
                     ),
                   ),
 
-                SizedBox(height: Responsive.h(context, 8)),
+                  SizedBox(height: Responsive.h(context, 6)),
 
-                // Revoke button
-                _CompactActionButton(
-                  icon: Icons.link_off_rounded,
-                  label: t.rally.rallyInvite.inviteLink.revokeButton,
-                  color: colorScheme.error,
-                  onTap: onRevoke,
-                ),
-              ],
+                  // Stats row
+                  Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.people_outline_rounded,
+                        size: Responsive.w(context, 14),
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                      ),
+                      SizedBox(width: Responsive.w(context, 4)),
+                      Flexible(
+                        child: Text(
+                          usageText,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Expiry row
+                  if (expiryText != null)
+                    Padding(
+                      padding: EdgeInsets.only(top: Responsive.h(context, 3)),
+                      child: Row(
+                        children: <Widget>[
+                          Icon(
+                            link.isExpired
+                                ? Icons.error_outline_rounded
+                                : Icons.schedule_rounded,
+                            size: Responsive.w(context, 14),
+                            color: link.isExpired
+                                ? colorScheme.error
+                                : colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                          ),
+                          SizedBox(width: Responsive.w(context, 4)),
+                          Flexible(
+                            child: Text(
+                              expiryText,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: link.isExpired
+                                    ? colorScheme.error
+                                    : colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  /// Opens a fullscreen dialog to display the QR code enlarged with a save option.
-  static void _showQrDetail(BuildContext context, InviteLinkItem link) {
-    showDialog<void>(context: context, builder: (BuildContext ctx) => _QrDetailDialog(link: link));
-  }
-}
-
-/// A compact tappable action chip for invite link actions.
-class _CompactActionButton extends StatelessWidget {
-  const _CompactActionButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(Responsive.w(context, 8)),
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: Responsive.w(context, 8),
-          vertical: Responsive.h(context, 4),
-        ),
-        decoration: BoxDecoration(
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-          borderRadius: BorderRadius.circular(Responsive.w(context, 8)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(icon, size: Responsive.w(context, 14), color: color),
             SizedBox(width: Responsive.w(context, 4)),
-            Text(
-              label,
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: color, fontWeight: FontWeight.w600),
+
+            // Revoke icon button
+            IconButton(
+              onPressed: onRevoke,
+              icon: Icon(
+                Icons.link_off_rounded,
+                size: Responsive.w(context, 16),
+                color: colorScheme.error.withValues(alpha: 0.7),
+              ),
+              style: IconButton.styleFrom(
+                backgroundColor: colorScheme.error.withValues(alpha: 0.08),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(Responsive.w(context, 8)),
+                ),
+                padding: EdgeInsets.all(Responsive.w(context, 6)),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              tooltip: t.rally.rallyInvite.inviteLink.revokeButton,
             ),
           ],
         ),
       ),
+    );
+  }
+
+  /// Opens a bottom sheet to display the QR code enlarged with copy & save options.
+  static void _showQrDetail(BuildContext context, InviteLinkItem link) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext ctx) => _QrDetailSheet(link: link),
     );
   }
 }
@@ -1012,18 +1011,33 @@ class _InvitableFriendItem extends StatelessWidget {
 }
 
 /// Fullscreen dialog displaying an enlarged QR code with a save-to-gallery option.
-class _QrDetailDialog extends StatefulWidget {
-  const _QrDetailDialog({required this.link});
+class _QrDetailSheet extends StatefulWidget {
+  const _QrDetailSheet({required this.link});
 
   final InviteLinkItem link;
 
   @override
-  State<_QrDetailDialog> createState() => _QrDetailDialogState();
+  State<_QrDetailSheet> createState() => _QrDetailSheetState();
 }
 
-class _QrDetailDialogState extends State<_QrDetailDialog> {
+class _QrDetailSheetState extends State<_QrDetailSheet> {
   final GlobalKey _qrKey = GlobalKey();
   bool _isSaving = false;
+  bool _isCopied = false;
+
+  String get _inviteUrl => 'https://rally-go.com/invite/${widget.link.token}';
+
+  Future<void> _copyLink() async {
+    final Translations t = Translations.of(context);
+    await Clipboard.setData(ClipboardData(text: _inviteUrl));
+    if (mounted) {
+      setState(() => _isCopied = true);
+      showSuccessSnackBar(context, t.rally.rallyInvite.inviteLink.linkCopied);
+      Future<void>.delayed(const Duration(seconds: 2), () {
+        if (mounted) setState(() => _isCopied = false);
+      });
+    }
+  }
 
   Future<void> _saveToGallery() async {
     if (_isSaving) return;
@@ -1031,7 +1045,6 @@ class _QrDetailDialogState extends State<_QrDetailDialog> {
 
     final Translations t = Translations.of(context);
     try {
-      // Request gallery access first.
       final bool hasAccess = await Gal.hasAccess(toAlbum: true);
       if (!hasAccess) {
         await Gal.requestAccess(toAlbum: true);
@@ -1044,19 +1057,21 @@ class _QrDetailDialogState extends State<_QrDetailDialog> {
         }
       }
 
-      // Capture the QR widget as an image.
       final RenderRepaintBoundary boundary =
           _qrKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
 
       if (byteData == null) throw Exception('Failed to encode image');
 
-      // Save to gallery.
       await Gal.putImageBytes(byteData.buffer.asUint8List(), album: 'Rally');
 
       if (mounted) {
-        showSuccessSnackBar(context, t.rally.rallyInvite.inviteLink.savedToGallery);
+        showSuccessSnackBar(
+          context,
+          t.rally.rallyInvite.inviteLink.savedToGallery,
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -1072,96 +1087,256 @@ class _QrDetailDialogState extends State<_QrDetailDialog> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
     final Translations t = Translations.of(context);
-    final double qrSize = MediaQuery.of(context).size.width * 0.65;
+    final double qrSize = MediaQuery.of(context).size.width * 0.52;
+    final ParticipantRole role = ParticipantRole.fromString(widget.link.role);
 
-    return Dialog(
-      backgroundColor: colorScheme.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Responsive.w(context, 24))),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: <Widget>[
-          // Main content
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              Responsive.w(context, 24),
-              Responsive.h(context, 40),
-              Responsive.w(context, 24),
-              Responsive.w(context, 24),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                // QR code (captured by RepaintBoundary for saving)
-                RepaintBoundary(
-                  key: _qrKey,
-                  child: Container(
-                    padding: EdgeInsets.all(Responsive.w(context, 16)),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(Responsive.w(context, 16)),
-                    ),
-                    child: QrImageView(
-                      data: 'https://rally-go.com/invite/${widget.link.token}',
-                      version: QrVersions.auto,
-                      size: qrSize,
-                      eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Colors.black),
-                      dataModuleStyle: const QrDataModuleStyle(
-                        dataModuleShape: QrDataModuleShape.square,
-                        color: Colors.black,
-                      ),
-                      embeddedImage: const AssetImage('assets/images/rally_logo_transparent.png'),
-                      embeddedImageStyle: QrEmbeddedImageStyle(
-                        size: Size(qrSize * 0.22, qrSize * 0.22),
-                      ),
-                      errorCorrectionLevel: QrErrorCorrectLevel.H,
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(Responsive.w(context, 24)),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            Responsive.w(context, 24),
+            0,
+            Responsive.w(context, 24),
+            Responsive.h(context, 24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              // Drag handle
+              SizedBox(height: Responsive.h(context, 12)),
+              Container(
+                width: Responsive.w(context, 40),
+                height: Responsive.h(context, 4),
+                decoration: BoxDecoration(
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+
+              SizedBox(height: Responsive.h(context, 20)),
+
+              // Title + role badge row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    t.rally.rallyInvite.inviteLink.shareTitle,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
                     ),
                   ),
+                  SizedBox(width: Responsive.w(context, 8)),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Responsive.w(context, 8),
+                      vertical: Responsive.h(context, 3),
+                    ),
+                    decoration: BoxDecoration(
+                      color: ParticipantRoleHelper.roleColor(role, colorScheme),
+                      borderRadius:
+                          BorderRadius.circular(Responsive.w(context, 6)),
+                    ),
+                    child: Text(
+                      ParticipantRoleHelper.roleLabel(role, t),
+                      style: textTheme.labelSmall?.copyWith(
+                        color: ParticipantRoleHelper.roleTextColor(
+                          role,
+                          colorScheme,
+                        ),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: Responsive.h(context, 20)),
+
+              // QR code
+              RepaintBoundary(
+                key: _qrKey,
+                child: Container(
+                  padding: EdgeInsets.all(Responsive.w(context, 16)),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:
+                        BorderRadius.circular(Responsive.w(context, 16)),
+                  ),
+                  child: QrImageView(
+                    data: _inviteUrl,
+                    version: QrVersions.auto,
+                    size: qrSize,
+                    eyeStyle: const QrEyeStyle(
+                      eyeShape: QrEyeShape.square,
+                      color: Colors.black,
+                    ),
+                    dataModuleStyle: const QrDataModuleStyle(
+                      dataModuleShape: QrDataModuleShape.square,
+                      color: Colors.black,
+                    ),
+                    embeddedImage: const AssetImage(
+                      'assets/images/rally_logo_transparent.png',
+                    ),
+                    embeddedImageStyle: QrEmbeddedImageStyle(
+                      size: Size(qrSize * 0.22, qrSize * 0.22),
+                    ),
+                    errorCorrectionLevel: QrErrorCorrectLevel.H,
+                  ),
                 ),
+              ),
 
-                SizedBox(height: Responsive.h(context, 20)),
+              SizedBox(height: Responsive.h(context, 12)),
 
-                // Save to Gallery button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _isSaving ? null : _saveToGallery,
-                    icon:
-                        _isSaving
-                            ? SizedBox(
-                              width: Responsive.w(context, 18),
-                              height: Responsive.w(context, 18),
+              // Scan hint
+              Text(
+                t.rally.rallyInvite.inviteLink.sectionDescription,
+                textAlign: TextAlign.center,
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                ),
+              ),
+
+              SizedBox(height: Responsive.h(context, 20)),
+
+              // Link display + copy
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: Responsive.w(context, 12),
+                  vertical: Responsive.h(context, 10),
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.4),
+                  borderRadius:
+                      BorderRadius.circular(Responsive.w(context, 12)),
+                ),
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.link_rounded,
+                      size: Responsive.w(context, 18),
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    SizedBox(width: Responsive.w(context, 8)),
+                    Expanded(
+                      child: Text(
+                        _inviteUrl,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    SizedBox(width: Responsive.w(context, 8)),
+                    GestureDetector(
+                      onTap: _copyLink,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: _isCopied
+                            ? Icon(
+                                Icons.check_rounded,
+                                key: const ValueKey<String>('check'),
+                                size: Responsive.w(context, 18),
+                                color: colorScheme.primary,
+                              )
+                            : Icon(
+                                Icons.copy_rounded,
+                                key: const ValueKey<String>('copy'),
+                                size: Responsive.w(context, 18),
+                                color: colorScheme.primary,
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: Responsive.h(context, 16)),
+
+              // Action buttons row
+              Row(
+                children: <Widget>[
+                  // Copy Link button
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _copyLink,
+                      icon: Icon(
+                        _isCopied ? Icons.check_rounded : Icons.copy_rounded,
+                        size: Responsive.w(context, 16),
+                      ),
+                      label: Text(
+                        t.rally.rallyInvite.inviteLink.copyLink,
+                        style: textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: colorScheme.primary,
+                        minimumSize: Size(0, Responsive.h(context, 48)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            Responsive.w(context, 24),
+                          ),
+                        ),
+                        side: BorderSide(
+                          color: colorScheme.primary.withValues(alpha: 0.3),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(width: Responsive.w(context, 8)),
+
+                  // Save to Gallery button
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: _isSaving ? null : _saveToGallery,
+                      icon: _isSaving
+                          ? SizedBox(
+                              width: Responsive.w(context, 14),
+                              height: Responsive.w(context, 14),
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 color: colorScheme.onPrimary,
                               ),
                             )
-                            : Icon(Icons.download_rounded, size: Responsive.w(context, 20)),
-                    label: Text(t.rally.rallyInvite.inviteLink.saveToGallery),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                      padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 14)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Responsive.w(context, 14)),
+                          : Icon(
+                              Icons.download_rounded,
+                              size: Responsive.w(context, 16),
+                            ),
+                      label: Text(
+                        t.rally.rallyInvite.inviteLink.saveToGallery,
+                        style: textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onPrimary,
+                        ),
                       ),
-                      textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                        minimumSize: Size(0, Responsive.h(context, 48)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            Responsive.w(context, 24),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ),
-
-          // Close button — positioned at dialog top-right edge
-          Positioned(
-            top: Responsive.h(context, 8),
-            right: Responsive.w(context, 8),
-            child: IconButton(
-              icon: Icon(Icons.close_rounded, color: colorScheme.onSurfaceVariant),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

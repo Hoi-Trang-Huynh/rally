@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:rally/models/cloudinary_signature.dart';
-import 'package:rally/models/responses/profile_response.dart';
+import 'package:rally/models/responses/verify_avatar_response.dart';
 import 'package:rally/services/api_client.dart';
 
 /// Repository for Cloudinary-related operations.
@@ -66,7 +66,7 @@ class CloudinaryRepository {
   }
 
   /// Verifies and updates the user's avatar after a successful upload.
-  Future<ProfileResponse> verifyAvatar({
+  Future<VerifyAvatarResponse> verifyAvatar({
     required String publicId,
     required String avatarUrl,
   }) async {
@@ -76,7 +76,7 @@ class CloudinaryRepository {
     };
 
     final dynamic response = await _apiClient.post('/api/v1/media/verify-avatar', body: body);
-    return ProfileResponse.fromJson(response as Map<String, dynamic>);
+    return VerifyAvatarResponse.fromJson(response as Map<String, dynamic>);
   }
 }
 

@@ -367,76 +367,72 @@ class _CreateRallyBottomSheetState extends ConsumerState<CreateRallyBottomSheet>
     }
   }
 
-  Widget _buildInviteMembersPage(ColorScheme colorScheme) {
-    final EdgeInsets keyboardInsets = MediaQuery.of(context).viewInsets;
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: keyboardInsets.bottom),
-      child: DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (BuildContext context, ScrollController scrollController) {
-          return Container(
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            child: InviteMembersPage(
-              initialInvitedMembers: _invitedMembers,
-              onBack: _hideInviteMembersSheet,
-              onDone: _onInviteMembersDone,
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
     final Translations t = Translations.of(context);
 
-    // Show InviteMembersPage as internal navigation
-    if (_showingInviteMembers) {
-      return _buildInviteMembersPage(colorScheme);
-    }
-
     final bool hasDraft = ref.watch(rallyDraftProvider)?.hasContent ?? false;
 
     return AppBottomSheet.draggable(
-      title: t.rally.createRally.title,
-      action: TextButton(
-        onPressed: hasDraft ? _clearDraft : null,
-        child: Text(
-          t.rally.createRally.actions.clearDraft,
-          style: textTheme.labelMedium?.copyWith(
-            color: hasDraft ? colorScheme.error : colorScheme.onSurface.withValues(alpha: 0.3),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+      title: _showingInviteMembers
+          ? t.rally.createRally.inviteMembers.title
+          : t.rally.createRally.title,
+      leading: _showingInviteMembers
+          ? IconButton(
+              icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
+              onPressed: _hideInviteMembersSheet,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            )
+          : null,
+      action: _showingInviteMembers
+          ? null
+          : TextButton(
+              onPressed: hasDraft ? _clearDraft : null,
+              child: Text(
+                t.rally.createRally.actions.clearDraft,
+                style: textTheme.labelMedium?.copyWith(
+                  color: hasDraft
+                      ? colorScheme.error
+                      : colorScheme.onSurface.withValues(alpha: 0.3),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
       initialChildSize: 0.9,
       minChildSize: 0.5,
       maxChildSize: 0.95,
       bodyBuilder: (ScrollController scrollController) {
-        return GestureDetector(
-          onTap: () {
-            FocusScope.of(context).unfocus();
-          },
-          behavior: HitTestBehavior.opaque,
-          child: ListView(
-            controller: scrollController,
-            padding: EdgeInsets.only(
-              left: Responsive.w(context, 24),
-              right: Responsive.w(context, 24),
-              top: Responsive.h(context, 16),
-              bottom: Responsive.h(context, 24) + MediaQuery.of(context).padding.bottom,
+        if (_showingInviteMembers) {
+          return <Widget>[
+            SliverToBoxAdapter(
+              child: InviteMembersPage(
+                initialInvitedMembers: _invitedMembers,
+                onBack: _hideInviteMembersSheet,
+                onDone: _onInviteMembersDone,
+              ),
             ),
-            children: <Widget>[
+          ];
+        }
+        return <Widget>[
+          SliverToBoxAdapter(
+            child: GestureDetector(
+              onTap: () {
+                FocusScope.of(context).unfocus();
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: Responsive.w(context, 24),
+                  right: Responsive.w(context, 24),
+                  top: Responsive.h(context, 16),
+                  bottom: Responsive.h(context, 24) + MediaQuery.of(context).padding.bottom,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
               // Cover Image Section
               Text(
                 t.rally.createRally.coverImage.title,
@@ -788,9 +784,12 @@ class _CreateRallyBottomSheetState extends ConsumerState<CreateRallyBottomSheet>
               ),
 
               SizedBox(height: Responsive.h(context, 24)),
-            ],
+                  ],
+                ),
+              ),
+            ),
           ),
-        );
+        ];
       },
     );
   }

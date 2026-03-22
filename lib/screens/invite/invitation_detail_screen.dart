@@ -4,106 +4,97 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/models/enums.dart';
-import 'package:rally/models/responses/join_via_link_response.dart';
+import 'package:rally/models/requests/participant_requests.dart';
+import 'package:rally/models/responses/pending_invitation_response.dart';
 import 'package:rally/providers/api_provider.dart';
+import 'package:rally/providers/user_provider.dart';
 import 'package:rally/router/app_router.dart';
+import 'package:rally/services/rally_repository.dart';
 import 'package:rally/utils/delta_utils.dart';
 import 'package:rally/utils/participant_role_helper.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/utils/ui_helpers.dart';
 
-/// Screen shown when the user opens an invite deep link.
+/// Screen shown when a user taps a pending in-app invitation.
 ///
-/// It fetches a preview of the rally, shows the details, and lets the
-/// user accept or decline the invitation.
-class InviteConfirmationScreen extends ConsumerStatefulWidget {
-  /// Creates a new [InviteConfirmationScreen].
-  const InviteConfirmationScreen({required this.token, super.key});
+/// Fetches the invitation from [pendingInvitationsProvider] using the
+/// [rallyId] and [participantId] path parameters.
+class InvitationDetailScreen extends ConsumerStatefulWidget {
+  /// Creates a new [InvitationDetailScreen].
+  const InvitationDetailScreen({
+    required this.rallyId,
+    required this.participantId,
+    super.key,
+  });
 
-  /// The invite link token extracted from the deep link URL.
-  final String token;
+  /// The rally ID from the route.
+  final String rallyId;
+
+  /// The participant record ID from the route.
+  final String participantId;
 
   @override
-  ConsumerState<InviteConfirmationScreen> createState() =>
-      _InviteConfirmationScreenState();
+  ConsumerState<InvitationDetailScreen> createState() =>
+      _InvitationDetailScreenState();
 }
 
-class _InviteConfirmationScreenState
-    extends ConsumerState<InviteConfirmationScreen> {
-  InvitePreviewResponse? _preview;
-  bool _isLoadingPreview = true;
+class _InvitationDetailScreenState
+    extends ConsumerState<InvitationDetailScreen> {
   bool _isAccepting = false;
-  String? _error;
+  bool _isDeclining = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadPreview();
-  }
+  bool get _isBusy => _isAccepting || _isDeclining;
 
-  Future<void> _loadPreview() async {
-    try {
-      final InvitePreviewResponse preview = await ref
-          .read(rallyRepositoryProvider)
-          .getInvitePreview(widget.token);
-
-      // If user is already joined, skip preview and go straight to the rally
-      if (preview.participantStatus == 'joined') {
-        if (mounted) {
-          context.go(AppRoutes.rally(preview.rallyId));
-        }
-        return;
-      }
-
-      if (mounted) {
-        setState(() {
-          _preview = preview;
-          _isLoadingPreview = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = e.toString();
-          _isLoadingPreview = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _acceptInvitation() async {
-    if (_isAccepting || _preview == null) return;
+  Future<void> _accept() async {
+    if (_isBusy) return;
     setState(() => _isAccepting = true);
 
     final Translations t = Translations.of(context);
     try {
-      final JoinViaLinkResponse result = await ref
-          .read(rallyRepositoryProvider)
-          .joinViaLink(widget.token);
-
-      if (!mounted) return;
-
-      if (result.success) {
-        showSuccessSnackBar(
-          context,
-          t.rally.rallyInvite.joinViaLink.acceptSuccess,
-        );
-        context.go(AppRoutes.rally(result.rallyId));
-      } else {
-        showErrorSnackBar(context, result.message);
-        setState(() => _isAccepting = false);
-      }
-    } catch (e) {
+      final RallyRepository rallyRepo = ref.read(rallyRepositoryProvider);
+      await rallyRepo.updateParticipant(
+        widget.rallyId,
+        widget.participantId,
+        const UpdateParticipantRequest(status: ParticipationStatus.joined),
+      );
+      ref.invalidate(pendingInvitationsProvider);
       if (mounted) {
-        showErrorSnackBar(context, t.rally.rallyInvite.joinViaLink.acceptError);
+        showSuccessSnackBar(context, t.notifications.invitations.acceptSuccess);
+        context.go(AppRoutes.rally(widget.rallyId));
+      }
+    } catch (_) {
+      if (mounted) {
+        showErrorSnackBar(context, t.notifications.invitations.acceptError);
         setState(() => _isAccepting = false);
       }
     }
   }
 
   Future<void> _decline() async {
-    if (mounted) {
-      context.go(AppRoutes.home);
+    if (_isBusy) return;
+    setState(() => _isDeclining = true);
+
+    final Translations t = Translations.of(context);
+    try {
+      final RallyRepository rallyRepo = ref.read(rallyRepositoryProvider);
+      await rallyRepo.updateParticipant(
+        widget.rallyId,
+        widget.participantId,
+        const UpdateParticipantRequest(status: ParticipationStatus.declined),
+      );
+      ref.invalidate(pendingInvitationsProvider);
+      if (mounted) {
+        showSuccessSnackBar(
+          context,
+          t.notifications.invitations.declineSuccess,
+        );
+        context.go(AppRoutes.home);
+      }
+    } catch (_) {
+      if (mounted) {
+        showErrorSnackBar(context, 'Failed to decline invitation');
+        setState(() => _isDeclining = false);
+      }
     }
   }
 
@@ -112,49 +103,60 @@ class _InviteConfirmationScreenState
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
     final Translations t = Translations.of(context);
+    final AsyncValue<PendingInvitationsResponse> invitationsAsync = ref.watch(
+      pendingInvitationsProvider,
+    );
 
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerHighest,
-      body:
-          _isLoadingPreview
-              ? _buildLoading(colorScheme, t)
-              : _buildContent(colorScheme, textTheme, t),
-    );
-  }
-
-  Widget _buildLoading(ColorScheme colorScheme, Translations t) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          CircularProgressIndicator(color: colorScheme.primary),
-          SizedBox(height: Responsive.h(context, 16)),
-          Text(
-            t.rally.rallyInvite.joinViaLink.loading,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+      body: invitationsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error:
+            (Object error, StackTrace stack) => Center(
+              child: Text(
+                t.notifications.invitations.acceptError,
+                style: textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
             ),
-          ),
-        ],
+        data: (PendingInvitationsResponse data) {
+          final PendingInvitationItem? inv = _findInvitation(data);
+          if (inv == null) {
+            return Center(
+              child: Text(
+                t.notifications.invitations.noInvitations,
+                style: textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            );
+          }
+          return _buildContent(context, inv, colorScheme, textTheme, t);
+        },
       ),
     );
   }
 
+  PendingInvitationItem? _findInvitation(PendingInvitationsResponse data) {
+    for (final PendingInvitationItem inv in data.invitations) {
+      if (inv.participantId == widget.participantId &&
+          inv.rallyId == widget.rallyId) {
+        return inv;
+      }
+    }
+    return null;
+  }
+
   Widget _buildContent(
+    BuildContext context,
+    PendingInvitationItem inv,
     ColorScheme colorScheme,
     TextTheme textTheme,
     Translations t,
   ) {
-    if (_error != null || _preview == null) {
-      return _buildError(colorScheme, textTheme, t);
-    }
-
-    final InvitePreviewResponse preview = _preview!;
     final String ownerName =
-        '${preview.owner.firstName} ${preview.owner.lastName}'.trim().isNotEmpty
-            ? '${preview.owner.firstName} ${preview.owner.lastName}'.trim()
-            : '@${preview.owner.username}';
-
+        inv.invitedBy != null ? inv.invitedBy!.displayName : '';
     final double coverHeight = Responsive.h(context, 260);
     final double overlap = Responsive.h(context, 80);
 
@@ -171,9 +173,9 @@ class _InviteConfirmationScreenState
                     bottomLeft: Radius.circular(Responsive.w(context, 32)),
                     bottomRight: Radius.circular(Responsive.w(context, 32)),
                   ),
-                  child: preview.coverImageUrl != null
+                  child: inv.coverImageUrl != null
                       ? Image.network(
-                          preview.coverImageUrl!,
+                          inv.coverImageUrl!,
                           height: coverHeight,
                           width: double.infinity,
                           fit: BoxFit.cover,
@@ -197,15 +199,14 @@ class _InviteConfirmationScreenState
                     children: <Widget>[
                       // Rally info card
                       _buildInfoCard(
-                        preview, ownerName, colorScheme, textTheme, t,
-                      ),
+                          inv, ownerName, colorScheme, textTheme, t),
 
                       SizedBox(height: Responsive.h(context, 12)),
 
                       // About section
-                      if (preview.description != null &&
-                          preview.description!.trim().isNotEmpty)
-                        _buildAboutCard(preview, colorScheme, textTheme, t),
+                      if (inv.description != null &&
+                          inv.description!.trim().isNotEmpty)
+                        _buildAboutCard(inv, colorScheme, textTheme, t),
 
                       SizedBox(height: Responsive.h(context, 24)),
                     ],
@@ -221,7 +222,7 @@ class _InviteConfirmationScreenState
                     onPressed: () => context.go(AppRoutes.home),
                     icon: Icon(
                       Icons.arrow_back_rounded,
-                      color: preview.coverImageUrl != null
+                      color: inv.coverImageUrl != null
                           ? Colors.white
                           : colorScheme.onSurface,
                     ),
@@ -238,7 +239,7 @@ class _InviteConfirmationScreenState
         ),
 
         // ── Bottom action buttons ──
-        _buildBottomActions(preview, colorScheme, textTheme, t),
+        _buildBottomActions(colorScheme, textTheme, t),
       ],
     );
   }
@@ -259,15 +260,13 @@ class _InviteConfirmationScreenState
   }
 
   Widget _buildInfoCard(
-    InvitePreviewResponse preview,
+    PendingInvitationItem inv,
     String ownerName,
     ColorScheme colorScheme,
     TextTheme textTheme,
     Translations t,
   ) {
-    final ParticipantRole role = ParticipantRole.fromString(
-      preview.roleOffered,
-    );
+    final ParticipantRole role = inv.role;
 
     return Container(
       padding: EdgeInsets.all(Responsive.w(context, 20)),
@@ -284,7 +283,7 @@ class _InviteConfirmationScreenState
             children: <Widget>[
               Expanded(
                 child: Text(
-                  preview.rallyName,
+                  inv.rallyName,
                   style: textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onSurface,
@@ -325,7 +324,7 @@ class _InviteConfirmationScreenState
           ),
 
           // Trip dates row
-          if (preview.startDate != null) ...<Widget>[
+          if (inv.startDate != null) ...<Widget>[
             SizedBox(height: Responsive.h(context, 20)),
             Row(
               children: <Widget>[
@@ -351,19 +350,15 @@ class _InviteConfirmationScreenState
                       ),
                       SizedBox(height: Responsive.h(context, 2)),
                       Text(
-                        _formatDateRange(preview.startDate!, preview.endDate),
+                        _formatDateRange(inv.startDate!, inv.endDate),
                         style: textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colorScheme.onSurface,
                         ),
                       ),
-                      if (preview.endDate != null)
+                      if (inv.startDate != null && inv.endDate != null)
                         Text(
-                          _formatDaysNights(
-                            preview.startDate!,
-                            preview.endDate!,
-                            t,
-                          ),
+                          _formatDaysNights(inv.startDate!, inv.endDate!, t),
                           style: textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -376,66 +371,65 @@ class _InviteConfirmationScreenState
           ],
 
           // Organizer row
-          SizedBox(height: Responsive.h(context, 16)),
-          Row(
-            children: <Widget>[
-              CircleAvatar(
-                radius: Responsive.w(context, 20),
-                backgroundColor: colorScheme.surfaceContainerHighest,
-                backgroundImage:
-                    preview.owner.avatarUrl != null
-                        ? NetworkImage(preview.owner.avatarUrl!)
-                        : null,
-                child:
-                    preview.owner.avatarUrl == null
-                        ? Text(
-                          ownerName.isNotEmpty
-                              ? ownerName[0].toUpperCase()
-                              : '?',
-                          style: textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        )
-                        : null,
-              ),
-              SizedBox(width: Responsive.w(context, 12)),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      t.rally.rallyInvite.joinViaLink.organizedBy.replaceAll(
-                        '{name}',
-                        '',
-                      ),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    SizedBox(height: Responsive.h(context, 2)),
-                    Text(
-                      ownerName,
-                      style: textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    Text(
-                      t.rally.rallyInvite.joinViaLink.participantsJoined
-                          .replaceAll(
-                            '{count}',
-                            preview.memberCount.toString(),
-                          ),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+          if (ownerName.isNotEmpty) ...<Widget>[
+            SizedBox(height: Responsive.h(context, 16)),
+            Row(
+              children: <Widget>[
+                CircleAvatar(
+                  radius: Responsive.w(context, 20),
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  backgroundImage:
+                      inv.invitedBy?.avatarUrl != null
+                          ? NetworkImage(inv.invitedBy!.avatarUrl!)
+                          : null,
+                  child:
+                      inv.invitedBy?.avatarUrl == null
+                          ? Text(
+                            ownerName.isNotEmpty
+                                ? ownerName[0].toUpperCase()
+                                : '?',
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          )
+                          : null,
                 ),
-              ),
-            ],
-          ),
+                SizedBox(width: Responsive.w(context, 12)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        t.rally.rallyInvite.joinViaLink.organizedBy.replaceAll(
+                          '{name}',
+                          '',
+                        ),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      SizedBox(height: Responsive.h(context, 2)),
+                      Text(
+                        ownerName,
+                        style: textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        t.rally.rallyInvite.joinViaLink.participantsJoined
+                            .replaceAll('{count}', inv.memberCount.toString()),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
 
         ],
       ),
@@ -443,7 +437,7 @@ class _InviteConfirmationScreenState
   }
 
   Widget _buildAboutCard(
-    InvitePreviewResponse preview,
+    PendingInvitationItem inv,
     ColorScheme colorScheme,
     TextTheme textTheme,
     Translations t,
@@ -466,7 +460,7 @@ class _InviteConfirmationScreenState
           ),
           SizedBox(height: Responsive.h(context, 12)),
           Text(
-            deltaToPlainText(preview.description!),
+            deltaToPlainText(inv.description!),
             style: textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
               height: 1.5,
@@ -478,7 +472,6 @@ class _InviteConfirmationScreenState
   }
 
   Widget _buildBottomActions(
-    InvitePreviewResponse preview,
     ColorScheme colorScheme,
     TextTheme textTheme,
     Translations t,
@@ -502,8 +495,21 @@ class _InviteConfirmationScreenState
           // Decline Rally
           Expanded(
             child: OutlinedButton.icon(
-              onPressed: _isAccepting ? null : _decline,
-              icon: Icon(Icons.close_rounded, size: Responsive.w(context, 14)),
+              onPressed: _isBusy ? null : _decline,
+              icon:
+                  _isDeclining
+                      ? SizedBox(
+                        width: Responsive.w(context, 14),
+                        height: Responsive.w(context, 14),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: colorScheme.error,
+                        ),
+                      )
+                      : Icon(
+                        Icons.close_rounded,
+                        size: Responsive.w(context, 14),
+                      ),
               label: Text(
                 t.rally.rallyInvite.joinViaLink.declineRally,
                 style: textTheme.labelSmall?.copyWith(
@@ -533,7 +539,7 @@ class _InviteConfirmationScreenState
           // Join Rally
           Expanded(
             child: FilledButton.icon(
-              onPressed: _isAccepting ? null : _acceptInvitation,
+              onPressed: _isBusy ? null : _accept,
               icon:
                   _isAccepting
                       ? SizedBox(
@@ -571,45 +577,6 @@ class _InviteConfirmationScreenState
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildError(
-    ColorScheme colorScheme,
-    TextTheme textTheme,
-    Translations t,
-  ) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(Responsive.w(context, 32)),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              Icons.link_off_rounded,
-              size: Responsive.w(context, 64),
-              color: colorScheme.error.withValues(alpha: 0.6),
-            ),
-            SizedBox(height: Responsive.h(context, 16)),
-            Text(
-              t.rally.rallyInvite.joinViaLink.invalidLink,
-              textAlign: TextAlign.center,
-              style: textTheme.bodyLarge?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            SizedBox(height: Responsive.h(context, 24)),
-            ElevatedButton(
-              onPressed: _decline,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-              ),
-              child: Text(t.rally.rallyInvite.joinViaLink.declineButton),
-            ),
-          ],
-        ),
       ),
     );
   }

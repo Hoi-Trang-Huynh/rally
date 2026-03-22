@@ -29,8 +29,8 @@ class FeedbackRepository {
       'username': username,
       'comment': comment,
       'categories': categories,
-      if (avatarUrl != null) 'avatar_url': avatarUrl,
-      if (attachmentUrls != null) 'attachment_urls': attachmentUrls,
+      if (avatarUrl != null) 'avatarUrl': avatarUrl,
+      if (attachmentUrls != null) 'attachmentUrls': attachmentUrls,
     };
 
     final dynamic response = await _apiClient.post('/api/v1/feedback', body: body);

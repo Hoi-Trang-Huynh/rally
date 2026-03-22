@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rally/models/responses/rally_response.dart';
+import 'package:rally/models/responses/rally_join_response.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/services/rally_repository.dart';
 
@@ -10,9 +10,9 @@ import 'package:rally/services/rally_repository.dart';
 ///
 /// TODO: In the future, this will use a WebSocket/stream connection
 /// for real-time updates (live document / chat room style).
-final AutoDisposeStateNotifierProvider<CurrentRallyNotifier, AsyncValue<RallyResponse>>
+final AutoDisposeStateNotifierProvider<CurrentRallyNotifier, AsyncValue<RallyJoinResponse>>
 currentRallyProvider =
-    StateNotifierProvider.autoDispose<CurrentRallyNotifier, AsyncValue<RallyResponse>>((Ref ref) {
+    StateNotifierProvider.autoDispose<CurrentRallyNotifier, AsyncValue<RallyJoinResponse>>((Ref ref) {
       final RallyRepository repository = ref.watch(rallyRepositoryProvider);
       return CurrentRallyNotifier(repository);
     });
@@ -21,9 +21,9 @@ currentRallyProvider =
 ///
 /// Manages loading, caching, and clearing the active rally data.
 /// Designed to be extended with streaming capabilities in the future.
-class CurrentRallyNotifier extends StateNotifier<AsyncValue<RallyResponse>> {
+class CurrentRallyNotifier extends StateNotifier<AsyncValue<RallyJoinResponse>> {
   /// Creates a new [CurrentRallyNotifier].
-  CurrentRallyNotifier(this._repository) : super(const AsyncValue<RallyResponse>.loading());
+  CurrentRallyNotifier(this._repository) : super(const AsyncValue<RallyJoinResponse>.loading());
 
   final RallyRepository _repository;
 
@@ -39,22 +39,22 @@ class CurrentRallyNotifier extends StateNotifier<AsyncValue<RallyResponse>> {
   ///
   /// TODO: Replace API fetch with stream subscription for real-time updates.
   Future<void> loadRally(String rallyId, {bool force = false}) async {
-    if (_currentRallyId == rallyId && !force && state is AsyncData<RallyResponse>) {
+    if (_currentRallyId == rallyId && !force && state is AsyncData<RallyJoinResponse>) {
       return; // Already loaded
     }
 
     _currentRallyId = rallyId;
-    state = const AsyncValue<RallyResponse>.loading();
+    state = const AsyncValue<RallyJoinResponse>.loading();
 
     try {
-      final RallyResponse rally = await _repository.getRally(rallyId);
+      final RallyJoinResponse rally = await _repository.getRally(rallyId);
       // Only update if still viewing the same rally (user may have navigated away)
       if (_currentRallyId == rallyId && mounted) {
-        state = AsyncValue<RallyResponse>.data(rally);
+        state = AsyncValue<RallyJoinResponse>.data(rally);
       }
     } catch (error, stackTrace) {
       if (_currentRallyId == rallyId && mounted) {
-        state = AsyncValue<RallyResponse>.error(error, stackTrace);
+        state = AsyncValue<RallyJoinResponse>.error(error, stackTrace);
       }
     }
   }
@@ -69,6 +69,6 @@ class CurrentRallyNotifier extends StateNotifier<AsyncValue<RallyResponse>> {
   /// Clears the current rally state.
   void clearRally() {
     _currentRallyId = null;
-    state = const AsyncValue<RallyResponse>.loading();
+    state = const AsyncValue<RallyJoinResponse>.loading();
   }
 }
