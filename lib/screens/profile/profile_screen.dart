@@ -10,17 +10,18 @@ import 'package:rally/utils/validators.dart';
 import 'package:rally/widgets/common/app_bottom_sheet.dart';
 import 'package:rally/widgets/common/empty_state.dart';
 import 'package:rally/widgets/common/shimmer_loading.dart';
+import 'package:rally/widgets/common/sticky_tab_bar_delegate.dart';
 
-import '../../i18n/generated/translations.g.dart';
-import '../../models/app_user.dart';
-import '../../providers/api_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/nav_provider.dart';
-import '../../utils/responsive.dart';
-import 'widgets/follow_list_sheet.dart';
-import 'widgets/profile_avatar.dart';
-import 'widgets/profile_content.dart';
-import 'widgets/profile_tab_bar.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/models/app_user.dart';
+import 'package:rally/providers/api_provider.dart';
+import 'package:rally/providers/auth_provider.dart';
+import 'package:rally/utils/responsive.dart';
+import 'package:rally/screens/profile/widgets/follow_list_sheet.dart';
+import 'package:rally/screens/profile/widgets/profile_avatar.dart';
+import 'package:rally/screens/profile/widgets/profile_content.dart';
+import 'package:rally/screens/profile/widgets/profile_rallies_tab.dart';
+import 'package:rally/screens/profile/widgets/profile_tab_bar.dart';
 
 /// The main profile screen displaying user information.
 ///
@@ -294,7 +295,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 // Sticky Tab Bar
                 SliverPersistentHeader(
                   pinned: true,
-                  delegate: _StickyTabBarDelegate(
+                  delegate: StickyTabBarDelegate(
                     child: Container(
                       color: colorScheme.surface, // Opaque background for sticky state
                       padding: EdgeInsets.only(bottom: Responsive.h(context, 16)),
@@ -316,7 +317,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 // Tab content (with padding to separate from tabs)
                 SliverPadding(
                   padding: EdgeInsets.only(top: Responsive.h(context, 16)),
-                  sliver: _buildTabContent(colorScheme),
+                  sliver: _buildTabContent(colorScheme, user, t),
                 ),
 
                 // Bottom padding for nav bar
@@ -327,36 +328,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         );
       },
       loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error:
-          (Object error, StackTrace stack) => Scaffold(body: Center(child: Text('Error: $error'))),
+      error: (Object error, StackTrace stack) {
+        final Translations t = Translations.of(context);
+        return Scaffold(body: Center(child: Text(t.common.errorGenericDisplay(error: error))));
+      },
     );
   }
 
-  Widget _buildTabContent(ColorScheme colorScheme) {
+  Widget _buildTabContent(ColorScheme colorScheme, AppUser user, Translations t) {
     switch (_selectedTabId) {
       case 'achievements':
         // Keep grid for achievements to show loading state example, or replaced if empty
         return _buildEmptyState(
           icon: Icons.emoji_events_outlined,
-          title: 'No Achievements Yet',
-          subtitle: 'Join rallies to earn badges!',
+          title: t.profile.noAchievements,
+          subtitle: t.profile.noAchievementsSubtitle,
         );
       case 'posts':
         return _buildEmptyState(
           icon: Icons.format_quote_outlined,
-          title: 'No Posts Yet',
-          subtitle: 'Share your rally experiences with the community.',
+          title: t.profile.noOwnPosts,
+          subtitle: t.profile.noOwnPostsSubtitle,
         );
       case 'rallies':
-        return _buildEmptyState(
-          icon: Icons.map_outlined,
-          title: 'No Upcoming Rallies',
-          subtitle: 'Find a rally nearby and join the fun!',
-          actionLabel: 'Explore Rallies',
-          onAction: () {
-            ref.read(navIndexProvider.notifier).state = 2; // Map/Explore tab index
-          },
-        );
+        return ProfileRalliesTab(userId: user.id ?? '');
       default:
         return _buildPlaceholderGrid(colorScheme, 6);
     }
@@ -411,32 +406,5 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         }, childCount: count),
       ),
     );
-  }
-}
-
-/// Helper delegate for sticky tab bar.
-class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-  final double maxHeight;
-  final double minHeight;
-
-  _StickyTabBarDelegate({required this.child, required this.maxHeight, required this.minHeight});
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return SizedBox.expand(child: child);
-  }
-
-  @override
-  double get maxExtent => maxHeight;
-
-  @override
-  double get minExtent => minHeight;
-
-  @override
-  bool shouldRebuild(_StickyTabBarDelegate oldDelegate) {
-    return maxHeight != oldDelegate.maxExtent ||
-        minHeight != oldDelegate.minExtent ||
-        child != oldDelegate.child;
   }
 }

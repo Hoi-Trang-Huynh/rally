@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rally/constants/shared_pref_keys.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
-import 'package:rally/screens/auth/auth_screen.dart';
+import 'package:rally/router/app_router.dart';
 import 'package:rally/services/shared_prefs_service.dart';
 import 'package:rally/themes/app_colors.dart';
 import 'package:rally/utils/responsive.dart';
@@ -35,9 +36,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Future<void> _completeOnboarding() async {
     await ref.read(sharedPrefsServiceProvider).setBool(SharedPrefKeys.onboardingSeen, true);
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const AuthScreen(initialIsLogin: false)),
-    );
+    context.go(AppRoutes.signup);
   }
 
   @override

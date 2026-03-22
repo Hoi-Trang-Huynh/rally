@@ -1,14 +1,18 @@
 import 'package:rally/models/responses/availability_response.dart';
+import 'package:rally/models/responses/pending_invitation_response.dart';
 import 'package:rally/models/responses/follow_list_response.dart';
 import 'package:rally/models/responses/follow_response.dart';
 import 'package:rally/models/responses/follow_status_response.dart';
+import 'package:rally/models/responses/friend_list_response.dart';
 import 'package:rally/models/responses/login_response.dart';
 import 'package:rally/models/responses/profile_details_response.dart';
 import 'package:rally/models/responses/profile_response.dart';
 import 'package:rally/models/responses/register_response.dart';
 import 'package:rally/models/responses/user_public_profile_response.dart';
+import 'package:rally/models/responses/user_rallies_response.dart';
 import 'package:rally/models/responses/user_search_response.dart';
 import 'package:rally/services/api_client.dart';
+import 'package:rally/utils/validation_constants.dart';
 
 /// Repository for user-related API calls.
 ///
@@ -144,7 +148,7 @@ class UserRepository {
   Future<UserSearchResponse> searchUsers({
     required String query,
     int page = 1,
-    int pageSize = 20,
+    int pageSize = PaginationDefaults.defaultPageSize,
   }) async {
     final dynamic response = await _apiClient.get(
       '/api/v1/user/search',
@@ -197,7 +201,7 @@ class UserRepository {
   Future<FollowListResponse> getFollowers({
     required String userId,
     int page = 1,
-    int pageSize = 20,
+    int pageSize = PaginationDefaults.defaultPageSize,
   }) async {
     final dynamic response = await _apiClient.get(
       '/api/v1/user/$userId/followers',
@@ -215,12 +219,86 @@ class UserRepository {
   Future<FollowListResponse> getFollowing({
     required String userId,
     int page = 1,
-    int pageSize = 20,
+    int pageSize = PaginationDefaults.defaultPageSize,
   }) async {
     final dynamic response = await _apiClient.get(
       '/api/v1/user/$userId/following',
       queryParams: <String, String>{'page': page.toString(), 'pageSize': pageSize.toString()},
     );
     return FollowListResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  /// Gets a paginated list of mutual friends (users who follow each other).
+  ///
+  /// [userId] The ID of the user to get friends for.
+  /// [query] Optional search query (matches username, first name, or last name).
+  /// [page] The page number (default: 1).
+  /// [pageSize] The number of results per page (default: 20).
+  /// Returns a [FriendListResponse] containing the friends list.
+  Future<FriendListResponse> getFriends({
+    required String userId,
+    String? query,
+    int page = 1,
+    int pageSize = PaginationDefaults.defaultPageSize,
+  }) async {
+    final Map<String, String> queryParams = <String, String>{
+      'page': page.toString(),
+      'pageSize': pageSize.toString(),
+    };
+    if (query != null && query.isNotEmpty) {
+      queryParams['q'] = query;
+    }
+
+    final dynamic response = await _apiClient.get(
+      '/api/v1/user/$userId/friends',
+      queryParams: queryParams,
+    );
+    return FriendListResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  // ============================================
+  // Rally Endpoints
+  // ============================================
+
+  /// Gets a filtered and sorted list of rallies where the user is a participant.
+  ///
+  /// Returns only rallies where the user has joined status.
+  /// [userId] The ID of the user to get rallies for.
+  /// [name] Optional filter by rally name (case-insensitive partial match).
+  /// [status] Optional filter by rally status (draft, active, inactive, completed, archived).
+  /// [sort] Sort order for start date ('asc' or 'desc', default: 'asc').
+  /// Returns a [UserRalliesResponse] containing the rallies list.
+  Future<UserRalliesResponse> getUserRallies({
+    required String userId,
+    String? name,
+    String? status,
+    String sort = 'asc',
+  }) async {
+    final Map<String, String> queryParams = <String, String>{'sort': sort};
+    if (name != null && name.isNotEmpty) {
+      queryParams['name'] = name;
+    }
+    if (status != null && status.isNotEmpty) {
+      queryParams['status'] = status;
+    }
+
+    final dynamic response = await _apiClient.get(
+      '/api/v1/user/$userId/rallies',
+      queryParams: queryParams,
+    );
+    return UserRalliesResponse.fromJson(response as Map<String, dynamic>);
+  }
+
+  // ============================================
+  // Invitation Endpoints
+  // ============================================
+
+  /// Gets all pending rally invitations for the current user.
+  ///
+  /// TODO: Temporary endpoint until realtime notifications are implemented.
+  /// Returns a [PendingInvitationsResponse] containing the invitations list.
+  Future<PendingInvitationsResponse> getPendingInvitations() async {
+    final dynamic response = await _apiClient.get('/api/v1/user/me/invitations');
+    return PendingInvitationsResponse.fromJson(response as Map<String, dynamic>);
   }
 }

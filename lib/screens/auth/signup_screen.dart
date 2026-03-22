@@ -13,7 +13,6 @@ import 'package:rally/screens/auth/widgets/auth_text_field.dart';
 import 'package:rally/screens/auth/widgets/or_divider.dart';
 import 'package:rally/screens/auth/widgets/password_requirements.dart';
 import 'package:rally/screens/auth/widgets/profile_fields_form.dart';
-import 'package:rally/screens/playground/auth_test.dart';
 import 'package:rally/utils/auth_helpers.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/utils/ui_helpers.dart';
@@ -279,9 +278,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         }
         if (!mounted) return;
         ref.invalidate(appUserProvider);
-        Navigator.of(
-          context,
-        ).pushReplacement(MaterialPageRoute<void>(builder: (_) => const AuthTestScreen()));
+        // Router redirect will handle navigation after provider invalidation
       } else if (mounted) {
         showErrorSnackBar(context, Translations.of(context).auth.signup.emailNotVerified);
       }
@@ -465,7 +462,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         child: TextButton.icon(
           onPressed: _anyLoading ? null : _cancelVerificationAndGoBack,
           icon: Icon(Icons.arrow_back, size: Responsive.w(context, 18)),
-          label: const Text('Back'),
+          label: Text(t.common.back),
           style: TextButton.styleFrom(foregroundColor: colorScheme.onSurfaceVariant),
         ),
       ),

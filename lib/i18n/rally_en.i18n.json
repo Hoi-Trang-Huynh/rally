@@ -1,0 +1,199 @@
+{
+  "createRally": {
+    "title": "Create Rally",
+    "coverImage": {
+      "title": "Cover Image",
+      "tapToUpload": "Tap to upload",
+      "fileFormat": "JPG, PNG (Max 10MB)"
+    },
+    "name": {
+      "title": "Name your Rally",
+      "placeholder": "Enter your Rally title",
+      "maxLength": "{count}/60"
+    },
+    "duration": {
+      "title": "Rally Duration",
+      "from": "From",
+      "to": "To",
+      "selectStartDate": "Select start date",
+      "selectEndDate": "Select end date",
+      "selectDateHeaderStart": "SELECT START DATE",
+      "selectDateHeaderEnd": "SELECT END DATE",
+      "today": "Today"
+    },
+    "inviteMembers": {
+      "title": "Invite Members",
+      "inviteButton": "Invite",
+      "tapToInvite": "Tap to invite members",
+      "memberCount": "{count} member(s) invited",
+      "headline": "Invite Buddies to Rally",
+      "searchPlaceholder": "Search friends...",
+      "invitedSection": "Invited ({count})",
+      "suggestedSection": "Suggested",
+      "add": "Add",
+      "remove": "Remove",
+      "added": "Added",
+      "cancel": "Cancel",
+      "done": "Done",
+      "noFriends": "No friends found",
+      "noInvitedYet": "No members invited yet"
+    },
+    "description": {
+      "title": "Descriptions",
+      "placeholder": "Add rally description..."
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "create": "Create",
+      "continueCreating": "Continue creating",
+      "clearDraft": "Clear draft",
+      "draftRestored": "Draft restored"
+    },
+    "validation": {
+      "nameRequired": "Please enter a rally name"
+    },
+    "success": {
+      "comingSoon": "Rally creation coming soon!"
+    }
+  },
+  "status": {
+    "draft": "Draft",
+    "active": "Active",
+    "inactive": "Inactive",
+    "completed": "Completed",
+    "archived": "Archived"
+  },
+  "filter": {
+    "label": "Filter",
+    "latest": "Latest",
+    "oldest": "Oldest",
+    "all": "All",
+    "searchPlaceholder": "Search..."
+  },
+  "home": {
+    "activeRallies": "Active Rallies",
+    "placesVisited": "Places Visited",
+    "newFriends": "New Friends",
+    "recentActivity": "Recent Activity"
+  },
+  "common": {
+    "noDates": "No dates",
+    "unknown": "Unknown",
+    "events": "Events",
+    "participants": "Participants",
+    "noParticipantsYet": "No participants yet",
+    "invitedByLabel": "invited",
+    "loadMore": "Load more",
+    "inviteMembersButton": "Invite Members",
+    "chat": "Chat",
+    "timeline": "Timeline",
+    "media": "Media",
+    "overview": "Overview",
+    "errorLoadingRally": "Failed to load rally",
+    "language": {
+      "english": "English",
+      "vietnamese": "Vietnamese"
+    },
+    "timeAgo": {
+      "years": "Updated {count}y ago",
+      "months": "{count}mo ago",
+      "days": "{count}d ago",
+      "hours": "{count}h ago",
+      "minutes": "{count}m ago",
+      "justNow": "just now"
+    },
+    "greeting": {
+      "morning": "Good Morning",
+      "afternoon": "Good Afternoon",
+      "evening": "Good Evening"
+    },
+    "fallback": {
+      "traveler": "Traveler"
+    },
+    "role": {
+      "owner": "Owner",
+      "editor": "Editor",
+      "participant": "Participant",
+      "owners": "Owners",
+      "editors": "Editors",
+      "participants": "Participants"
+    },
+    "participationStatus": {
+      "invited": "Invited",
+      "joined": "Joined",
+      "declined": "Declined",
+      "left": "Left"
+    },
+    "error": {
+      "sessionExpired": "Session expired. Please log in again.",
+      "permissionDenied": "You don't have permission to do this.",
+      "notFound": "The requested item was not found.",
+      "tooManyRequests": "Too many requests. Please wait a moment.",
+      "serverError": "Server error. Please try again later.",
+      "timeout": "Request timed out. Please check your connection.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "rallyInvite": {
+    "title": "Invite Members",
+    "headline": "Invite Friends to Rally",
+    "searchPlaceholder": "Search friends...",
+    "invite": "Invite",
+    "invited": "Invited",
+    "noFriends": "No friends available to invite",
+    "cancel": "Cancel",
+    "done": "Send Invites",
+    "inviteLink": {
+      "generateButton": "Generate Invite Link",
+      "generating": "Generating...",
+      "noLinksYet": "No invite links yet. Generate one to share!",
+      "shareTitle": "Rally Invite",
+      "shareMessage": "Join my rally! Use invite token: {token}",
+      "copyToken": "Copy Token",
+      "tokenCopied": "Token copied to clipboard",
+      "revokeButton": "Revoke",
+      "revokeConfirmTitle": "Revoke Invite Link",
+      "revokeConfirmMessage": "This will prevent anyone from using this QR code. Continue?",
+      "revokeConfirmYes": "Revoke",
+      "revokeConfirmNo": "Cancel",
+      "revokeSuccess": "Invite link revoked",
+      "revokeError": "Failed to revoke invite link",
+      "generateError": "Failed to generate invite link",
+      "uses": "{current}/{max} uses",
+      "usesUnlimited": "{current} uses",
+      "expiresAt": "Expires {date}",
+      "expired": "Expired",
+      "activeLinks": "Active Invite Links",
+      "sectionDescription": "Share a QR code or link to invite anyone",
+      "copyLink": "Copy Link",
+      "linkCopied": "Invite link copied to clipboard",
+      "saveToGallery": "Gallery",
+      "savedToGallery": "QR code saved to gallery",
+      "saveError": "Failed to save QR code"
+    },
+    "inviteSuccess": "Invitations sent successfully",
+    "inviteError": "Failed to send invitations",
+    "joinViaLink": {
+      "title": "Rally Invitation",
+      "loading": "Loading invite details...",
+      "invalidLink": "This invite link is invalid or has expired.",
+      "errorLoading": "Could not load invite details. Please try again.",
+      "roleLabel": "You're invited as",
+      "participantsLabel": "{count} participants",
+      "organizedBy": "Organized by {name}",
+      "aboutThisRally": "About This Rally",
+      "tripDates": "Trip Dates",
+      "daysNights": "{days} days, {nights} nights",
+      "participantsJoined": "{count} participants joined",
+      "viewSchedule": "View Schedule",
+      "joinRally": "Join this Rally",
+      "declineRally": "Decline Rally",
+      "acceptButton": "Accept Invitation",
+      "declineButton": "Decline",
+      "accepting": "Joining...",
+      "acceptSuccess": "Invitation accepted! You've been added to the rally.",
+      "acceptError": "Failed to accept invitation. Please try again.",
+      "loginRequired": "Please log in to accept this invitation."
+    }
+  }
+}

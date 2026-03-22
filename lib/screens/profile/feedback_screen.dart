@@ -6,15 +6,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../i18n/generated/translations.g.dart';
-import '../../models/app_user.dart';
-import '../../models/cloudinary_signature.dart';
-import '../../models/feedback_category.dart';
-import '../../providers/api_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../services/cloudinary_repository.dart';
-import '../../services/feedback_repository.dart';
-import '../../utils/responsive.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/models/app_user.dart';
+import 'package:rally/models/feedback_category.dart';
+import 'package:rally/providers/api_provider.dart';
+import 'package:rally/providers/auth_provider.dart';
+import 'package:rally/utils/image_upload_helper.dart';
+import 'package:rally/utils/responsive.dart';
+import 'package:rally/utils/storage_constants.dart';
+import 'package:rally/utils/validation_constants.dart';
 
 /// Screen for submitting user feedback.
 ///
@@ -42,14 +42,14 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   }
 
   Future<void> _pickImage() async {
-    if (_selectedImages.length >= 3) return;
+    if (_selectedImages.length >= ImageValidation.maxFeedbackImages) return;
 
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
+        maxWidth: ImageValidation.avatarMaxWidth,
+        maxHeight: ImageValidation.avatarMaxHeight,
+        imageQuality: ImageValidation.imageQuality,
       );
 
       if (image != null) {
@@ -59,9 +59,10 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       }
     } catch (e) {
       if (!mounted) return;
+      final Translations t = Translations.of(context);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error picking image: $e')));
+      ).showSnackBar(SnackBar(content: Text(t.settings.feedback.errorPickingImage(error: e))));
     }
   }
 
@@ -75,39 +76,22 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     if (_selectedImages.isEmpty) return <String>[];
 
     setState(() => _isUploading = true);
-    final List<String> uploadedUrls = <String>[];
-    final CloudinaryRepository cloudinary = ref.read(cloudinaryRepositoryProvider);
+    List<ImageUploadResult> results = <ImageUploadResult>[];
 
     try {
-      // Get signature once (can be reused if backend allows, or per image)
-      // Assuming one signature works for standard upload or getting one per image.
-      // Doing one per image to be safe and simple for now.
+      final ImageUploadHelper helper = ref.read(imageUploadHelperProvider);
+      final List<File> files = _selectedImages.map((XFile x) => File(x.path)).toList();
 
-      for (int i = 0; i < _selectedImages.length; i++) {
-        final XFile image = _selectedImages[i];
-        // Create unique ID to prevent overwriting and ensure valid public_id
-        final String uniqueId = '${userId}_${DateTime.now().millisecondsSinceEpoch}_$i';
-
-        final CloudinarySignature signature = await cloudinary.getUploadSignature(
-          userId: uniqueId,
-          folder: 'rally_feedback',
-        );
-
-        final Map<String, dynamic> result = await cloudinary.uploadImage(
-          file: File(image.path),
-          signature: signature,
-          folder: 'rally_feedback',
-        );
-
-        uploadedUrls.add(result['secure_url'] as String);
-      }
-    } catch (e) {
-      rethrow;
+      results = await helper.uploadMultipleImages(
+        files: files,
+        folder: StorageConstants.feedbackFolder,
+        userId: userId,
+      );
     } finally {
       setState(() => _isUploading = false);
     }
 
-    return uploadedUrls;
+    return results.map((ImageUploadResult r) => r.secureUrl).toList();
   }
 
   Future<void> _submitFeedback() async {
@@ -133,8 +117,9 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 
     try {
       final AppUser? user = ref.read(appUserProvider).valueOrNull;
-      if (user == null || user.id == null || user.username == null || user.username!.isEmpty)
+      if (user == null || user.id == null || user.username == null || user.username!.isEmpty) {
         return;
+      }
 
       // Upload images first
       List<String> attachmentUrls = <String>[];
@@ -329,7 +314,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 
               // Attachments Section
               Text(
-                'Attachments (Optional, max 3)',
+                t.settings.feedback.attachments,
                 style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
               SizedBox(height: Responsive.h(context, 12)),
@@ -438,7 +423,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                               ),
                               SizedBox(width: Responsive.w(context, 12)),
                               Text(
-                                _isUploading ? 'Uploading images...' : 'Submitting...',
+                                _isUploading ? t.settings.feedback.uploadingImages : t.settings.feedback.submitting,
                                 style: textTheme.titleMedium?.copyWith(
                                   color: colorScheme.onPrimary,
                                   fontWeight: FontWeight.w600,

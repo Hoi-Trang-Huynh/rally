@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/screens/auth/login_screen.dart';
 import 'package:rally/screens/auth/signup_screen.dart';
@@ -12,7 +13,7 @@ import 'package:rally/widgets/common/glass_container.dart';
 ///
 /// This ensures the Top Bar (Language/Theme) and Logo remain completely static
 /// while the form content animates during transitions.
-class AuthScreen extends StatefulWidget {
+class AuthScreen extends ConsumerStatefulWidget {
   /// Whether to start in Login mode. Defaults to `true`.
   /// Set to `false` to start in Signup mode.
   final bool initialIsLogin;
@@ -21,10 +22,10 @@ class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key, this.initialIsLogin = true});
 
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
+class _AuthScreenState extends ConsumerState<AuthScreen> {
   late bool _isLogin;
   bool _hideLogoForVerification = false;
 

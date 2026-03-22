@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/screens/home/widgets/home_header.dart';
 import 'package:rally/screens/home/widgets/summary_card.dart';
 import 'package:rally/utils/responsive.dart';
@@ -12,6 +13,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Use Builder to access the NestedScrollView's inner scroll controller
+    final Translations t = Translations.of(context);
     return Builder(
       builder: (BuildContext context) {
         return CustomScrollView(
@@ -42,8 +44,8 @@ class HomeScreen extends StatelessWidget {
                       children: <Widget>[
                         SizedBox(
                           width: Responsive.w(context, 140),
-                          child: const SummaryCard(
-                            title: 'Active Rallies',
+                          child: SummaryCard(
+                            title: t.rally.home.activeRallies,
                             value: '3',
                             icon: Icons.flag_rounded,
                             color: Colors.orange,
@@ -52,8 +54,8 @@ class HomeScreen extends StatelessWidget {
                         SizedBox(width: Responsive.w(context, 12)),
                         SizedBox(
                           width: Responsive.w(context, 140),
-                          child: const SummaryCard(
-                            title: 'Places Visited',
+                          child: SummaryCard(
+                            title: t.rally.home.placesVisited,
                             value: '12',
                             icon: Icons.map_rounded,
                             color: Colors.blue,
@@ -62,8 +64,8 @@ class HomeScreen extends StatelessWidget {
                         SizedBox(width: Responsive.w(context, 12)),
                         SizedBox(
                           width: Responsive.w(context, 140),
-                          child: const SummaryCard(
-                            title: 'New Friends',
+                          child: SummaryCard(
+                            title: t.rally.home.newFriends,
                             value: '5',
                             icon: Icons.people_rounded,
                             color: Colors.purple,
@@ -84,7 +86,7 @@ class HomeScreen extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
                 child: Text(
-                  'Recent Activity',
+                  t.rally.home.recentActivity,
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),

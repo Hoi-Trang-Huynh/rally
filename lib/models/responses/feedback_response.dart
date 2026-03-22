@@ -47,19 +47,19 @@ class FeedbackResponse {
     return FeedbackResponse(
       id: json['id'] as String? ?? '',
       username: json['username'] as String? ?? '',
-      avatarUrl: json['avatar_url'] as String?,
+      avatarUrl: json['avatarUrl'] as String?,
       comment: json['comment'] as String? ?? '',
       attachmentUrls:
-          (json['attachment_urls'] as List<dynamic>?)?.map((dynamic e) => e as String).toList() ??
+          (json['attachmentUrls'] as List<dynamic>?)?.map((dynamic e) => e as String).toList() ??
           <String>[],
       categories:
           (json['categories'] as List<dynamic>?)?.map((dynamic e) => e as String).toList() ??
           <String>[],
       resolved: json['resolved'] as bool? ?? false,
       createdAt:
-          json['created_at'] != null ? DateTime.tryParse(json['created_at'] as String) : null,
+          json['createdAt'] != null ? DateTime.tryParse(json['createdAt'] as String) : null,
       updatedAt:
-          json['updated_at'] != null ? DateTime.tryParse(json['updated_at'] as String) : null,
+          json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt'] as String) : null,
     );
   }
 
@@ -68,13 +68,13 @@ class FeedbackResponse {
     return <String, dynamic>{
       'id': id,
       'username': username,
-      'avatar_url': avatarUrl,
+      'avatarUrl': avatarUrl,
       'comment': comment,
-      'attachment_urls': attachmentUrls,
+      'attachmentUrls': attachmentUrls,
       'categories': categories,
       'resolved': resolved,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 }

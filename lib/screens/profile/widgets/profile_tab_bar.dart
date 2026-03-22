@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../utils/responsive.dart';
+import 'package:rally/utils/responsive.dart';
 
 /// Data class for profile tab items.
 class ProfileTabData {

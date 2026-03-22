@@ -87,4 +87,26 @@ abstract class AppColors {
 
   /// 900 - #78350F
   static const Color warning900 = Color(0xFF78350F);
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Status Badge Colors (used by RallyStatusHelper)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Active status background - Light green
+  static const Color statusActiveBg = Color(0xFFE8F5E9);
+
+  /// Active status text - Dark green
+  static const Color statusActiveText = Color(0xFF2E7D32);
+
+  /// Inactive status background - Light red
+  static const Color statusInactiveBg = Color(0xFFFFEBEE);
+
+  /// Inactive status text - Dark red
+  static const Color statusInactiveText = Color(0xFFC62828);
+
+  /// Completed status background - Light blue
+  static const Color statusCompletedBg = Color(0xFFE3F2FD);
+
+  /// Completed status text - Dark blue
+  static const Color statusCompletedText = Color(0xFF1565C0);
 }

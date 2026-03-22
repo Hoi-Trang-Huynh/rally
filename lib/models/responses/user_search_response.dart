@@ -1,4 +1,4 @@
-import 'package:rally/models/responses/profile_response.dart';
+import 'package:rally/models/responses/user_search_result.dart';
 
 /// Response model for user search results.
 ///
@@ -17,7 +17,7 @@ class UserSearchResponse {
   final int totalPages;
 
   /// The list of users found.
-  final List<ProfileResponse> users;
+  final List<UserSearchResult> users;
 
   /// Creates a new [UserSearchResponse].
   const UserSearchResponse({
@@ -37,9 +37,9 @@ class UserSearchResponse {
       totalPages: json['totalPages'] as int? ?? 0,
       users:
           (json['users'] as List<dynamic>?)
-              ?.map((dynamic e) => ProfileResponse.fromJson(e as Map<String, dynamic>))
+              ?.map((dynamic e) => UserSearchResult.fromJson(e as Map<String, dynamic>))
               .toList() ??
-          <ProfileResponse>[],
+          <UserSearchResult>[],
     );
   }
 }

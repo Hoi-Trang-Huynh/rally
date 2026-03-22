@@ -10,6 +10,7 @@
     "alreadyHaveAccountQuestion": "Đã có tài khoản?",
     "alreadyHaveAccountAction": "Đăng nhập"
   },
+  "appIntro": "Giới thiệu ứng dụng",
   "signup": {
     "username": "Tên người dùng",
     "firstName": "Tên",

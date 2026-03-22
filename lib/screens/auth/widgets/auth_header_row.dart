@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/providers/theme_provider.dart';
+import 'package:rally/router/app_router.dart';
 import 'package:rally/screens/auth/widgets/language_selector.dart';
-import 'package:rally/screens/onboarding/onboarding_screen.dart';
+import 'package:rally/utils/responsive.dart';
 
 /// A reusable header row widget for auth screens.
 ///
@@ -19,7 +22,10 @@ class AuthHeaderRow extends ConsumerWidget {
     final ThemeNotifier themeNotifier = ref.read(themeProvider.notifier);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: Responsive.w(context, 8),
+        vertical: Responsive.h(context, 4),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -32,11 +38,9 @@ class AuthHeaderRow extends ConsumerWidget {
             children: <Widget>[
               IconButton(
                 icon: Icon(Icons.info_outline, color: Theme.of(context).colorScheme.onSurface),
-                tooltip: 'App Intro',
+                tooltip: Translations.of(context).auth.appIntro,
                 onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute<void>(builder: (_) => const OnboardingScreen()),
-                  );
+                  context.go(AppRoutes.onboarding);
                 },
               ),
               IconButton(

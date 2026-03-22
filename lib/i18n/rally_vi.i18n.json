@@ -1,0 +1,199 @@
+{
+  "createRally": {
+    "title": "Tạo Rally",
+    "coverImage": {
+      "title": "Ảnh Bìa",
+      "tapToUpload": "Nhấn để tải lên",
+      "fileFormat": "JPG, PNG (Tối đa 10MB)"
+    },
+    "name": {
+      "title": "Đặt tên Rally",
+      "placeholder": "Nhập tiêu đề Rally của bạn",
+      "maxLength": "{count}/60"
+    },
+    "duration": {
+      "title": "Thời Lượng Rally",
+      "from": "Từ",
+      "to": "Đến",
+      "selectStartDate": "Chọn ngày bắt đầu",
+      "selectEndDate": "Chọn ngày kết thúc",
+      "selectDateHeaderStart": "CHỌN NGÀY BẮT ĐẦU",
+      "selectDateHeaderEnd": "CHỌN NGÀY KẾT THÚC",
+      "today": "Hôm nay"
+    },
+    "inviteMembers": {
+      "title": "Mời Thành Viên",
+      "inviteButton": "Mời",
+      "tapToInvite": "Nhấn để mời thành viên",
+      "memberCount": "{count} thành viên đã mời",
+      "headline": "Mời Bạn Bè Tham Gia Rally",
+      "searchPlaceholder": "Tìm kiếm bạn bè...",
+      "invitedSection": "Đã mời ({count})",
+      "suggestedSection": "Gợi ý",
+      "add": "Thêm",
+      "remove": "Xóa",
+      "added": "Đã thêm",
+      "cancel": "Hủy",
+      "done": "Xong",
+      "noFriends": "Không tìm thấy bạn bè",
+      "noInvitedYet": "Chưa mời thành viên nào"
+    },
+    "description": {
+      "title": "Mô Tả",
+      "placeholder": "Thêm mô tả rally..."
+    },
+    "actions": {
+      "cancel": "Hủy",
+      "create": "Tạo",
+      "continueCreating": "Tiếp tục tạo",
+      "clearDraft": "Xóa bản nháp",
+      "draftRestored": "Đã khôi phục bản nháp"
+    },
+    "validation": {
+      "nameRequired": "Vui lòng nhập tên rally"
+    },
+    "success": {
+      "comingSoon": "Tính năng tạo rally sẽ sớm ra mắt!"
+    }
+  },
+  "status": {
+    "draft": "Nháp",
+    "active": "Đang diễn ra",
+    "inactive": "Không hoạt động",
+    "completed": "Đã kết thúc",
+    "archived": "Đã lưu trữ"
+  },
+  "filter": {
+    "label": "Bộ lọc",
+    "latest": "Mới nhất",
+    "oldest": "Cũ nhất",
+    "all": "Tất cả",
+    "searchPlaceholder": "Tìm kiếm..."
+  },
+  "home": {
+    "activeRallies": "Rally đang hoạt động",
+    "placesVisited": "Địa điểm đã đến",
+    "newFriends": "Bạn bè mới",
+    "recentActivity": "Hoạt động gần đây"
+  },
+  "common": {
+    "noDates": "Không có ngày",
+    "unknown": "Không rõ",
+    "events": "Sự kiện",
+    "participants": "Thành viên",
+    "noParticipantsYet": "Chưa có người tham gia",
+    "invitedByLabel": "đã mời",
+    "loadMore": "Xem thêm",
+    "inviteMembersButton": "Mời thành viên",
+    "chat": "Trò chuyện",
+    "timeline": "Lịch trình",
+    "media": "Hình ảnh",
+    "overview": "Tổng quan",
+    "errorLoadingRally": "Không thể tải rally",
+    "language": {
+      "english": "Tiếng Anh",
+      "vietnamese": "Tiếng Việt"
+    },
+    "timeAgo": {
+      "years": "Cập nhật {count} năm trước",
+      "months": "{count} tháng trước",
+      "days": "{count} ngày trước",
+      "hours": "{count} giờ trước",
+      "minutes": "{count} phút trước",
+      "justNow": "vừa xong"
+    },
+    "greeting": {
+      "morning": "Chào buổi sáng",
+      "afternoon": "Chào buổi chiều",
+      "evening": "Chào buổi tối"
+    },
+    "fallback": {
+      "traveler": "Khách"
+    },
+    "role": {
+      "owner": "Chủ phòng",
+      "editor": "Quản trị viên",
+      "participant": "Thành viên",
+      "owners": "Chủ phòng",
+      "editors": "Quản trị viên",
+      "participants": "Thành viên"
+    },
+    "participationStatus": {
+      "invited": "Đã mời",
+      "joined": "Đã tham gia",
+      "declined": "Từ chối",
+      "left": "Đã rời"
+    },
+    "error": {
+      "sessionExpired": "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
+      "permissionDenied": "Bạn không có quyền thực hiện thao tác này.",
+      "notFound": "Không tìm thấy mục yêu cầu.",
+      "tooManyRequests": "Quá nhiều yêu cầu. Vui lòng thử lại sau.",
+      "serverError": "Lỗi máy chủ. Vui lòng thử lại sau.",
+      "timeout": "Hết thời gian chờ. Vui lòng kiểm tra kết nối.",
+      "generic": "Đã có lỗi xảy ra. Vui lòng thử lại."
+    }
+  },
+  "rallyInvite": {
+    "title": "Mời Thành Viên",
+    "headline": "Mời Bạn Bè Tham Gia Rally",
+    "searchPlaceholder": "Tìm kiếm bạn bè...",
+    "invite": "Mời",
+    "invited": "Đã mời",
+    "noFriends": "Không có bạn bè nào có thể mời",
+    "cancel": "Hủy",
+    "done": "Gửi Lời Mời",
+    "inviteLink": {
+      "generateButton": "Tạo liên kết mời",
+      "generating": "Đang tạo...",
+      "noLinksYet": "Chưa có liên kết mời. Tạo một liên kết để chia sẻ!",
+      "shareTitle": "Lời mời Rally",
+      "shareMessage": "Tham gia rally của tôi! Dùng mã mời: {token}",
+      "copyToken": "Sao chép mã",
+      "tokenCopied": "Đã sao chép mã vào bộ nhớ tạm",
+      "revokeButton": "Thu hồi",
+      "revokeConfirmTitle": "Thu hồi liên kết mời",
+      "revokeConfirmMessage": "Thao tác này sẽ vô hiệu hóa mã QR này. Tiếp tục?",
+      "revokeConfirmYes": "Thu hồi",
+      "revokeConfirmNo": "Hủy",
+      "revokeSuccess": "Đã thu hồi liên kết mời",
+      "revokeError": "Không thể thu hồi liên kết mời",
+      "generateError": "Không thể tạo liên kết mời",
+      "uses": "{current}/{max} lượt dùng",
+      "usesUnlimited": "{current} lượt dùng",
+      "expiresAt": "Hết hạn {date}",
+      "expired": "Đã hết hạn",
+      "activeLinks": "Liên kết mời đang hoạt động",
+      "sectionDescription": "Chia sẻ mã QR hoặc liên kết để mời mọi người",
+      "copyLink": "Sao chép liên kết",
+      "linkCopied": "Đã sao chép liên kết mời vào bộ nhớ tạm",
+      "saveToGallery": "Thư viện",
+      "savedToGallery": "Đã lưu mã QR vào thư viện",
+      "saveError": "Không thể lưu mã QR"
+    },
+    "inviteSuccess": "Gửi lời mời thành công",
+    "inviteError": "Gửi lời mời thất bại",
+    "joinViaLink": {
+      "title": "Lời mời Rally",
+      "loading": "Đang tải thông tin lời mời...",
+      "invalidLink": "Liên kết mời không hợp lệ hoặc đã hết hạn.",
+      "errorLoading": "Không thể tải thông tin lời mời. Vui lòng thử lại.",
+      "roleLabel": "Bạn được mời với vai trò",
+      "participantsLabel": "{count} thành viên",
+      "organizedBy": "Tổ chức bởi {name}",
+      "aboutThisRally": "Về Rally Này",
+      "tripDates": "Ngày đi",
+      "daysNights": "{days} ngày, {nights} đêm",
+      "participantsJoined": "{count} thành viên đã tham gia",
+      "viewSchedule": "Xem lịch trình",
+      "joinRally": "Tham gia Rally",
+      "declineRally": "Từ chối Rally",
+      "acceptButton": "Chấp nhận lời mời",
+      "declineButton": "Từ chối",
+      "accepting": "Đang tham gia...",
+      "acceptSuccess": "Đã chấp nhận lời mời! Bạn đã được thêm vào rally.",
+      "acceptError": "Không thể chấp nhận lời mời. Vui lòng thử lại.",
+      "loginRequired": "Vui lòng đăng nhập để chấp nhận lời mời."
+    }
+  }
+}

@@ -22,5 +22,15 @@
   "privateProfile": "Private Profile",
   "followToSee": "Follow to see their posts and rallies.",
   "errorFollow": "Failed to follow: $error",
-  "errorUnfollow": "Failed to unfollow: $error"
+  "errorUnfollow": "Failed to unfollow: $error",
+  "noAchievements": "No Achievements Yet",
+  "noAchievementsSubtitle": "Join rallies to earn badges!",
+  "noOwnPosts": "No Posts Yet",
+  "noOwnPostsSubtitle": "Share your rally experiences with the community.",
+  "noRalliesFound": "No rallies found",
+  "noRalliesFoundSubtitle": "Try adjusting your filters or search terms",
+  "failedToLoadRallies": "Failed to load rallies",
+  "failedToPickImage": "Failed to pick image: $error",
+  "avatarUpdatedSuccessfully": "Avatar updated successfully",
+  "failedToUploadAvatar": "Failed to upload avatar: $error"
 }

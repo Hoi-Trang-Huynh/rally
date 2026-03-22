@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rally/services/api_client.dart';
+import 'package:rally/utils/ui_helpers.dart';
 
 /// Global error handler for the Rally application.
 ///
@@ -94,11 +95,7 @@ class ErrorHandler {
   /// Handles errors manually reported from the app.
   ///
   /// Use this to report caught errors that should be logged.
-  static void reportError(
-    Object error, {
-    StackTrace? stack,
-    String? context,
-  }) {
+  static void reportError(Object error, {StackTrace? stack, String? context}) {
     // Get stack trace if not provided
     stack ??= StackTrace.current;
 
@@ -110,19 +107,15 @@ class ErrorHandler {
   }
 
   /// Logs an error with structured information.
-  static void _logError(
-    String type,
-    Object error,
-    StackTrace? stack, {
-    String? context,
-  }) {
-    final StringBuffer buffer = StringBuffer()
-      ..writeln('═══════════════════════════════════════════════════════════')
-      ..writeln('ERROR [$type]')
-      ..writeln('═══════════════════════════════════════════════════════════')
-      ..writeln('Time: ${DateTime.now().toIso8601String()}')
-      ..writeln('Error: $error')
-      ..writeln('Type: ${error.runtimeType}');
+  static void _logError(String type, Object error, StackTrace? stack, {String? context}) {
+    final StringBuffer buffer =
+        StringBuffer()
+          ..writeln('═══════════════════════════════════════════════════════════')
+          ..writeln('ERROR [$type]')
+          ..writeln('═══════════════════════════════════════════════════════════')
+          ..writeln('Time: ${DateTime.now().toIso8601String()}')
+          ..writeln('Error: $error')
+          ..writeln('Type: ${error.runtimeType}');
 
     if (context != null) {
       buffer.writeln('Context: $context');
@@ -186,27 +179,13 @@ class ErrorHandler {
 /// Extension on [BuildContext] for showing error snackbars.
 extension ErrorSnackbar on BuildContext {
   /// Shows an error snackbar with optional retry action.
+  /// Shows an error snackbar with the given message.
   void showErrorSnackbar(
     String message, {
     VoidCallback? onRetry,
     Duration duration = const Duration(seconds: 4),
   }) {
-    final ThemeData theme = Theme.of(this);
-
-    ScaffoldMessenger.of(this).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: theme.colorScheme.error,
-        duration: duration,
-        action: onRetry != null
-            ? SnackBarAction(
-                label: 'Retry',
-                textColor: theme.colorScheme.onError,
-                onPressed: onRetry,
-              )
-            : null,
-      ),
-    );
+    showErrorSnackBar(this, message, onRetry: onRetry, duration: duration);
   }
 
   /// Shows a user-friendly error message based on the error type.

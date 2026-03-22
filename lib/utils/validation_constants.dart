@@ -80,6 +80,58 @@ class PasswordValidation {
       hasDigit(password);
 }
 
+/// Image validation constants.
+class ImageValidation {
+  /// Maximum width for avatar/profile images.
+  static const double avatarMaxWidth = 1024;
+
+  /// Maximum height for avatar/profile images.
+  static const double avatarMaxHeight = 1024;
+
+  /// Maximum width for cover/banner images.
+  static const double coverMaxWidth = 1920;
+
+  /// Maximum height for cover/banner images.
+  static const double coverMaxHeight = 1080;
+
+  /// Default image quality for compression (0-100).
+  static const int imageQuality = 85;
+
+  /// Maximum number of feedback attachment images.
+  static const int maxFeedbackImages = 3;
+}
+
+/// Rally validation constants.
+class RallyValidation {
+  /// Minimum length for rally name.
+  static const int nameMinLength = 3;
+
+  /// Maximum length for rally name.
+  static const int nameMaxLength = 50;
+
+  /// Maximum length for rally description.
+  static const int descriptionMaxLength = 500;
+}
+
 /// Email validation regex pattern.
 /// This is a simplified pattern that covers most common email formats.
 final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+
+/// Pagination default constants for API calls.
+///
+/// Centralizes page size values used across repositories and providers
+/// to ensure consistency and easy adjustment.
+class PaginationDefaults {
+  /// Default page size for most paginated API calls
+  /// (search, followers, following, friends, participants).
+  static const int defaultPageSize = 20;
+
+  /// Page size for the participants tab (smaller for initial load).
+  static const int participantsPageSize = 5;
+
+  /// Page size when loading all friends for invite selection (large batch).
+  static const int inviteFriendsPageSize = 100;
+
+  /// Page size for the invitable-friends list in the rally invite sheet.
+  static const int invitableFriendsPageSize = 20;
+}

@@ -3,10 +3,10 @@ import 'package:rally/models/app_user.dart';
 import 'package:rally/models/responses/user_public_profile_response.dart';
 import 'package:rally/utils/responsive.dart';
 
-import '../../../i18n/generated/translations.g.dart';
-import 'profile_avatar.dart';
-import 'profile_bio.dart';
-import 'profile_stats_row.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/screens/profile/widgets/profile_avatar.dart';
+import 'package:rally/screens/profile/widgets/profile_bio.dart';
+import 'package:rally/screens/profile/widgets/profile_stats_row.dart';
 
 /// Data class to hold profile data from different sources.
 class ProfileData {

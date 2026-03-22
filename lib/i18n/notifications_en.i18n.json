@@ -3,5 +3,15 @@
   "markAllAsRead": "Mark all as read",
   "newSection": "New",
   "earlier": "Earlier",
-  "noNotifications": "No notifications"
+  "noNotifications": "No notifications",
+  "invitations": {
+    "sectionTitle": "Invitations",
+    "invitedBy": "Invited by $name",
+    "accept": "Accept",
+    "decline": "Decline",
+    "noInvitations": "No pending invitations",
+    "acceptSuccess": "You have joined the rally!",
+    "acceptError": "Failed to join rally",
+    "declineSuccess": "Invitation declined"
+  }
 }

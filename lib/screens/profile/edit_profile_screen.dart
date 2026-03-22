@@ -4,20 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:rally/models/cloudinary_signature.dart';
 import 'package:rally/models/responses/availability_response.dart';
 import 'package:rally/screens/auth/widgets/auth_text_field.dart';
-import 'package:rally/services/cloudinary_repository.dart';
+import 'package:rally/utils/image_upload_helper.dart';
 import 'package:rally/widgets/common/app_bottom_sheet.dart';
 
-import '../../i18n/generated/translations.g.dart';
-import '../../models/app_user.dart';
-import '../../providers/api_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../utils/responsive.dart';
-import '../../utils/ui_helpers.dart';
-import '../../utils/validators.dart';
-import 'widgets/profile_avatar.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
+import 'package:rally/models/app_user.dart';
+import 'package:rally/providers/api_provider.dart';
+import 'package:rally/providers/auth_provider.dart';
+import 'package:rally/utils/responsive.dart';
+import 'package:rally/utils/ui_helpers.dart';
+import 'package:rally/utils/validation_constants.dart';
+import 'package:rally/utils/validators.dart';
+import 'package:rally/screens/profile/widgets/profile_avatar.dart';
 
 /// Screen for editing user profile.
 ///
@@ -121,12 +121,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         child: Row(
           children: <Widget>[
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(Responsive.w(context, 10)),
               decoration: BoxDecoration(
                 color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: colorScheme.primary, size: 24),
+              child: Icon(icon, color: colorScheme.primary, size: Responsive.w(context, 24)),
             ),
             SizedBox(width: Responsive.w(context, 16)),
             Text(
@@ -143,16 +143,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     try {
       final XFile? image = await _picker.pickImage(
         source: source,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
+        maxWidth: ImageValidation.avatarMaxWidth,
+        maxHeight: ImageValidation.avatarMaxHeight,
+        imageQuality: ImageValidation.imageQuality,
       );
 
       if (image == null) return;
 
       await _uploadAvatar(File(image.path));
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, 'Failed to pick image: $e');
+      if (mounted) {
+        final Translations t = Translations.of(context);
+        showErrorSnackBar(context, t.profile.failedToPickImage(error: e));
+      }
     }
   }
 
@@ -166,34 +169,22 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       final AppUser? user = ref.read(appUserProvider).valueOrNull;
       if (user?.id == null) throw Exception('User not found');
 
-      // 2. Get Upload Signature
-      final CloudinaryRepository repo = ref.read(cloudinaryRepositoryProvider);
-      final String folderName = 'rally_avatars';
-      final CloudinarySignature signature = await repo.getUploadSignature(
-        userId: user!.id,
-        folder: folderName,
-      );
+      // 2. Upload and verify avatar using helper
+      final ImageUploadHelper helper = ref.read(imageUploadHelperProvider);
+      await helper.uploadAndVerifyAvatar(file: imageFile, userId: user!.id!);
 
-      // 3. Upload directly to Cloudinary
-      final Map<String, dynamic> result = await repo.uploadImage(
-        file: imageFile,
-        signature: signature,
-        folder: folderName,
-      );
-
-      // 4.
-      await repo.verifyAvatar(
-        publicId: result['public_id'] as String,
-        avatarUrl: result['secure_url'] as String,
-      );
-      // 5. Refresh user provider to confirm new image
-      ref.invalidate(appUserProvider);
+      // 3. Refresh profile provider to confirm new image (not auth provider)
+      ref.invalidate(myProfileProvider);
 
       if (mounted) {
-        showSuccessSnackBar(context, 'Avatar updated successfully');
+        final Translations t = Translations.of(context);
+        showSuccessSnackBar(context, t.profile.avatarUpdatedSuccessfully);
       }
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, 'Failed to upload avatar: $e');
+      if (mounted) {
+        final Translations t = Translations.of(context);
+        showErrorSnackBar(context, t.profile.failedToUploadAvatar(error: e));
+      }
     } finally {
       if (mounted) setState(() => _isUploadingAvatar = false);
     }
@@ -253,8 +244,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             lastName: _lastNameController.text.trim(),
           );
 
-      // Refresh user state
-      ref.invalidate(appUserProvider);
+      // Refresh profile state (not auth provider)
+      ref.invalidate(myProfileProvider);
 
       if (mounted) {
         showSuccessSnackBar(context, t.settings.saveChanges);
@@ -337,7 +328,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           right: 4,
                           bottom: 4,
                           child: Container(
-                            padding: const EdgeInsets.all(10),
+                            padding: EdgeInsets.all(Responsive.w(context, 10)),
                             decoration: BoxDecoration(
                               color: colorScheme.primary,
                               shape: BoxShape.circle,
@@ -352,7 +343,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             ),
                             child: Icon(
                               Icons.camera_alt_rounded,
-                              size: 20,
+                              size: Responsive.w(context, 20),
                               color: colorScheme.onPrimary,
                             ),
                           ),
@@ -424,7 +415,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ),
             ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (Object error, StackTrace stack) => Center(child: Text('Error: $error')),
+        error:
+            (Object error, StackTrace stack) =>
+                Center(child: Text(t.common.errorGenericDisplay(error: error))),
       ),
     );
   }

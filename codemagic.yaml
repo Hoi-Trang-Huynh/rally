@@ -42,6 +42,12 @@ workflows:
           echo "API_BACKEND_URL=$API_BACKEND_URL" > .env
           echo ".env file created with API_BACKEND_URL"
 
+      - name: Set up local.properties
+        script: |
+          set -e
+          echo "Setting up local.properties..."
+          echo "MAPS_API_KEY=$MAPS_API_KEY" >> android/local.properties
+
       - name: Generate i18n files
         script: |
           set -e

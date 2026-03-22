@@ -3,9 +3,10 @@ import 'package:rally/utils/responsive.dart';
 
 /// A reusable bottom sheet widget with consistent styling across the app.
 ///
-/// Provides two variants:
+/// Provides three variants:
 /// - [AppBottomSheet.draggable] for scrollable content (like notifications)
 /// - [AppBottomSheet.fixed] for fixed-height content (like bio edit)
+/// - [AppBottomSheet.persistent] for embedding in a [Stack] (like map overlay)
 ///
 /// Common features:
 /// - Drag handle at top
@@ -16,33 +17,46 @@ import 'package:rally/utils/responsive.dart';
 class AppBottomSheet extends StatelessWidget {
   const AppBottomSheet._({
     required this.title,
+    this.leading,
     this.action,
     this.body,
     this.bodyBuilder,
     this.showDivider = true,
     this.handleKeyboard = true,
     this.isDraggable = false,
+    this.isPersistent = false,
     this.initialChildSize = 0.7,
     this.minChildSize = 0.4,
     this.maxChildSize = 0.95,
+    this.snap = false,
+    this.snapSizes,
   });
 
   /// Creates a draggable bottom sheet for scrollable content.
   ///
   /// Use this for content that needs to scroll, like notifications or lists.
-  /// The [bodyBuilder] receives a [ScrollController] that must be attached
-  /// to the scrollable widget for proper drag behavior.
+  /// The [bodyBuilder] returns a list of **sliver** widgets that are placed
+  /// inside a [CustomScrollView]. The header is pinned so dragging anywhere
+  /// on the sheet (header or body) resizes it.
+  ///
+  /// When [snap] is true the sheet snaps to [minChildSize], each value in
+  /// [snapSizes], and [maxChildSize]. If [snapSizes] is omitted it defaults
+  /// to `[initialChildSize]`, giving three snap positions.
   factory AppBottomSheet.draggable({
     required String title,
+    Widget? leading,
     Widget? action,
-    required Widget Function(ScrollController scrollController) bodyBuilder,
+    required List<Widget> Function(ScrollController scrollController) bodyBuilder,
     bool showDivider = true,
     double initialChildSize = 0.7,
     double minChildSize = 0.4,
     double maxChildSize = 0.95,
+    bool snap = true,
+    List<double>? snapSizes,
   }) {
     return AppBottomSheet._(
       title: title,
+      leading: leading,
       action: action,
       bodyBuilder: bodyBuilder,
       showDivider: showDivider,
@@ -50,6 +64,8 @@ class AppBottomSheet extends StatelessWidget {
       initialChildSize: initialChildSize,
       minChildSize: minChildSize,
       maxChildSize: maxChildSize,
+      snap: snap,
+      snapSizes: snapSizes ?? <double>[initialChildSize],
     );
   }
 
@@ -74,8 +90,44 @@ class AppBottomSheet extends StatelessWidget {
     );
   }
 
+  /// Creates a persistent bottom sheet for embedding in a [Stack].
+  ///
+  /// Unlike [AppBottomSheet.draggable], this is NOT shown via
+  /// [showModalBottomSheet]. Instead, place it directly in a [Stack]
+  /// on top of your main content (e.g., a map).
+  ///
+  /// The sheet can be dragged between [minChildSize] and [maxChildSize],
+  /// snapping to [snapSizes] if [snap] is true.
+  factory AppBottomSheet.persistent({
+    required String title,
+    Widget? action,
+    required List<Widget> Function(ScrollController scrollController) bodyBuilder,
+    bool showDivider = true,
+    double initialChildSize = 0.35,
+    double minChildSize = 0.15,
+    double maxChildSize = 1.0,
+    List<double>? snapSizes,
+    bool snap = true,
+  }) {
+    return AppBottomSheet._(
+      title: title,
+      action: action,
+      bodyBuilder: bodyBuilder,
+      showDivider: showDivider,
+      isPersistent: true,
+      initialChildSize: initialChildSize,
+      minChildSize: minChildSize,
+      maxChildSize: maxChildSize,
+      snapSizes: snapSizes ?? const <double>[0.15, 0.35],
+      snap: snap,
+    );
+  }
+
   /// The title displayed in the header.
   final String title;
+
+  /// Optional widget displayed on the left side of the header, before the title.
+  final Widget? leading;
 
   /// Optional action widget displayed on the right side of the header.
   final Widget? action;
@@ -83,8 +135,10 @@ class AppBottomSheet extends StatelessWidget {
   /// The body content for fixed sheets.
   final Widget? body;
 
-  /// Builder for the body content in draggable sheets.
-  final Widget Function(ScrollController scrollController)? bodyBuilder;
+  /// Builder for sliver body content in draggable and persistent sheets.
+  ///
+  /// Returns a list of sliver widgets placed inside a [CustomScrollView].
+  final List<Widget> Function(ScrollController scrollController)? bodyBuilder;
 
   /// Whether to show a divider after the header.
   final bool showDivider;
@@ -95,38 +149,113 @@ class AppBottomSheet extends StatelessWidget {
   /// Whether this is a draggable sheet.
   final bool isDraggable;
 
-  /// Initial size for draggable sheets (0.0 to 1.0).
+  /// Whether this is a persistent sheet (embedded in a [Stack]).
+  final bool isPersistent;
+
+  /// Initial size for draggable/persistent sheets (0.0 to 1.0).
   final double initialChildSize;
 
-  /// Minimum size for draggable sheets (0.0 to 1.0).
+  /// Minimum size for draggable/persistent sheets (0.0 to 1.0).
   final double minChildSize;
 
-  /// Maximum size for draggable sheets (0.0 to 1.0).
+  /// Maximum size for draggable/persistent sheets (0.0 to 1.0).
   final double maxChildSize;
+
+  /// Whether the persistent sheet should snap to [snapSizes].
+  final bool snap;
+
+  /// Snap positions for persistent sheets (0.0 to 1.0).
+  final List<double>? snapSizes;
 
   @override
   Widget build(BuildContext context) {
-    if (isDraggable) {
+    if (isPersistent) {
+      return _buildPersistentSheet(context);
+    } else if (isDraggable) {
       return _buildDraggableSheet(context);
     } else {
       return _buildFixedSheet(context);
     }
   }
 
-  Widget _buildDraggableSheet(BuildContext context) {
+  Widget _buildPersistentSheet(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
     return DraggableScrollableSheet(
       initialChildSize: initialChildSize,
       minChildSize: minChildSize,
       maxChildSize: maxChildSize,
-      expand: false,
+      snap: snap,
+      snapSizes: snapSizes,
       builder: (BuildContext context, ScrollController scrollController) {
-        return _SheetContainer(
-          title: title,
-          action: action,
-          showDivider: showDivider,
-          child: Expanded(child: bodyBuilder!(scrollController)),
+        return Material(
+          elevation: 8,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          color: colorScheme.surface,
+          clipBehavior: Clip.antiAlias,
+          child: CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _SheetHeaderDelegate(
+                  title: title,
+                  leading: leading,
+                  action: action,
+                  showDivider: showDivider,
+                  colorScheme: colorScheme,
+                  textTheme: textTheme,
+                  context: context,
+                ),
+              ),
+              ...bodyBuilder!(scrollController),
+            ],
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildDraggableSheet(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final EdgeInsets keyboardInsets = MediaQuery.of(context).viewInsets;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboardInsets.bottom),
+      child: DraggableScrollableSheet(
+        initialChildSize: initialChildSize,
+        minChildSize: minChildSize,
+        maxChildSize: maxChildSize,
+        expand: false,
+        snap: snap,
+        snapSizes: snapSizes,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return Material(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            color: colorScheme.surface,
+            clipBehavior: Clip.antiAlias,
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: <Widget>[
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _SheetHeaderDelegate(
+                    title: title,
+                    action: action,
+                    showDivider: showDivider,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    context: context,
+                  ),
+                ),
+                ...bodyBuilder!(scrollController),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -142,6 +271,112 @@ class AppBottomSheet extends StatelessWidget {
         showDivider: showDivider,
         isFixed: true,
         child: body!,
+      ),
+    );
+  }
+}
+
+/// Delegate for the pinned header in persistent bottom sheets.
+class _SheetHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _SheetHeaderDelegate({
+    required this.title,
+    this.leading,
+    this.action,
+    required this.showDivider,
+    required this.colorScheme,
+    required this.textTheme,
+    required this.context,
+  });
+
+  final String title;
+  final Widget? leading;
+  final Widget? action;
+  final bool showDivider;
+  final ColorScheme colorScheme;
+  final TextTheme textTheme;
+  final BuildContext context;
+
+  double get _headerHeight {
+    // Measure the actual title line height using TextPainter for accuracy.
+    final TextStyle titleStyle = (textTheme.headlineSmall ?? const TextStyle(fontSize: 24))
+        .copyWith(fontWeight: FontWeight.bold);
+    final TextPainter painter = TextPainter(
+      text: TextSpan(text: title, style: titleStyle),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final double titleLineHeight = painter.height;
+    painter.dispose();
+
+    // drag handle spacing + handle + title padding + title + bottom padding + divider
+    return Responsive.h(context, 12) +
+        Responsive.h(context, 4) +
+        Responsive.h(context, 16) +
+        titleLineHeight +
+        Responsive.h(context, 12) +
+        (showDivider ? 1 : 0);
+  }
+
+  @override
+  double get minExtent => _headerHeight;
+
+  @override
+  double get maxExtent => _headerHeight;
+
+  @override
+  bool shouldRebuild(covariant _SheetHeaderDelegate oldDelegate) {
+    return title != oldDelegate.title ||
+        leading != oldDelegate.leading ||
+        action != oldDelegate.action ||
+        showDivider != oldDelegate.showDivider;
+  }
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: colorScheme.surface,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          SizedBox(height: Responsive.h(context, 12)),
+          Container(
+            width: Responsive.w(context, 40),
+            height: Responsive.h(context, 4),
+            decoration: BoxDecoration(
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              Responsive.w(context, 24),
+              Responsive.h(context, 16),
+              Responsive.w(context, 24),
+              Responsive.h(context, 12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                if (leading != null) ...<Widget>[
+                  leading!,
+                  SizedBox(width: Responsive.w(context, 12)),
+                ],
+                Expanded(
+                  child: Text(
+                    title,
+                    style: textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                if (action != null) action!,
+              ],
+            ),
+          ),
+          if (showDivider) const Divider(height: 1),
+        ],
       ),
     );
   }
@@ -168,11 +403,9 @@ class _SheetContainer extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+    return Material(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      color: colorScheme.surface,
       child: Column(
         mainAxisSize: isFixed ? MainAxisSize.min : MainAxisSize.max,
         children: <Widget>[
@@ -192,7 +425,7 @@ class _SheetContainer extends StatelessWidget {
               Responsive.w(context, 24),
               Responsive.h(context, 16),
               Responsive.w(context, 24),
-              0,
+              Responsive.h(context, 12),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -206,22 +439,10 @@ class _SheetContainer extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (action != null) action!,
               ],
             ),
           ),
-          if (action != null)
-            Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  Responsive.w(context, 24),
-                  0,
-                  Responsive.w(context, 24),
-                  0,
-                ),
-                child: action!,
-              ),
-            ),
           if (showDivider) const Divider(height: 1),
           // Body - wrapped in Flexible to prevent overflow
           if (isFixed) Flexible(child: SingleChildScrollView(child: child)) else child,

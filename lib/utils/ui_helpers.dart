@@ -5,13 +5,20 @@ import 'package:rally/utils/responsive.dart';
 /// Shared UI helper functions.
 
 /// Shows an error snackbar with the given message.
-void showErrorSnackBar(BuildContext context, String message) {
+void showErrorSnackBar(
+  BuildContext context,
+  String message, {
+  VoidCallback? onRetry,
+  Duration duration = const Duration(seconds: 4),
+}) {
   _showModernSnackBar(
     context,
     message,
     backgroundColor: Theme.of(context).colorScheme.errorContainer,
     textColor: Theme.of(context).colorScheme.onErrorContainer,
     icon: Icons.error_outline,
+    onRetry: onRetry,
+    duration: duration,
   );
 }
 
@@ -46,6 +53,8 @@ void _showModernSnackBar(
   required Color backgroundColor,
   required Color textColor,
   required IconData icon,
+  VoidCallback? onRetry,
+  Duration duration = const Duration(seconds: 4),
 }) {
   if (!context.mounted) return;
 
@@ -58,6 +67,7 @@ void _showModernSnackBar(
         dismissDirection: DismissDirection.horizontal,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         backgroundColor: backgroundColor,
+        duration: duration,
         elevation: 4,
         content: Row(
           children: <Widget>[
@@ -73,6 +83,14 @@ void _showModernSnackBar(
             ),
           ],
         ),
+        action:
+            onRetry != null
+                ? SnackBarAction(
+                  label: 'Retry', // Could be localized, but 'Retry' is standard for now
+                  textColor: textColor,
+                  onPressed: onRetry,
+                )
+                : null,
       ),
     );
 }

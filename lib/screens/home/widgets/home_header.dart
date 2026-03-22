@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/models/app_user.dart';
 import 'package:rally/providers/auth_provider.dart';
+import 'package:rally/utils/date_time_utils.dart';
 import 'package:rally/utils/responsive.dart';
 
 /// The header widget for the home screen, displaying a greeting and user info.
@@ -9,22 +11,12 @@ class HomeHeader extends ConsumerWidget {
   /// Creates a [HomeHeader].
   const HomeHeader({super.key});
 
-  String _getGreeting(BuildContext context) {
-    final int hour = DateTime.now().hour;
-    if (hour < 12) {
-      return 'Good Morning';
-    } else if (hour < 17) {
-      return 'Good Afternoon';
-    } else {
-      return 'Good Evening';
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<AppUser?> userAsync = ref.watch(appUserProvider);
     final TextTheme textTheme = Theme.of(context).textTheme;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Translations t = Translations.of(context);
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -35,7 +27,7 @@ class HomeHeader extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            _getGreeting(context),
+            DateTimeUtils.getGreeting(context),
             style: textTheme.bodyLarge?.copyWith(
               color: colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
@@ -44,7 +36,8 @@ class HomeHeader extends ConsumerWidget {
           SizedBox(height: Responsive.h(context, 4)),
           userAsync.when(
             data: (AppUser? user) {
-              final String name = user?.displayName ?? user?.username ?? 'Traveler';
+              final String name =
+                  user?.displayName ?? user?.username ?? t.rally.common.fallback.traveler;
               return Text(
                 name,
                 style: textTheme.headlineMedium?.copyWith(
@@ -66,7 +59,7 @@ class HomeHeader extends ConsumerWidget {
                 ),
             error:
                 (_, __) => Text(
-                  'Traveler',
+                  t.rally.common.fallback.traveler,
                   style: textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onSurface,

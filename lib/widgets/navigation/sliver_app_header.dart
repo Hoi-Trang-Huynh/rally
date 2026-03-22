@@ -40,7 +40,8 @@ class SliverAppHeader extends ConsumerWidget {
     final EdgeInsets safePadding = MediaQuery.paddingOf(context);
 
     // Calculate header height: safe area + content height
-    final double contentHeight = Responsive.h(context, 35);
+    // Using 50 instead of 35 to ensure notification badge isn't clipped
+    final double contentHeight = Responsive.h(context, 20);
     final double headerHeight = safePadding.top + contentHeight;
 
     // Determine if we're in dark mode

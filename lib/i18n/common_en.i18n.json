@@ -23,5 +23,6 @@
   "errorLoadingProfile": "Failed to load profile",
   "goBack": "Go Back",
   "retry": "Retry",
-  "tapAgainToExit": "Tap back again to exit"
+  "tapAgainToExit": "Tap back again to exit",
+  "errorGenericDisplay": "Error: $error"
 }

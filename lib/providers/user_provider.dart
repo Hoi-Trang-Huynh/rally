@@ -1,16 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/models/responses/follow_status_response.dart';
-import 'package:rally/models/responses/profile_response.dart';
+import 'package:rally/models/responses/pending_invitation_response.dart';
 import 'package:rally/models/responses/user_public_profile_response.dart';
+import 'package:rally/models/responses/user_rallies_response.dart';
 import 'package:rally/models/responses/user_search_response.dart';
+import 'package:rally/models/responses/user_search_result.dart';
 import 'package:rally/providers/api_provider.dart';
 import 'package:rally/services/user_repository.dart';
+import 'package:rally/utils/validation_constants.dart';
 
-/// Provider for user repository related operations.
-final AutoDisposeProvider<UserRepository> userRepositoryProvider =
-    Provider.autoDispose<UserRepository>((Ref ref) {
-      return UserRepository(ref.watch(apiClientProvider));
-    });
+// Export the repository provider from api_provider to maintain backward compatibility
+export 'package:rally/providers/api_provider.dart' show userRepositoryProvider;
 
 /// Provider to fetch a specific user's public profile by ID.
 final AutoDisposeFutureProviderFamily<UserPublicProfileResponse, String> userProfileProvider =
@@ -28,10 +28,10 @@ final AutoDisposeFutureProviderFamily<UserSearchResponse, String> userSearchProv
       if (query.isEmpty) {
         return const UserSearchResponse(
           page: 1,
-          pageSize: 20,
+          pageSize: PaginationDefaults.defaultPageSize,
           total: 0,
           totalPages: 0,
-          users: <ProfileResponse>[],
+          users: <UserSearchResult>[],
         );
       }
       final UserRepository repository = ref.watch(userRepositoryProvider);
@@ -46,4 +46,55 @@ final AutoDisposeFutureProviderFamily<FollowStatusResponse, String> followStatus
     FutureProvider.autoDispose.family<FollowStatusResponse, String>((Ref ref, String userId) async {
       final UserRepository repository = ref.watch(userRepositoryProvider);
       return repository.getFollowStatus(userId);
+    });
+
+/// Parameters for fetching user rallies.
+class UserRalliesParams {
+  final String userId;
+  final String? name;
+  final String? status;
+  final String sort;
+
+  const UserRalliesParams({required this.userId, this.name, this.status, this.sort = 'asc'});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserRalliesParams &&
+          runtimeType == other.runtimeType &&
+          userId == other.userId &&
+          name == other.name &&
+          status == other.status &&
+          sort == other.sort;
+
+  @override
+  int get hashCode => userId.hashCode ^ name.hashCode ^ status.hashCode ^ sort.hashCode;
+}
+
+/// Provider to fetch a user's rallies.
+///
+/// Supports filtering by name, status, and sorting by start date.
+/// Auto-disposes when no longer needed.
+final AutoDisposeFutureProviderFamily<UserRalliesResponse, UserRalliesParams> userRalliesProvider =
+    FutureProvider.autoDispose.family<UserRalliesResponse, UserRalliesParams>((
+      Ref ref,
+      UserRalliesParams params,
+    ) async {
+      final UserRepository repository = ref.watch(userRepositoryProvider);
+      return repository.getUserRallies(
+        userId: params.userId,
+        name: params.name,
+        status: params.status,
+        sort: params.sort,
+      );
+    });
+
+/// Provider for pending rally invitations for the current user.
+///
+/// TODO: Temporary until realtime notifications are implemented.
+/// Auto-disposes when no longer watched.
+final AutoDisposeFutureProvider<PendingInvitationsResponse> pendingInvitationsProvider =
+    FutureProvider.autoDispose<PendingInvitationsResponse>((Ref ref) async {
+      final UserRepository repository = ref.watch(userRepositoryProvider);
+      return repository.getPendingInvitations();
     });

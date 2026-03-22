@@ -1,6 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rally/models/responses/feedback_response.dart';
-import 'package:rally/providers/api_provider.dart';
 import 'package:rally/services/api_client.dart';
 
 /// Repository for feedback-related API calls.
@@ -31,19 +29,11 @@ class FeedbackRepository {
       'username': username,
       'comment': comment,
       'categories': categories,
-      if (avatarUrl != null) 'avatar_url': avatarUrl,
-      if (attachmentUrls != null) 'attachment_urls': attachmentUrls,
+      if (avatarUrl != null) 'avatarUrl': avatarUrl,
+      if (attachmentUrls != null) 'attachmentUrls': attachmentUrls,
     };
 
     final dynamic response = await _apiClient.post('/api/v1/feedback', body: body);
     return FeedbackResponse.fromJson(response as Map<String, dynamic>);
   }
 }
-
-/// Provider for [FeedbackRepository].
-final Provider<FeedbackRepository> feedbackRepositoryProvider = Provider<FeedbackRepository>((
-  Ref ref,
-) {
-  final ApiClient apiClient = ref.watch(apiClientProvider);
-  return FeedbackRepository(apiClient: apiClient);
-});
