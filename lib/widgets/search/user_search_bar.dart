@@ -105,7 +105,10 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
           child: CompositedTransformFollower(
             link: _layerLink,
             showWhenUnlinked: false,
-            offset: Offset(0, Responsive.h(context, 50)), // Height of search bar + padding
+            offset: Offset(
+              0,
+              Responsive.h(context, 50),
+            ), // Height of search bar + padding
             child: TapRegion(
               groupId: 'UserSearchDropdown',
               child: Material(
@@ -113,9 +116,15 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                 borderRadius: BorderRadius.circular(Responsive.w(context, 16)),
                 color: Theme.of(context).colorScheme.surfaceContainerHigh,
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: Responsive.h(context, 300)),
+                  constraints: BoxConstraints(
+                    maxHeight: Responsive.h(context, 300),
+                  ),
                   child: Consumer(
-                    builder: (BuildContext context, WidgetRef ref, Widget? child) {
+                    builder: (
+                      BuildContext context,
+                      WidgetRef ref,
+                      Widget? child,
+                    ) {
                       final Translations t = Translations.of(context);
 
                       if (_lastQuery.isEmpty) {
@@ -123,22 +132,28 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                           padding: EdgeInsets.all(Responsive.w(context, 16)),
                           child: Text(
                             t.common.search.typeToSearch,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         );
                       }
 
-                      final AsyncValue<UserSearchResponse> searchAsync = ref.watch(
-                        userSearchProvider(_lastQuery),
-                      );
+                      final AsyncValue<UserSearchResponse> searchAsync = ref
+                          .watch(userSearchProvider(_lastQuery));
 
                       return searchAsync.when(
                         data: (UserSearchResponse response) {
                           if (response.users.isEmpty) {
                             return Padding(
-                              padding: EdgeInsets.all(Responsive.w(context, 16)),
+                              padding: EdgeInsets.all(
+                                Responsive.w(context, 16),
+                              ),
                               child: Text(
                                 t.common.search.noUsersFound,
                                 style: Theme.of(context).textTheme.bodyMedium,
@@ -147,7 +162,9 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                           }
 
                           return ListView.separated(
-                            padding: EdgeInsets.symmetric(vertical: Responsive.h(context, 8)),
+                            padding: EdgeInsets.symmetric(
+                              vertical: Responsive.h(context, 8),
+                            ),
                             shrinkWrap: true,
                             itemCount: response.users.length,
                             separatorBuilder:
@@ -158,17 +175,24 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                                   ).colorScheme.outline.withValues(alpha: 0.1),
                                 ),
                             itemBuilder: (BuildContext context, int index) {
-                              final UserSearchResult user = response.users[index];
+                              final UserSearchResult user =
+                                  response.users[index];
                               return ListTile(
                                 leading: CircleAvatar(
                                   radius: Responsive.w(context, 16),
                                   backgroundImage:
-                                      user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
+                                      user.avatarUrl != null
+                                          ? NetworkImage(user.avatarUrl!)
+                                          : null,
                                   child:
                                       user.avatarUrl == null
                                           ? Text(
-                                            user.username.characters.first.toUpperCase(),
-                                            style: Theme.of(context).textTheme.labelMedium,
+                                            user.username.characters.first
+                                                .toUpperCase(),
+                                            style:
+                                                Theme.of(
+                                                  context,
+                                                ).textTheme.labelMedium,
                                           )
                                           : null,
                                 ),
@@ -178,9 +202,11 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 subtitle:
-                                    (user.firstName != null || user.lastName != null)
+                                    (user.firstName != null ||
+                                            user.lastName != null)
                                         ? Text(
-                                          '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim(),
+                                          '${user.firstName ?? ''} ${user.lastName ?? ''}'
+                                              .trim(),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         )
@@ -192,14 +218,17 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                                   final AppUser? currentUser =
                                       ref.read(appUserProvider).valueOrNull;
                                   final bool isMe =
-                                      currentUser?.id != null && currentUser!.id == user.id;
+                                      currentUser?.id != null &&
+                                      currentUser!.id == user.id;
 
                                   if (isMe) {
                                     // Navigate to own profile tab
                                     context.go(AppRoutes.profile);
                                   } else {
                                     // Push to user profile (maintains back stack)
-                                    context.push(AppRoutes.userProfile(user.id));
+                                    context.push(
+                                      AppRoutes.userProfile(user.id),
+                                    );
                                   }
                                 },
                               );
@@ -215,10 +244,14 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                             ),
                         error:
                             (Object error, StackTrace stack) => Padding(
-                              padding: EdgeInsets.all(Responsive.w(context, 16)),
+                              padding: EdgeInsets.all(
+                                Responsive.w(context, 16),
+                              ),
                               child: Text(
                                 'Error: $error',
-                                style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
                               ),
                             ),
                       );
@@ -246,7 +279,9 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
           decoration: BoxDecoration(
             color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(Responsive.w(context, 24)),
-            border: Border.all(color: colorScheme.outline.withValues(alpha: 0.1)),
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.1),
+            ),
           ),
           child: TextField(
             controller: _controller,
@@ -273,13 +308,13 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                       )
                       : widget.expandable
                       ? IconButton(
-                          icon: Icon(
-                            Icons.close_rounded,
-                            size: Responsive.w(context, 18),
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                          onPressed: _collapse,
-                        )
+                        icon: Icon(
+                          Icons.close_rounded,
+                          size: Responsive.w(context, 18),
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        onPressed: _collapse,
+                      )
                       : null,
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(
@@ -291,7 +326,10 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                 fontSize: Responsive.w(context, 14),
               ),
             ),
-            style: TextStyle(color: colorScheme.onSurface, fontSize: Responsive.w(context, 14)),
+            style: TextStyle(
+              color: colorScheme.onSurface,
+              fontSize: Responsive.w(context, 14),
+            ),
           ),
         ),
       ),
@@ -312,7 +350,8 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
       sizeCurve: Curves.easeInOut,
       firstCurve: Curves.easeInOut,
       secondCurve: Curves.easeInOut,
-      crossFadeState: _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+      crossFadeState:
+          _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
       firstChild: Align(
         alignment: Alignment.centerRight,
         child: GestureDetector(
@@ -323,7 +362,9 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
             decoration: BoxDecoration(
               color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               shape: BoxShape.circle,
-              border: Border.all(color: colorScheme.outline.withValues(alpha: 0.1)),
+              border: Border.all(
+                color: colorScheme.outline.withValues(alpha: 0.1),
+              ),
             ),
             child: Icon(
               Icons.search_rounded,
