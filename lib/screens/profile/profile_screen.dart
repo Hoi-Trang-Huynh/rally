@@ -22,6 +22,7 @@ import 'package:rally/screens/profile/widgets/profile_avatar.dart';
 import 'package:rally/screens/profile/widgets/profile_content.dart';
 import 'package:rally/screens/profile/widgets/profile_rallies_tab.dart';
 import 'package:rally/screens/profile/widgets/profile_tab_bar.dart';
+import 'package:rally/widgets/search/user_search_bar.dart';
 
 /// The main profile screen displaying user information.
 ///
@@ -104,7 +105,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     setState(() => _isSavingBio = true);
 
     try {
-      await ref.read(userRepositoryProvider).updateUserProfile(userId: user!.id!, bioText: newBio);
+      await ref
+          .read(userRepositoryProvider)
+          .updateUserProfile(userId: user!.id!, bioText: newBio);
       if (mounted && context.mounted) {
         setState(() {
           _bioText = newBio.isEmpty ? null : newBio;
@@ -141,7 +144,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               // Avatar
-              ProfileAvatar(avatarUrl: user.avatarUrl, baseSize: 80, showOnlineIndicator: false),
+              ProfileAvatar(
+                avatarUrl: user.avatarUrl,
+                baseSize: 80,
+                showOnlineIndicator: false,
+              ),
               SizedBox(height: Responsive.h(context, 16)),
               // Username handle
               Text(
@@ -158,15 +165,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 maxLines: 3,
                 maxLength: BioValidation.maxLength,
                 autofocus: true,
-                style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
+                style: textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
                 decoration: InputDecoration(
                   labelText: t.profile.bioPlaceholder,
                   alignLabelWithHint: true,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(Responsive.w(context, 12)),
+                    borderRadius: BorderRadius.circular(
+                      Responsive.w(context, 12),
+                    ),
                   ),
                   filled: true,
-                  fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  fillColor: colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  ),
                 ),
               ),
               SizedBox(height: Responsive.h(context, 24)),
@@ -179,14 +192,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         backgroundColor: colorScheme.surfaceContainerHighest,
                         foregroundColor: colorScheme.onSurfaceVariant,
                       ),
-                      onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+                      onPressed:
+                          () =>
+                              Navigator.of(context, rootNavigator: true).pop(),
                       child: Text(t.common.cancel),
                     ),
                   ),
                   SizedBox(width: Responsive.w(context, 16)),
                   Expanded(
                     child: FilledButton(
-                      onPressed: _isSavingBio ? null : () => _saveBio(_bioController.text.trim()),
+                      onPressed:
+                          _isSavingBio
+                              ? null
+                              : () => _saveBio(_bioController.text.trim()),
                       child:
                           _isSavingBio
                               ? SizedBox(
@@ -238,7 +256,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: AnimationLimiter(
             child: CustomScrollView(
               controller: PrimaryScrollController.of(context),
-              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
               slivers: <Widget>[
                 // Profile Content (Clean Layout)
                 // Profile Content (Standardized)
@@ -246,7 +266,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   bottom: false,
                   sliver: SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 24)),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: Responsive.w(context, 24),
+                      ),
                       child: Column(
                         children: AnimationConfiguration.toStaggeredList(
                           duration: const Duration(milliseconds: 375),
@@ -256,6 +278,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 child: FadeInAnimation(child: widget),
                               ),
                           children: <Widget>[
+                            // User search bar (expandable)
+                            const UserSearchBar(expandable: true),
+                            SizedBox(height: Responsive.h(context, 12)),
                             ProfileContent(
                               data: ProfileData(
                                 id: user.id,
@@ -270,7 +295,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               isBioLoading: _isLoadingDetails,
                               overrideBioText: _bioText,
                               onEditBio: () => _showEditBioBottomSheet(user),
-                              onEditProfile: () => context.push(AppRoutes.editProfile),
+                              onEditProfile:
+                                  () => context.push(AppRoutes.editProfile),
                               onFollowersTap:
                                   () => showFollowListSheet(
                                     context: context,
@@ -297,8 +323,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   pinned: true,
                   delegate: StickyTabBarDelegate(
                     child: Container(
-                      color: colorScheme.surface, // Opaque background for sticky state
-                      padding: EdgeInsets.only(bottom: Responsive.h(context, 16)),
+                      color:
+                          colorScheme
+                              .surface, // Opaque background for sticky state
+                      padding: EdgeInsets.only(
+                        bottom: Responsive.h(context, 16),
+                      ),
                       child: ProfileTabBar(
                         tabs: _buildTabs(t),
                         selectedId: _selectedTabId,
@@ -321,21 +351,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
 
                 // Bottom padding for nav bar
-                SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 100))),
+                SliverToBoxAdapter(
+                  child: SizedBox(height: Responsive.h(context, 100)),
+                ),
               ],
             ),
           ),
         );
       },
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading:
+          () =>
+              const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (Object error, StackTrace stack) {
         final Translations t = Translations.of(context);
-        return Scaffold(body: Center(child: Text(t.common.errorGenericDisplay(error: error))));
+        return Scaffold(
+          body: Center(child: Text(t.common.errorGenericDisplay(error: error))),
+        );
       },
     );
   }
 
-  Widget _buildTabContent(ColorScheme colorScheme, AppUser user, Translations t) {
+  Widget _buildTabContent(
+    ColorScheme colorScheme,
+    AppUser user,
+    Translations t,
+  ) {
     switch (_selectedTabId) {
       case 'achievements':
         // Keep grid for achievements to show loading state example, or replaced if empty
@@ -367,7 +407,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return SliverFillRemaining(
       hasScrollBody: false,
       child: Padding(
-        padding: EdgeInsets.only(bottom: Responsive.h(context, 100)), // Account for nav bar
+        padding: EdgeInsets.only(
+          bottom: Responsive.h(context, 100),
+        ), // Account for nav bar
         child: EmptyState(
           icon: icon,
           title: title,

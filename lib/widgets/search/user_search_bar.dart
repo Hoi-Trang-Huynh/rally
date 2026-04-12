@@ -14,9 +14,15 @@ import 'package:rally/utils/responsive.dart';
 import '../../i18n/generated/translations.g.dart';
 
 /// A search bar widget that allows searching for users with a dropdown results list.
+///
+/// When [expandable] is true the bar starts collapsed (icon only) and expands
+/// with an animation when tapped.
 class UserSearchBar extends ConsumerStatefulWidget {
   /// Creates a new [UserSearchBar].
-  const UserSearchBar({super.key});
+  const UserSearchBar({super.key, this.expandable = false});
+
+  /// Whether the bar starts collapsed and expands on tap.
+  final bool expandable;
 
   @override
   ConsumerState<UserSearchBar> createState() => _UserSearchBarState();
@@ -29,6 +35,7 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
   OverlayEntry? _overlayEntry;
   Timer? _debounce;
   String _lastQuery = '';
+  bool _isExpanded = false;
 
   @override
   void initState() {
@@ -38,8 +45,23 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
         _showOverlay();
       } else {
         _removeOverlay();
+        if (widget.expandable && _controller.text.isEmpty) {
+          _collapse();
+        }
       }
     });
+  }
+
+  void _expand() {
+    setState(() => _isExpanded = true);
+    Future<void>.delayed(const Duration(milliseconds: 50), () {
+      if (mounted) _focusNode.requestFocus();
+    });
+  }
+
+  void _collapse() {
+    _focusNode.unfocus();
+    setState(() => _isExpanded = false);
   }
 
   @override
@@ -211,10 +233,7 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
+  Widget _buildTextField(BuildContext context, ColorScheme colorScheme) {
     return CompositedTransformTarget(
       link: _layerLink,
       child: TapRegion(
@@ -223,7 +242,7 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
           _focusNode.unfocus();
         },
         child: Container(
-          height: Responsive.h(context, 48),
+          height: Responsive.h(context, 40),
           decoration: BoxDecoration(
             color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(Responsive.w(context, 24)),
@@ -252,6 +271,15 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
                           _overlayEntry?.markNeedsBuild();
                         },
                       )
+                      : widget.expandable
+                      ? IconButton(
+                          icon: Icon(
+                            Icons.close_rounded,
+                            size: Responsive.w(context, 18),
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          onPressed: _collapse,
+                        )
                       : null,
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(
@@ -266,6 +294,48 @@ class _UserSearchBarState extends ConsumerState<UserSearchBar> {
             style: TextStyle(color: colorScheme.onSurface, fontSize: Responsive.w(context, 14)),
           ),
         ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    if (!widget.expandable) {
+      return _buildTextField(context, colorScheme);
+    }
+
+    // Expandable variant: icon button ↔ full-width search bar
+    return AnimatedCrossFade(
+      duration: const Duration(milliseconds: 280),
+      sizeCurve: Curves.easeInOut,
+      firstCurve: Curves.easeInOut,
+      secondCurve: Curves.easeInOut,
+      crossFadeState: _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+      firstChild: Align(
+        alignment: Alignment.centerRight,
+        child: GestureDetector(
+          onTap: _expand,
+          child: Container(
+            width: Responsive.w(context, 40),
+            height: Responsive.w(context, 40),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+              border: Border.all(color: colorScheme.outline.withValues(alpha: 0.1)),
+            ),
+            child: Icon(
+              Icons.search_rounded,
+              color: colorScheme.onSurfaceVariant,
+              size: Responsive.w(context, 20),
+            ),
+          ),
+        ),
+      ),
+      secondChild: SizedBox(
+        width: double.infinity,
+        child: _buildTextField(context, colorScheme),
       ),
     );
   }
