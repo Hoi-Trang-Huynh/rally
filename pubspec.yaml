@@ -56,6 +56,7 @@ dependencies:
   slang_flutter: ^4.11.0
   qr_flutter: ^4.1.0
   gal: ^2.3.2
+  geolocator: ^13.0.2
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to

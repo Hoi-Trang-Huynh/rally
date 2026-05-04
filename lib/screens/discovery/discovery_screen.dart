@@ -8,13 +8,14 @@ import 'package:rally/themes/app_colors.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/common/app_bottom_sheet.dart';
 import 'package:rally/widgets/common/scale_button.dart';
+import 'package:rally/providers/location_provider.dart';
 import 'package:rally/screens/discovery/widgets/category_filter_bar.dart';
 
 // ---------------------------------------------------------------------------
 // Data
 // ---------------------------------------------------------------------------
 
-enum _SectionCardType { placeGrid, collectionGrid }
+enum _SectionCardType { placeList, collectionList }
 
 class _Place {
   const _Place({
@@ -27,7 +28,9 @@ class _Place {
     required this.hours,
     required this.distance,
     required this.latLng,
-    this.badge,
+    required this.category,
+    this.description,
+    this.address,
     this.pricePerNight,
   });
 
@@ -40,7 +43,9 @@ class _Place {
   final String hours;
   final String distance;
   final LatLng latLng;
-  final String? badge;
+  final String category;
+  final String? description;
+  final String? address;
   final String? pricePerNight;
 }
 
@@ -70,8 +75,7 @@ class _PlaceSection {
     required this.subtitle,
     this.places = const <_Place>[],
     this.collections = const <_Collection>[],
-    this.cardType = _SectionCardType.placeGrid,
-    this.showTrendingChip = false,
+    this.cardType = _SectionCardType.placeList,
   });
 
   final String title;
@@ -79,140 +83,13 @@ class _PlaceSection {
   final List<_Place> places;
   final List<_Collection> collections;
   final _SectionCardType cardType;
-  final bool showTrendingChip;
-
-  int get itemCount =>
-      cardType == _SectionCardType.collectionGrid ? collections.length : places.length;
 }
 
 const List<_PlaceSection> _kSections = <_PlaceSection>[
   _PlaceSection(
-    title: 'Trending Places',
-    subtitle: 'Popular spots this week',
-    showTrendingChip: true,
-    places: <_Place>[
-      _Place(
-        id: 'dragon-bridge',
-        name: 'Dragon Bridge',
-        imageUrl: 'https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=600',
-        rating: 4.4,
-        reviewCount: 2340,
-        price: 'Free',
-        hours: 'Open 24h',
-        distance: '1.2 km',
-        latLng: LatLng(16.0609, 108.2272),
-        badge: 'Trending',
-      ),
-      _Place(
-        id: 'my-khe-beach',
-        name: 'My Khe Beach',
-        imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600',
-        rating: 4.5,
-        reviewCount: 5120,
-        price: 'Free',
-        hours: 'Open 24h',
-        distance: '2.8 km',
-        latLng: LatLng(16.0635, 108.2470),
-        badge: 'Trending',
-      ),
-      _Place(
-        id: 'marble-mountains',
-        name: 'Marble Mountains',
-        imageUrl: 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=600',
-        rating: 4.7,
-        reviewCount: 3892,
-        price: r'$',
-        hours: '7AM–5:30PM',
-        distance: '5.1 km',
-        latLng: LatLng(15.9731, 108.2625),
-        badge: 'Hot',
-      ),
-      _Place(
-        id: 'ba-na-hills',
-        name: 'Ba Na Hills',
-        imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600',
-        rating: 4.6,
-        reviewCount: 4210,
-        price: r'$$',
-        hours: '7AM–10PM',
-        distance: '25 km',
-        latLng: LatLng(15.9973, 107.9882),
-        badge: 'Popular',
-      ),
-      _Place(
-        id: 'son-tra-peninsula',
-        name: 'Son Tra Peninsula',
-        imageUrl: 'https://images.unsplash.com/photo-1540202403-b7abd6747a18?w=600',
-        rating: 4.8,
-        reviewCount: 1560,
-        price: 'Free',
-        hours: 'Open 24h',
-        distance: '8.3 km',
-        latLng: LatLng(16.1055, 108.2862),
-        badge: 'Trending',
-      ),
-    ],
-  ),
-  _PlaceSection(
-    title: 'Where to Eat',
-    subtitle: 'Top-rated restaurants nearby',
-    places: <_Place>[
-      _Place(
-        id: 'be-man-seafood',
-        name: 'Be Man Seafood',
-        imageUrl: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600',
-        rating: 4.6,
-        reviewCount: 1247,
-        price: r'$$',
-        hours: '10AM–10PM',
-        distance: '0.8 km',
-        latLng: LatLng(16.0472, 108.2241),
-      ),
-      _Place(
-        id: 'mi-quang-ba-mua',
-        name: 'Mi Quang Ba Mua',
-        imageUrl: 'https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=600',
-        rating: 4.5,
-        reviewCount: 890,
-        price: r'$',
-        hours: '6AM–9PM',
-        distance: '1.5 km',
-        latLng: LatLng(16.0521, 108.2199),
-      ),
-    ],
-  ),
-  _PlaceSection(
-    title: 'Where to Play',
-    subtitle: 'Fun activities & entertainment',
-    places: <_Place>[
-      _Place(
-        id: 'asia-park',
-        name: 'Asia Park',
-        imageUrl: 'https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=600',
-        rating: 4.3,
-        reviewCount: 1890,
-        price: r'$$',
-        hours: '3PM–10PM',
-        distance: '3.5 km',
-        latLng: LatLng(16.0396, 108.2171),
-      ),
-      _Place(
-        id: 'surf-shack',
-        name: 'Surf Shack Da Nang',
-        imageUrl: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=600',
-        rating: 4.6,
-        reviewCount: 340,
-        price: r'$$',
-        hours: '6AM–6PM',
-        distance: '2.8 km',
-        latLng: LatLng(16.0590, 108.2453),
-      ),
-    ],
-  ),
-  _PlaceSection(
     title: 'Community Recommends',
     subtitle: 'Curated by locals',
-    cardType: _SectionCardType.collectionGrid,
+    cardType: _SectionCardType.collectionList,
     collections: <_Collection>[
       _Collection(
         id: 'da-nang-gems',
@@ -232,11 +109,206 @@ const List<_PlaceSection> _kSections = <_PlaceSection>[
         authorAvatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100',
         locationCount: 12,
       ),
+      _Collection(
+        id: 'sunrise-spots',
+        title: 'Best Sunrise Spots',
+        description: 'Catch the sunrise at these magical views',
+        imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600',
+        authorName: 'An Nguyen',
+        authorAvatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
+        locationCount: 5,
+      ),
+    ],
+  ),
+  _PlaceSection(
+    title: 'Where to Eat',
+    subtitle: 'Top-rated restaurants nearby',
+    places: <_Place>[
+      _Place(
+        id: 'be-man-seafood',
+        name: 'Be Man Seafood',
+        imageUrl: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600',
+        rating: 4.6,
+        reviewCount: 1247,
+        price: r'$$',
+        hours: '10AM–10PM',
+        distance: '0.8 km',
+        latLng: LatLng(16.0472, 108.2241),
+        category: 'Seafood',
+        description: 'A beloved local seafood spot serving fresh catches from the East Sea. Known for grilled fish, shrimp, and crab at great prices.',
+        address: '10 Tran Phu, Hai Chau, Da Nang',
+      ),
+      _Place(
+        id: 'mi-quang-ba-mua',
+        name: 'Mi Quang Ba Mua',
+        imageUrl: 'https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=600',
+        rating: 4.5,
+        reviewCount: 890,
+        price: r'$',
+        hours: '6AM–9PM',
+        distance: '1.5 km',
+        latLng: LatLng(16.0521, 108.2199),
+        category: 'Vietnamese',
+        description: 'Authentic Mi Quang — a Central Vietnamese noodle dish with turmeric-tinted noodles, pork, shrimp, and fresh herbs.',
+        address: '35 Tran Binh Trong, Hai Chau, Da Nang',
+      ),
+      _Place(
+        id: 'banh-mi-phuong',
+        name: 'Banh Mi Phuong',
+        imageUrl: 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=600',
+        rating: 4.7,
+        reviewCount: 3200,
+        price: r'$',
+        hours: '6AM–9PM',
+        distance: '2.1 km',
+        latLng: LatLng(16.0469, 108.2235),
+        category: 'Street Food',
+        description: 'Famous banh mi shop known worldwide for its crispy baguette loaded with pâté, cold cuts, and pickled vegetables.',
+        address: '2B Phan Chu Trinh, Hai Chau, Da Nang',
+      ),
+      _Place(
+        id: 'madame-lan',
+        name: 'Madame Lan Restaurant',
+        imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600',
+        rating: 4.4,
+        reviewCount: 760,
+        price: r'$$',
+        hours: '10AM–10PM',
+        distance: '3.0 km',
+        latLng: LatLng(16.0601, 108.2280),
+        category: 'Vietnamese',
+        description: 'Upscale Vietnamese dining in a beautifully restored colonial building. Great for groups and special occasions.',
+        address: '4 Bach Dang, Hai Chau, Da Nang',
+      ),
+    ],
+  ),
+  _PlaceSection(
+    title: 'Where to Play',
+    subtitle: 'Activities & entertainment',
+    places: <_Place>[
+      _Place(
+        id: 'asia-park',
+        name: 'Asia Park',
+        imageUrl: 'https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=600',
+        rating: 4.3,
+        reviewCount: 1890,
+        price: r'$$',
+        hours: '3PM–10PM',
+        distance: '3.5 km',
+        latLng: LatLng(16.0396, 108.2171),
+        category: 'Amusement Park',
+        description: 'A large amusement park featuring the iconic Sun Wheel — one of the largest Ferris wheels in Asia — plus rides and cultural pavilions.',
+        address: '1 Phan Dang Luu, Hai Chau, Da Nang',
+      ),
+      _Place(
+        id: 'surf-shack',
+        name: 'Surf Shack Da Nang',
+        imageUrl: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=600',
+        rating: 4.6,
+        reviewCount: 340,
+        price: r'$$',
+        hours: '6AM–6PM',
+        distance: '2.8 km',
+        latLng: LatLng(16.0590, 108.2453),
+        category: 'Water Sports',
+        description: 'Learn to surf on My Khe Beach with certified instructors. Board rental, lessons for all levels, and a chill beach vibe.',
+        address: 'My Khe Beach, Son Tra, Da Nang',
+      ),
+      _Place(
+        id: 'marble-mountains',
+        name: 'Marble Mountains',
+        imageUrl: 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=600',
+        rating: 4.7,
+        reviewCount: 3892,
+        price: r'$',
+        hours: '7AM–5:30PM',
+        distance: '5.1 km',
+        latLng: LatLng(15.9731, 108.2625),
+        category: 'Attraction',
+        description: 'Five marble and limestone hills with caves, tunnels, and Buddhist sanctuaries. Climb to the summit for panoramic views over Da Nang.',
+        address: '52 Huyen Tran Cong Chua, Ngu Hanh Son, Da Nang',
+      ),
+      _Place(
+        id: 'son-tra-peninsula',
+        name: 'Son Tra Peninsula',
+        imageUrl: 'https://images.unsplash.com/photo-1540202403-b7abd6747a18?w=600',
+        rating: 4.8,
+        reviewCount: 1560,
+        price: 'Free',
+        hours: 'Open 24h',
+        distance: '8.3 km',
+        latLng: LatLng(16.1055, 108.2862),
+        category: 'Nature',
+        description: 'A forested peninsula jutting into the sea, home to the golden Linh Ung Pagoda and rare red-shanked douc langurs.',
+        address: 'Son Tra Peninsula, Son Tra, Da Nang',
+      ),
+    ],
+  ),
+  _PlaceSection(
+    title: 'Where to Drink',
+    subtitle: 'Sip, chill & hang out',
+    places: <_Place>[
+      _Place(
+        id: 'sky36-bar',
+        name: 'SKY36 Rooftop Bar',
+        imageUrl: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=600',
+        rating: 4.5,
+        reviewCount: 1120,
+        price: r'$$$',
+        hours: '5PM–2AM',
+        distance: '1.8 km',
+        latLng: LatLng(16.0623, 108.2230),
+        category: 'Rooftop Bar',
+        description: 'Da Nang\'s highest rooftop bar on the 36th floor of the Novotel. Stunning views of the Han River, great cocktails and DJ sets on weekends.',
+        address: '36 Bach Dang, Hai Chau, Da Nang',
+      ),
+      _Place(
+        id: 'the-rooftop-bar',
+        name: 'The Rooftop Bar',
+        imageUrl: 'https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=600',
+        rating: 4.3,
+        reviewCount: 680,
+        price: r'$$',
+        hours: '4PM–1AM',
+        distance: '0.9 km',
+        latLng: LatLng(16.0571, 108.2218),
+        category: 'Bar',
+        description: 'Relaxed rooftop bar with river views, craft beers, and a buzzing happy hour from 4–6PM daily.',
+        address: '12 Tran Phu, Hai Chau, Da Nang',
+      ),
+      _Place(
+        id: 'young-cafe',
+        name: 'Young Café',
+        imageUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600',
+        rating: 4.4,
+        reviewCount: 540,
+        price: r'$',
+        hours: '7AM–11PM',
+        distance: '1.2 km',
+        latLng: LatLng(16.0508, 108.2260),
+        category: 'Café',
+        description: 'A cozy multi-level café popular with students and remote workers. Great Vietnamese iced coffee, smoothies, and light bites.',
+        address: '22 Hoang Dieu, Hai Chau, Da Nang',
+      ),
+      _Place(
+        id: 'waterfront-bar',
+        name: 'Waterfront Bar',
+        imageUrl: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600',
+        rating: 4.2,
+        reviewCount: 430,
+        price: r'$$',
+        hours: '3PM–12AM',
+        distance: '2.4 km',
+        latLng: LatLng(16.0655, 108.2301),
+        category: 'Bar',
+        description: 'Riverside bar with a breezy terrace, live music on Friday nights, and a solid selection of imported craft beers.',
+        address: '150 Bach Dang, Hai Chau, Da Nang',
+      ),
     ],
   ),
   _PlaceSection(
     title: 'Where to Stay',
-    subtitle: 'Hotels & accommodations',
+    subtitle: 'Accommodations nearby',
     places: <_Place>[
       _Place(
         id: 'mercure-danang',
@@ -248,6 +320,9 @@ const List<_PlaceSection> _kSections = <_PlaceSection>[
         hours: 'Check-in 2PM',
         distance: '3.2 km',
         latLng: LatLng(16.0511, 108.2248),
+        category: 'Hotel',
+        description: 'Modern 4-star hotel in the city centre with rooftop pool, spa, and stunning views of the Han River and Dragon Bridge.',
+        address: '478 Tran Hung Dao, Son Tra, Da Nang',
         pricePerNight: r'$80/night',
       ),
       _Place(
@@ -260,14 +335,47 @@ const List<_PlaceSection> _kSections = <_PlaceSection>[
         hours: 'Check-in 2PM',
         distance: '5.0 km',
         latLng: LatLng(16.0631, 108.2498),
+        category: 'Resort',
+        description: 'Beachfront 5-star resort directly on My Khe Beach. Features multiple pools, a private beach, and world-class dining.',
+        address: '101 Vo Nguyen Giap, Son Tra, Da Nang',
         pricePerNight: r'$180/night',
+      ),
+      _Place(
+        id: 'holiday-beach',
+        name: 'Holiday Beach Hotel',
+        imageUrl: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600',
+        rating: 4.5,
+        reviewCount: 1150,
+        price: r'$$',
+        hours: 'Check-in 2PM',
+        distance: '2.0 km',
+        latLng: LatLng(16.0580, 108.2440),
+        category: 'Hotel',
+        description: 'Well-located 4-star hotel one block from My Khe Beach. Outdoor pool, breakfast included, and great value for money.',
+        address: '218 Vo Nguyen Giap, Son Tra, Da Nang',
+        pricePerNight: r'$55/night',
+      ),
+      _Place(
+        id: 'brilliant-hotel',
+        name: 'Brilliant Hotel',
+        imageUrl: 'https://images.unsplash.com/photo-1551882547-ff40c4a49ce5?w=600',
+        rating: 4.3,
+        reviewCount: 870,
+        price: r'$$',
+        hours: 'Check-in 3PM',
+        distance: '1.5 km',
+        latLng: LatLng(16.0535, 108.2222),
+        category: 'Hotel',
+        description: 'City-centre hotel with Han River views, rooftop bar, and convenient access to restaurants and nightlife.',
+        address: '162 Bach Dang, Hai Chau, Da Nang',
+        pricePerNight: r'$45/night',
       ),
     ],
   ),
 ];
 
 List<_Place> get _kAllPlaces => _kSections
-    .where((_PlaceSection s) => s.cardType != _SectionCardType.collectionGrid)
+    .where((_PlaceSection s) => s.cardType != _SectionCardType.collectionList)
     .expand((_PlaceSection s) => s.places)
     .toList();
 
@@ -277,7 +385,6 @@ List<_Place> get _kAllPlaces => _kSections
 
 /// The Explore tab — Google Map with a draggable place discovery sheet.
 class DiscoveryScreen extends ConsumerStatefulWidget {
-  /// Creates a [DiscoveryScreen].
   const DiscoveryScreen({super.key});
 
   @override
@@ -308,7 +415,11 @@ class _DiscoveryScreenState extends ConsumerState<DiscoveryScreen> {
     _mapController?.animateCamera(CameraUpdate.zoomOut());
   }
 
-  void _goToMyLocation() => HapticFeedback.lightImpact();
+  void _goToMyLocation() {
+    HapticFeedback.lightImpact();
+    final LatLng? loc = ref.read(currentLocationProvider).valueOrNull;
+    if (loc != null) _mapController?.animateCamera(CameraUpdate.newLatLng(loc));
+  }
 
   @override
   void dispose() {
@@ -318,14 +429,18 @@ class _DiscoveryScreenState extends ConsumerState<DiscoveryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final LatLng mapCenter =
+        ref.watch(currentLocationProvider).valueOrNull ?? _danangCenter;
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Stack(
         children: <Widget>[
           GoogleMap(
-            initialCameraPosition: const CameraPosition(target: _danangCenter, zoom: 13.5),
+            initialCameraPosition: CameraPosition(target: mapCenter, zoom: 13.5),
             onMapCreated: (GoogleMapController c) => _mapController = c,
             markers: _markers,
+            myLocationEnabled: true,
             zoomControlsEnabled: false,
             myLocationButtonEnabled: false,
             mapToolbarEnabled: false,
@@ -334,7 +449,6 @@ class _DiscoveryScreenState extends ConsumerState<DiscoveryScreen> {
             },
           ),
 
-          // Search bar + category chips
           Positioned(
             top: 0,
             left: 0,
@@ -359,7 +473,6 @@ class _DiscoveryScreenState extends ConsumerState<DiscoveryScreen> {
             ),
           ),
 
-          // Map controls — vertical pill for zoom + separate location button
           Positioned(
             right: Responsive.w(context, 16),
             bottom: MediaQuery.sizeOf(context).height * 0.47,
@@ -370,10 +483,7 @@ class _DiscoveryScreenState extends ConsumerState<DiscoveryScreen> {
             ),
           ),
 
-          // Draggable discovery sheet — Positioned.fill is required so
-          // DraggableScrollableSheet resolves child-size fractions against
-          // a finite parent height.
-          const Positioned.fill(child: _ExploreBottomSheet()),
+          Positioned.fill(child: _ExploreBottomSheet(selectedCategoryIndex: _selectedCategoryIndex)),
         ],
       ),
     );
@@ -424,7 +534,7 @@ class _PlaceSearchBar extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Map controls — vertical pill with +/- and separate location button
+// Map controls
 // ---------------------------------------------------------------------------
 
 class _MapControls extends StatelessWidget {
@@ -507,8 +617,15 @@ class _MapControls extends StatelessWidget {
 // Explore bottom sheet
 // ---------------------------------------------------------------------------
 
+// Chip-index → section index mapping (null = "All" → home feed).
+// Chip order: All(0), Restaurants(1), Hotels(2), Coffee(3), Activities(4).
+// Section order in _kSections: Community(0), Eat(1), Play(2), Drink(3), Stay(4).
+const List<int?> _kChipToSectionIndex = <int?>[null, 1, 4, 3, 2];
+
 class _ExploreBottomSheet extends StatefulWidget {
-  const _ExploreBottomSheet();
+  const _ExploreBottomSheet({required this.selectedCategoryIndex});
+
+  final int selectedCategoryIndex;
 
   @override
   State<_ExploreBottomSheet> createState() => _ExploreBottomSheetState();
@@ -518,16 +635,67 @@ class _ExploreBottomSheetState extends State<_ExploreBottomSheet> {
   int _selectedTabIndex = 0;
   final Set<String> _bookmarkedIds = <String>{};
   _PlaceSection? _activeSection;
+  _Place? _activePlace;
+  final DraggableScrollableController _sheetController = DraggableScrollableController();
+
+  @override
+  void didUpdateWidget(_ExploreBottomSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedCategoryIndex != widget.selectedCategoryIndex) {
+      final int? sectionIdx = _kChipToSectionIndex[widget.selectedCategoryIndex];
+      if (sectionIdx == null) {
+        setState(() { _activeSection = null; _activePlace = null; });
+      } else {
+        _onSeeMore(_kSections[sectionIdx]);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _sheetController.dispose();
+    super.dispose();
+  }
+
+  // ── Navigation helpers ────────────────────────────────────────────────────
 
   void _onSeeMore(_PlaceSection section) {
     HapticFeedback.lightImpact();
-    setState(() => _activeSection = section);
+    setState(() {
+      _activeSection = section;
+      _activePlace = null;
+    });
   }
 
   void _onBackFromDrilldown() {
     HapticFeedback.lightImpact();
     setState(() => _activeSection = null);
   }
+
+  void _onPlaceTap(_Place place) {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _activePlace = place;
+      _activeSection = null;
+    });
+    _sheetController.animateTo(
+      0.92,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  void _onCloseDetail() {
+    HapticFeedback.lightImpact();
+    setState(() => _activePlace = null);
+    _sheetController.animateTo(
+      0.45,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  // ── Bookmark ──────────────────────────────────────────────────────────────
 
   void _onBookmark(_Place place) {
     if (_bookmarkedIds.contains(place.id)) {
@@ -570,7 +738,8 @@ class _ExploreBottomSheetState extends State<_ExploreBottomSheet> {
     );
   }
 
-  // Header: drag handle + tab switcher or drill-down back row
+  // ── Header ────────────────────────────────────────────────────────────────
+
   Widget _buildHeader(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
@@ -590,7 +759,56 @@ class _ExploreBottomSheetState extends State<_ExploreBottomSheet> {
           ),
         ),
         SizedBox(height: Responsive.h(context, 16)),
-        if (_activeSection != null)
+        if (_activePlace != null)
+          // Place detail header: name + bookmark + close
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 20)),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    _activePlace!.name,
+                    style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                ScaleButton(
+                  onTap: () => _onBookmark(_activePlace!),
+                  child: Padding(
+                    padding: EdgeInsets.all(Responsive.w(context, 4)),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(
+                        _bookmarkedIds.contains(_activePlace!.id)
+                            ? Icons.bookmark_rounded
+                            : Icons.bookmark_border_rounded,
+                        key: ValueKey<bool>(_bookmarkedIds.contains(_activePlace!.id)),
+                        size: Responsive.w(context, 22),
+                        color: _bookmarkedIds.contains(_activePlace!.id)
+                            ? AppColors.brandGradientStart
+                            : colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: Responsive.w(context, 4)),
+                ScaleButton(
+                  onTap: _onCloseDetail,
+                  child: Container(
+                    padding: EdgeInsets.all(Responsive.w(context, 6)),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.close_rounded, size: Responsive.w(context, 18), color: colorScheme.onSurfaceVariant),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else if (_activeSection != null)
+          // Drilldown header: back + section title
           Padding(
             padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 20)),
             child: Row(
@@ -614,6 +832,7 @@ class _ExploreBottomSheetState extends State<_ExploreBottomSheet> {
             ),
           )
         else
+          // Home header: Explore / Saved Places tabs
           Padding(
             padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 20)),
             child: Row(
@@ -645,6 +864,8 @@ class _ExploreBottomSheetState extends State<_ExploreBottomSheet> {
     );
   }
 
+  // ── Home feed slivers ─────────────────────────────────────────────────────
+
   List<Widget> _buildHomeSlivers(BuildContext context) {
     final List<Widget> slivers = <Widget>[];
 
@@ -654,57 +875,60 @@ class _ExploreBottomSheetState extends State<_ExploreBottomSheet> {
           child: _SectionHeader(
             title: section.title,
             subtitle: section.subtitle,
-            onSeeMore: section.cardType == _SectionCardType.placeGrid
+            onSeeMore: section.cardType == _SectionCardType.placeList
                 ? () => _onSeeMore(section)
                 : null,
           ),
         ),
       );
 
-      if (section.showTrendingChip) {
-        slivers.add(const SliverToBoxAdapter(child: _TrendingOnMapsChip()));
-      }
-
-      final SliverChildBuilderDelegate gridDelegate;
-      if (section.cardType == _SectionCardType.collectionGrid) {
-        gridDelegate = SliverChildBuilderDelegate(
-          (BuildContext _, int index) => _CollectionGridCard(
-            collection: section.collections[index],
-            onTap: () => HapticFeedback.lightImpact(),
-          ),
-          childCount: section.collections.length,
-        );
-      } else {
-        gridDelegate = SliverChildBuilderDelegate(
-          (BuildContext _, int index) {
-            final _Place place = section.places[index];
-            return _ExploreGridCard(
-              place: place,
-              isBookmarked: _bookmarkedIds.contains(place.id),
-              onTap: () => HapticFeedback.lightImpact(),
-              onBookmark: () => _onBookmark(place),
-            );
-          },
-          childCount: section.places.length,
-        );
-      }
-
       slivers.add(
-        SliverPadding(
-          padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 16)),
-          sliver: SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: Responsive.w(context, 10),
-              mainAxisSpacing: Responsive.h(context, 10),
-              childAspectRatio: 0.72,
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height: Responsive.h(context, 220),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 16)),
+              itemCount: section.cardType == _SectionCardType.collectionList
+                  ? section.collections.length
+                  : section.places.length,
+              itemBuilder: (BuildContext ctx, int index) {
+                final double cardWidth = Responsive.w(context, 160);
+                final EdgeInsets itemPadding = EdgeInsets.only(right: Responsive.w(context, 12));
+
+                if (section.cardType == _SectionCardType.collectionList) {
+                  return Padding(
+                    padding: itemPadding,
+                    child: SizedBox(
+                      width: cardWidth,
+                      child: _CollectionHorizontalCard(
+                        collection: section.collections[index],
+                        onTap: () => HapticFeedback.lightImpact(),
+                      ),
+                    ),
+                  );
+                }
+
+                final _Place place = section.places[index];
+                return Padding(
+                  padding: itemPadding,
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: _ExploreHorizontalCard(
+                      place: place,
+                      isBookmarked: _bookmarkedIds.contains(place.id),
+                      onTap: () => _onPlaceTap(place),
+                      onBookmark: () => _onBookmark(place),
+                    ),
+                  ),
+                );
+              },
             ),
-            delegate: gridDelegate,
           ),
         ),
       );
 
-      slivers.add(SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 12))));
+      slivers.add(SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 8))));
     }
 
     slivers.add(SliverToBoxAdapter(
@@ -713,6 +937,8 @@ class _ExploreBottomSheetState extends State<_ExploreBottomSheet> {
 
     return slivers;
   }
+
+  // ── Drill-down slivers ────────────────────────────────────────────────────
 
   List<Widget> _buildDrilldownSlivers(BuildContext context, _PlaceSection section) {
     final List<Widget> slivers = <Widget>[];
@@ -741,7 +967,7 @@ class _ExploreBottomSheetState extends State<_ExploreBottomSheet> {
         child: _ExploreListCard(
           place: place,
           isBookmarked: _bookmarkedIds.contains(place.id),
-          onTap: () => HapticFeedback.lightImpact(),
+          onTap: () => _onPlaceTap(place),
           onBookmark: () => _onBookmark(place),
         ),
       ));
@@ -763,12 +989,272 @@ class _ExploreBottomSheetState extends State<_ExploreBottomSheet> {
     return slivers;
   }
 
+  // ── Place detail slivers ──────────────────────────────────────────────────
+
+  List<Widget> _buildPlaceDetailSlivers(BuildContext context, _Place place) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
+    return <Widget>[
+      // Hero image
+      SliverToBoxAdapter(
+        child: SizedBox(
+          height: Responsive.h(context, 220),
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              Image.network(
+                place.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(color: colorScheme.surfaceContainer),
+              ),
+              Positioned(
+                bottom: Responsive.h(context, 12),
+                left: Responsive.w(context, 16),
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Responsive.w(context, 10),
+                    vertical: Responsive.h(context, 5),
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.brandGradientStart,
+                    borderRadius: BorderRadius.circular(Responsive.w(context, 20)),
+                  ),
+                  child: Text(
+                    place.category,
+                    style: textTheme.labelSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      // Rating + price
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            Responsive.w(context, 20),
+            Responsive.h(context, 16),
+            Responsive.w(context, 20),
+            Responsive.h(context, 4),
+          ),
+          child: Row(
+            children: <Widget>[
+              Icon(Icons.star_rounded, size: Responsive.w(context, 16), color: Colors.amber),
+              SizedBox(width: Responsive.w(context, 4)),
+              Text(
+                '${place.rating} (${_fmtCount(place.reviewCount)})',
+                style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 12)),
+                child: Container(
+                  width: 1,
+                  height: Responsive.h(context, 14),
+                  color: colorScheme.outline.withValues(alpha: 0.4),
+                ),
+              ),
+              Icon(Icons.attach_money_rounded, size: Responsive.w(context, 16), color: colorScheme.onSurfaceVariant),
+              Text(
+                place.price,
+                style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      // Description
+      if (place.description != null)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 20), vertical: Responsive.h(context, 8)),
+            child: Text(
+              place.description!,
+              style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant, height: 1.5),
+            ),
+          ),
+        ),
+
+      // Location
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(Responsive.w(context, 20), Responsive.h(context, 8), Responsive.w(context, 20), 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Icon(Icons.location_on_outlined, size: Responsive.w(context, 16), color: colorScheme.onSurfaceVariant),
+              SizedBox(width: Responsive.w(context, 8)),
+              Expanded(
+                child: Text(
+                  place.address ?? 'Da Nang, Vietnam',
+                  style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      // Hours
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(Responsive.w(context, 20), Responsive.h(context, 6), Responsive.w(context, 20), Responsive.h(context, 16)),
+          child: Row(
+            children: <Widget>[
+              Icon(Icons.access_time_rounded, size: Responsive.w(context, 16), color: colorScheme.onSurfaceVariant),
+              SizedBox(width: Responsive.w(context, 8)),
+              Text(
+                place.hours,
+                style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      SliverToBoxAdapter(child: Divider(height: 1, color: colorScheme.outline.withValues(alpha: 0.15))),
+
+      // More photos
+      SliverToBoxAdapter(child: _buildDetailSectionHeader(context, 'More photos')),
+      SliverToBoxAdapter(
+        child: SizedBox(
+          height: Responsive.h(context, 110),
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 20)),
+            itemCount: 4,
+            itemBuilder: (_, int i) => Padding(
+              padding: EdgeInsets.only(right: Responsive.w(context, 10)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(Responsive.w(context, 10)),
+                child: Image.network(
+                  place.imageUrl,
+                  width: Responsive.w(context, 140),
+                  height: Responsive.h(context, 110),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: Responsive.w(context, 140),
+                    color: colorScheme.surfaceContainer,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 16))),
+
+      SliverToBoxAdapter(child: Divider(height: 1, color: colorScheme.outline.withValues(alpha: 0.15))),
+
+      // Opening hours
+      SliverToBoxAdapter(child: _buildDetailSectionHeader(context, 'Opening hours')),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 20)),
+          child: Column(
+            children: <Widget>[
+              _buildHoursRow(context, 'Mon – Fri', '8:00 – 23:00'),
+              SizedBox(height: Responsive.h(context, 8)),
+              _buildHoursRow(context, 'Sat – Sun', '10:00 – 00:00'),
+            ],
+          ),
+        ),
+      ),
+      SliverToBoxAdapter(child: SizedBox(height: Responsive.h(context, 16))),
+
+      SliverToBoxAdapter(child: Divider(height: 1, color: colorScheme.outline.withValues(alpha: 0.15))),
+
+      // Contact
+      SliverToBoxAdapter(child: _buildDetailSectionHeader(context, 'Contact')),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(Responsive.w(context, 20), 0, Responsive.w(context, 20), Responsive.h(context, 16)),
+          child: Row(
+            children: <Widget>[
+              const _ContactChip(icon: Icons.call_rounded, label: 'Call'),
+              SizedBox(width: Responsive.w(context, 10)),
+              const _ContactChip(icon: Icons.language_rounded, label: 'Website'),
+              SizedBox(width: Responsive.w(context, 10)),
+              const _ContactChip(icon: Icons.map_rounded, label: 'Google Maps'),
+            ],
+          ),
+        ),
+      ),
+
+      SliverToBoxAdapter(child: Divider(height: 1, color: colorScheme.outline.withValues(alpha: 0.15))),
+
+      // Reviews
+      SliverToBoxAdapter(
+        child: _buildDetailSectionHeader(context, 'Google reviews · ${_fmtCount(place.reviewCount)}'),
+      ),
+      const SliverToBoxAdapter(
+        child: _ReviewCard(
+          avatarUrl: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100',
+          name: 'Chris L.',
+          daysAgo: '4 days ago',
+          stars: 5,
+          review: 'Absolutely wonderful experience! A must-visit when you\'re in Da Nang.',
+        ),
+      ),
+      SliverToBoxAdapter(child: Divider(height: 1, indent: Responsive.w(context, 20), endIndent: Responsive.w(context, 20))),
+      const SliverToBoxAdapter(
+        child: _ReviewCard(
+          avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
+          name: 'Ken G.',
+          daysAgo: '1 month ago',
+          stars: 5,
+          review: 'Iconic landmark. Best experienced in the evening when the lights come on.',
+        ),
+      ),
+
+      SliverToBoxAdapter(
+        child: SizedBox(height: MediaQuery.paddingOf(context).bottom + Responsive.h(context, 32)),
+      ),
+    ];
+  }
+
+  // ── Detail helper builders ────────────────────────────────────────────────
+
+  Widget _buildDetailSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        Responsive.w(context, 20),
+        Responsive.h(context, 16),
+        Responsive.w(context, 20),
+        Responsive.h(context, 12),
+      ),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildHoursRow(BuildContext context, String day, String time) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Text(day, style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+        Text(time, style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
+      ],
+    );
+  }
+
+  // ── Build ─────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final _PlaceSection? activeSection = _activeSection;
+    final _Place? activePlace = _activePlace;
 
     return DraggableScrollableSheet(
+      controller: _sheetController,
       initialChildSize: 0.45,
       minChildSize: 0.25,
       maxChildSize: 0.92,
@@ -785,11 +1271,15 @@ class _ExploreBottomSheetState extends State<_ExploreBottomSheet> {
               _buildHeader(context),
               Expanded(
                 child: CustomScrollView(
-                  key: ValueKey<bool>(activeSection != null),
+                  key: ValueKey<String>(
+                    activePlace?.id ?? (activeSection != null ? 'drill:${activeSection.title}' : 'home'),
+                  ),
                   controller: scrollController,
-                  slivers: activeSection != null
-                      ? _buildDrilldownSlivers(context, activeSection)
-                      : _buildHomeSlivers(context),
+                  slivers: activePlace != null
+                      ? _buildPlaceDetailSlivers(context, activePlace)
+                      : activeSection != null
+                          ? _buildDrilldownSlivers(context, activeSection)
+                          : _buildHomeSlivers(context),
                 ),
               ),
             ],
@@ -798,6 +1288,8 @@ class _ExploreBottomSheetState extends State<_ExploreBottomSheet> {
       },
     );
   }
+
+  String _fmtCount(int count) => count >= 1000 ? '${(count / 1000).toStringAsFixed(1)}k' : '$count';
 }
 
 // ---------------------------------------------------------------------------
@@ -926,53 +1418,11 @@ class _SectionHeader extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// "Trending on Maps" chip
+// Horizontal card — places
 // ---------------------------------------------------------------------------
 
-class _TrendingOnMapsChip extends StatelessWidget {
-  const _TrendingOnMapsChip();
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TextTheme textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: EdgeInsets.only(left: Responsive.w(context, 20), bottom: Responsive.h(context, 10)),
-      child: ScaleButton(
-        onTap: () => HapticFeedback.lightImpact(),
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: Responsive.w(context, 14),
-            vertical: Responsive.h(context, 8),
-          ),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(Responsive.w(context, 20)),
-            border: Border.all(color: colorScheme.outline.withValues(alpha: 0.25)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Icon(Icons.local_fire_department_rounded, size: Responsive.w(context, 15), color: AppColors.brandGradientStart),
-              SizedBox(width: Responsive.w(context, 6)),
-              Text('Trending on Maps', style: textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w500)),
-              SizedBox(width: Responsive.w(context, 6)),
-              Icon(Icons.location_on_rounded, size: Responsive.w(context, 14), color: colorScheme.onSurfaceVariant),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 2-column grid card — places
-// ---------------------------------------------------------------------------
-
-class _ExploreGridCard extends StatelessWidget {
-  const _ExploreGridCard({
+class _ExploreHorizontalCard extends StatelessWidget {
+  const _ExploreHorizontalCard({
     required this.place,
     required this.isBookmarked,
     required this.onTap,
@@ -1012,23 +1462,12 @@ class _ExploreGridCard extends StatelessWidget {
                       topLeft: Radius.circular(Responsive.w(context, 16)),
                       topRight: Radius.circular(Responsive.w(context, 16)),
                     ),
-                    child: Image.network(place.imageUrl, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(color: colorScheme.surfaceContainer)),
-                  ),
-                  if (place.badge != null)
-                    Positioned(
-                      top: Responsive.h(context, 8),
-                      left: Responsive.w(context, 8),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 8), vertical: Responsive.h(context, 4)),
-                        decoration: BoxDecoration(color: AppColors.brandGradientStart, borderRadius: BorderRadius.circular(Responsive.w(context, 10))),
-                        child: Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
-                          Icon(Icons.local_fire_department_rounded, size: Responsive.w(context, 11), color: Colors.white),
-                          SizedBox(width: Responsive.w(context, 3)),
-                          Text(place.badge!, style: textTheme.labelSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-                        ]),
-                      ),
+                    child: Image.network(
+                      place.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(color: colorScheme.surfaceContainer),
                     ),
+                  ),
                   if (place.pricePerNight != null)
                     Positioned(
                       bottom: Responsive.h(context, 8),
@@ -1107,11 +1546,11 @@ class _ExploreGridCard extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 2-column grid card — collections
+// Horizontal card — collections
 // ---------------------------------------------------------------------------
 
-class _CollectionGridCard extends StatelessWidget {
-  const _CollectionGridCard({required this.collection, required this.onTap});
+class _CollectionHorizontalCard extends StatelessWidget {
+  const _CollectionHorizontalCard({required this.collection, required this.onTap});
 
   final _Collection collection;
   final VoidCallback onTap;
@@ -1144,8 +1583,11 @@ class _CollectionGridCard extends StatelessWidget {
                       topLeft: Radius.circular(Responsive.w(context, 16)),
                       topRight: Radius.circular(Responsive.w(context, 16)),
                     ),
-                    child: Image.network(collection.imageUrl, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(color: colorScheme.surfaceContainer)),
+                    child: Image.network(
+                      collection.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(color: colorScheme.surfaceContainer),
+                    ),
                   ),
                   Positioned(
                     top: Responsive.h(context, 8),
@@ -1168,11 +1610,14 @@ class _CollectionGridCard extends StatelessWidget {
                       height: Responsive.w(context, 28),
                       decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
                       child: ClipOval(
-                        child: Image.network(collection.authorAvatarUrl, fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              color: AppColors.brandGradientStart,
-                              child: Icon(Icons.person_rounded, color: Colors.white, size: Responsive.w(context, 16)),
-                            )),
+                        child: Image.network(
+                          collection.authorAvatarUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: AppColors.brandGradientStart,
+                            child: Icon(Icons.person_rounded, color: Colors.white, size: Responsive.w(context, 16)),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -1206,7 +1651,7 @@ class _CollectionGridCard extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Horizontal list card — drill-down view
+// List card — drill-down view
 // ---------------------------------------------------------------------------
 
 class _ExploreListCard extends StatelessWidget {
@@ -1292,6 +1737,132 @@ class _ExploreListCard extends StatelessWidget {
   }
 
   String _fmt(int count) => count >= 1000 ? '${(count / 1000).toStringAsFixed(1)}k' : '$count';
+}
+
+// ---------------------------------------------------------------------------
+// Contact chip (place detail)
+// ---------------------------------------------------------------------------
+
+class _ContactChip extends StatelessWidget {
+  const _ContactChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
+    return ScaleButton(
+      onTap: () => HapticFeedback.lightImpact(),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: Responsive.w(context, 14),
+          vertical: Responsive.h(context, 8),
+        ),
+        decoration: BoxDecoration(
+          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
+          borderRadius: BorderRadius.circular(Responsive.w(context, 20)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(icon, size: Responsive.w(context, 14), color: AppColors.brandGradientStart),
+            SizedBox(width: Responsive.w(context, 6)),
+            Text(
+              label,
+              style: textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Review card (place detail)
+// ---------------------------------------------------------------------------
+
+class _ReviewCard extends StatelessWidget {
+  const _ReviewCard({
+    required this.avatarUrl,
+    required this.name,
+    required this.daysAgo,
+    required this.stars,
+    required this.review,
+  });
+
+  final String avatarUrl;
+  final String name;
+  final String daysAgo;
+  final int stars;
+  final String review;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: Responsive.w(context, 20),
+        vertical: Responsive.h(context, 12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          ClipOval(
+            child: Image.network(
+              avatarUrl,
+              width: Responsive.w(context, 40),
+              height: Responsive.w(context, 40),
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                width: Responsive.w(context, 40),
+                height: Responsive.w(context, 40),
+                color: colorScheme.surfaceContainer,
+                child: Icon(Icons.person_rounded, size: Responsive.w(context, 22), color: colorScheme.onSurfaceVariant),
+              ),
+            ),
+          ),
+          SizedBox(width: Responsive.w(context, 12)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(name, style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                    ),
+                    Text(daysAgo, style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+                  ],
+                ),
+                SizedBox(height: Responsive.h(context, 4)),
+                Row(
+                  children: List<Widget>.generate(
+                    5,
+                    (int i) => Icon(
+                      Icons.star_rounded,
+                      size: Responsive.w(context, 14),
+                      color: i < stars ? Colors.amber : colorScheme.outline.withValues(alpha: 0.4),
+                    ),
+                  ),
+                ),
+                SizedBox(height: Responsive.h(context, 6)),
+                Text(
+                  review,
+                  style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant, height: 1.4),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
