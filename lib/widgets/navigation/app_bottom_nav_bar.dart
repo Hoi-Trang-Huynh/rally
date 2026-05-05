@@ -55,7 +55,9 @@ class AppBottomNavBar extends StatelessWidget {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 12)),
           child: Container(
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(borderRadius)),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(borderRadius),
               child: BackdropFilter(
@@ -64,7 +66,10 @@ class AppBottomNavBar extends StatelessWidget {
                   decoration: BoxDecoration(
                     // Higher opacity in light mode for better readability
                     color: colorScheme.surfaceContainer.withValues(
-                      alpha: Theme.of(context).brightness == Brightness.light ? 0.6 : 0.75,
+                      alpha:
+                          Theme.of(context).brightness == Brightness.light
+                              ? 0.6
+                              : 0.75,
                     ),
                     borderRadius: BorderRadius.circular(borderRadius),
                     border: Border.all(
@@ -80,7 +85,7 @@ class AppBottomNavBar extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: <Widget>[
-                        // Left side items (Home, Chat)
+                        // Left side items (Home, Explore)
                         NavBarItem(
                           item: items[0],
                           isSelected: currentIndex == 0,
@@ -110,7 +115,7 @@ class AppBottomNavBar extends StatelessWidget {
                             },
                           ),
                         ),
-                        // Right side items (Explore, Profile)
+                        // Right side items (Chat, Profile)
                         NavBarItem(
                           item: items[2],
                           isSelected: currentIndex == 2,

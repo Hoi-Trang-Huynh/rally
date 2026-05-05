@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rally/router/app_router.dart';
-import 'package:rally/utils/responsive.dart';
-import 'package:rally/widgets/navigation/sliver_app_header.dart';
-
 import 'package:rally/i18n/generated/translations.g.dart';
 import 'package:rally/models/nav_item_data.dart';
+import 'package:rally/router/app_router.dart';
+import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/navigation/app_bottom_nav_bar.dart';
+import 'package:rally/widgets/navigation/sliver_app_header.dart';
 import 'package:rally/widgets/navigation/speed_dial_overlay.dart';
 import 'package:rally/widgets/rally/create_rally_bottom_sheet.dart';
 
@@ -66,16 +65,16 @@ class _MainShellState extends State<MainShell> {
         iconSize: 30,
       ),
       NavItemData(
-        icon: Icons.forum_outlined,
-        activeIcon: Icons.forum,
-        label: t.nav.chat,
-        iconSize: 26,
-      ),
-      NavItemData(
         icon: Icons.explore_outlined,
         activeIcon: Icons.explore,
         label: t.nav.explore,
         iconSize: 30,
+      ),
+      NavItemData(
+        icon: Icons.forum_outlined,
+        activeIcon: Icons.forum,
+        label: t.nav.chat,
+        iconSize: 26,
       ),
       NavItemData(
         icon: Icons.person_outlined,
@@ -90,8 +89,8 @@ class _MainShellState extends State<MainShell> {
     final GoRouter router = GoRouter.of(context);
     final String location = router.routerDelegate.currentConfiguration.uri.path;
 
-    if (location.startsWith(AppRoutes.chat)) return 1;
-    if (location.startsWith(AppRoutes.explore)) return 2;
+    if (location.startsWith(AppRoutes.explore)) return 1;
+    if (location.startsWith(AppRoutes.chat)) return 2;
     if (location.startsWith(AppRoutes.profile)) return 3;
     return 0; // Default to home (index 0)
   }
@@ -114,10 +113,10 @@ class _MainShellState extends State<MainShell> {
         context.go(AppRoutes.home);
         break;
       case 1:
-        context.go(AppRoutes.chat);
+        context.go(AppRoutes.explore);
         break;
       case 2:
-        context.go(AppRoutes.explore);
+        context.go(AppRoutes.chat);
         break;
       case 3:
         context.go(AppRoutes.profile);
@@ -176,9 +175,9 @@ class _MainShellState extends State<MainShell> {
       case 0:
         return t.nav.home;
       case 1:
-        return t.nav.chat;
-      case 2:
         return t.nav.explore;
+      case 2:
+        return t.nav.chat;
       case 3:
         return t.nav.profile;
       default:
@@ -226,7 +225,8 @@ class _MainShellState extends State<MainShell> {
 
     // Compute anchor position for the speed dial close button
     final double systemNavBarHeight = MediaQuery.paddingOf(context).bottom;
-    final double navBarPillHeight = Responsive.h(context, 2) * 4 + Responsive.w(context, 56);
+    final double navBarPillHeight =
+        Responsive.h(context, 2) * 4 + Responsive.w(context, 56);
     final double anchorBottom =
         systemNavBarHeight + Responsive.h(context, 5) + navBarPillHeight / 2;
 
@@ -242,9 +242,11 @@ class _MainShellState extends State<MainShell> {
             body: NotificationListener<UserScrollNotification>(
               onNotification: (UserScrollNotification notification) {
                 if (_isSpeedDialOpen) return false;
-                if (notification.direction == ScrollDirection.reverse && _isNavbarVisible) {
+                if (notification.direction == ScrollDirection.reverse &&
+                    _isNavbarVisible) {
                   setState(() => _isNavbarVisible = false);
-                } else if (notification.direction == ScrollDirection.forward && !_isNavbarVisible) {
+                } else if (notification.direction == ScrollDirection.forward &&
+                    !_isNavbarVisible) {
                   setState(() => _isNavbarVisible = true);
                 }
                 return false;
@@ -256,7 +258,9 @@ class _MainShellState extends State<MainShell> {
                     child: Builder(
                       builder: (BuildContext context) {
                         final double headerHeight = Responsive.h(context, 60);
-                        final EdgeInsets currentPadding = MediaQuery.paddingOf(context);
+                        final EdgeInsets currentPadding = MediaQuery.paddingOf(
+                          context,
+                        );
 
                         // Inject padding for the fixed header
                         return MediaQuery(
@@ -276,11 +280,14 @@ class _MainShellState extends State<MainShell> {
                     top: 0,
                     left: 0,
                     right: 0,
-                    height: Responsive.h(context, 60) + MediaQuery.paddingOf(context).top,
+                    height:
+                        Responsive.h(context, 60) +
+                        MediaQuery.paddingOf(context).top,
                     child: AnimatedSlide(
                       duration: const Duration(milliseconds: 700),
                       curve: Curves.easeOutCubic,
-                      offset: _isNavbarVisible ? Offset.zero : const Offset(0, -1),
+                      offset:
+                          _isNavbarVisible ? Offset.zero : const Offset(0, -1),
                       child: CustomScrollView(
                         physics: const NeverScrollableScrollPhysics(),
                         slivers: <Widget>[
