@@ -13,6 +13,7 @@ import 'package:rally/themes/app_colors.dart';
 import 'package:rally/utils/responsive.dart';
 import 'package:rally/widgets/common/app_bottom_sheet.dart';
 import 'package:rally/widgets/common/scale_button.dart';
+import 'package:rally/widgets/common/empty_state.dart';
 import 'package:rally/widgets/common/shimmer_loading.dart';
 
 // ---------------------------------------------------------------------------
@@ -94,6 +95,54 @@ class _DiscoveryScreenState extends ConsumerState<DiscoveryScreen> {
     if (loc != null) _mapController?.animateCamera(CameraUpdate.newLatLng(loc));
   }
 
+  Set<Marker> _buildMarkers(LatLng center) {
+    final Set<Marker> markers = <Marker>{};
+    for (final _SectionConfig section in _kSectionConfigs) {
+      final List<PlaceResult> places = ref
+              .watch(
+                nearbyPlacesProvider(
+                  NearbySearchParams(
+                    lat: center.latitude,
+                    lng: center.longitude,
+                    type: section.type,
+                  ),
+                ),
+              )
+              .valueOrNull ??
+          <PlaceResult>[];
+      for (final PlaceResult place in places) {
+        markers.add(
+          Marker(
+            markerId: MarkerId(place.id),
+            position: LatLng(place.lat, place.lng),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              _hueForType(section.type),
+            ),
+            infoWindow: InfoWindow(title: place.name),
+            onTap: () =>
+                ref.read(markerSelectedPlaceProvider.notifier).state = place,
+          ),
+        );
+      }
+    }
+    return markers;
+  }
+
+  static double _hueForType(String type) {
+    switch (type) {
+      case 'restaurant':
+        return BitmapDescriptor.hueOrange;
+      case 'amusement_park':
+        return BitmapDescriptor.hueGreen;
+      case 'bar':
+        return BitmapDescriptor.hueViolet;
+      case 'lodging':
+        return BitmapDescriptor.hueCyan;
+      default:
+        return BitmapDescriptor.hueRed;
+    }
+  }
+
   @override
   void dispose() {
     _mapController?.dispose();
@@ -115,7 +164,7 @@ class _DiscoveryScreenState extends ConsumerState<DiscoveryScreen> {
               zoom: 13.5,
             ),
             onMapCreated: (GoogleMapController c) => _mapController = c,
-            markers: const <Marker>{},
+            markers: _buildMarkers(mapCenter),
             myLocationEnabled: true,
             zoomControlsEnabled: false,
             myLocationButtonEnabled: false,
@@ -342,7 +391,6 @@ class _ExploreBottomSheet extends ConsumerStatefulWidget {
 
 class _ExploreBottomSheetState extends ConsumerState<_ExploreBottomSheet> {
   int _selectedTabIndex = 0;
-  final Set<String> _bookmarkedIds = <String>{};
   _SectionConfig? _activeSection;
   PlaceResult? _activePlace;
   final DraggableScrollableController _sheetController =
@@ -681,7 +729,7 @@ class _ExploreBottomSheetState extends ConsumerState<_ExploreBottomSheet> {
                           width: Responsive.w(context, 160),
                           child: _ExploreHorizontalCard(
                             place: place,
-                            isBookmarked: _bookmarkedIds.contains(place.id),
+                            isBookmarked: _isSaved(place.id),
                             onTap: () => _onPlaceTap(place),
                             onBookmark: () => _onBookmark(place),
                           ),
@@ -853,7 +901,7 @@ class _ExploreBottomSheetState extends ConsumerState<_ExploreBottomSheet> {
             SliverToBoxAdapter(
               child: _ExploreListCard(
                 place: place,
-                isBookmarked: _bookmarkedIds.contains(place.id),
+                isBookmarked: _isSaved(place.id),
                 onTap: () => _onPlaceTap(place),
                 onBookmark: () => _onBookmark(place),
               ),
@@ -1267,10 +1315,126 @@ class _ExploreBottomSheetState extends ConsumerState<_ExploreBottomSheet> {
     );
   }
 
+  // ── Saved slivers ─────────────────────────────────────────────────────────
+
+  List<Widget> _buildSavedSlivers(BuildContext context) {
+    final AsyncValue<List<PlaceResult>> savedAsync =
+        ref.watch(savedPlacesProvider);
+    final List<Widget> slivers = <Widget>[];
+
+    savedAsync.when(
+      loading: () {
+        for (int i = 0; i < 5; i++) {
+          slivers.add(
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: Responsive.w(context, 20),
+                  vertical: Responsive.h(context, 10),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    ShimmerLoading(
+                      width: Responsive.w(context, 76),
+                      height: Responsive.w(context, 76),
+                      borderRadius: Responsive.w(context, 12),
+                    ),
+                    SizedBox(width: Responsive.w(context, 14)),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          ShimmerLoading(
+                            width: double.infinity,
+                            height: Responsive.h(context, 16),
+                            borderRadius: 4,
+                          ),
+                          SizedBox(height: Responsive.h(context, 8)),
+                          ShimmerLoading(
+                            width: Responsive.w(context, 120),
+                            height: Responsive.h(context, 12),
+                            borderRadius: 4,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+      },
+      error: (_, __) {},
+      data: (List<PlaceResult> places) {
+        if (places.isEmpty) {
+          slivers.add(
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: EmptyState(
+                  icon: Icons.bookmark_border_rounded,
+                  title: 'No saved places yet',
+                  subtitle:
+                      'Tap the bookmark icon on any place to save it here',
+                ),
+              ),
+            ),
+          );
+          return;
+        }
+
+        for (int i = 0; i < places.length; i++) {
+          final PlaceResult place = places[i];
+          slivers.add(
+            SliverToBoxAdapter(
+              child: _ExploreListCard(
+                place: place,
+                isBookmarked: true,
+                onTap: () => _onPlaceTap(place),
+                onBookmark: () => _onBookmark(place),
+              ),
+            ),
+          );
+          if (i < places.length - 1) {
+            slivers.add(
+              SliverToBoxAdapter(
+                child: Divider(
+                  height: 1,
+                  indent: Responsive.w(context, 20),
+                  endIndent: Responsive.w(context, 20),
+                ),
+              ),
+            );
+          }
+        }
+      },
+    );
+
+    slivers.add(
+      SliverToBoxAdapter(
+        child: SizedBox(
+          height:
+              MediaQuery.paddingOf(context).bottom + Responsive.h(context, 24),
+        ),
+      ),
+    );
+
+    return slivers;
+  }
+
   // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<PlaceResult?>(markerSelectedPlaceProvider, (_, PlaceResult? place) {
+      if (place != null) {
+        _onPlaceTap(place);
+        ref.read(markerSelectedPlaceProvider.notifier).state = null;
+      }
+    });
+
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final _SectionConfig? activeSection = _activeSection;
     final PlaceResult? activePlace = _activePlace;
@@ -1297,6 +1461,8 @@ class _ExploreBottomSheetState extends ConsumerState<_ExploreBottomSheet> {
                     activePlace?.id ??
                         (activeSection != null
                             ? 'drill:${activeSection.title}'
+                            : _selectedTabIndex == 1
+                            ? 'saved'
                             : 'home'),
                   ),
                   controller: scrollController,
@@ -1305,6 +1471,8 @@ class _ExploreBottomSheetState extends ConsumerState<_ExploreBottomSheet> {
                           ? _buildPlaceDetailSlivers(context, activePlace)
                           : activeSection != null
                           ? _buildDrilldownSlivers(context, activeSection)
+                          : _selectedTabIndex == 1
+                          ? _buildSavedSlivers(context)
                           : _buildHomeSlivers(context),
                 ),
               ),
