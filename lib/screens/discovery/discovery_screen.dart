@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -76,6 +78,7 @@ class DiscoveryScreen extends ConsumerStatefulWidget {
 class _DiscoveryScreenState extends ConsumerState<DiscoveryScreen> {
   int _selectedCategoryIndex = 0;
   GoogleMapController? _mapController;
+  String _searchQuery = '';
 
   static const LatLng _danangCenter = LatLng(16.0544, 108.2022);
 
@@ -190,7 +193,10 @@ class _DiscoveryScreenState extends ConsumerState<DiscoveryScreen> {
                     padding: EdgeInsets.symmetric(
                       horizontal: Responsive.w(context, 16),
                     ),
-                    child: const _PlaceSearchBar(),
+                    child: _PlaceSearchBar(
+                      onQueryChanged: (String q) =>
+                          setState(() => _searchQuery = q),
+                    ),
                   ),
                   SizedBox(height: Responsive.h(context, 10)),
                   CategoryFilterBar(
@@ -217,6 +223,7 @@ class _DiscoveryScreenState extends ConsumerState<DiscoveryScreen> {
             child: _ExploreBottomSheet(
               selectedCategoryIndex: _selectedCategoryIndex,
               center: mapCenter,
+              searchQuery: _searchQuery,
             ),
           ),
         ],
@@ -229,30 +236,136 @@ class _DiscoveryScreenState extends ConsumerState<DiscoveryScreen> {
 // Search bar
 // ---------------------------------------------------------------------------
 
-class _PlaceSearchBar extends StatelessWidget {
-  const _PlaceSearchBar();
+class _PlaceSearchBar extends StatefulWidget {
+  const _PlaceSearchBar({required this.onQueryChanged});
+
+  final ValueChanged<String> onQueryChanged;
+
+  @override
+  State<_PlaceSearchBar> createState() => _PlaceSearchBarState();
+}
+
+class _PlaceSearchBarState extends State<_PlaceSearchBar> {
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  Timer? _debounce;
+  bool _isActive = false;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _activate() {
+    setState(() => _isActive = true);
+    _focusNode.requestFocus();
+  }
+
+  void _onChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      widget.onQueryChanged(value.trim());
+    });
+  }
+
+  void _clear() {
+    _controller.clear();
+    _debounce?.cancel();
+    widget.onQueryChanged('');
+    _focusNode.requestFocus();
+  }
+
+  void _dismiss() {
+    _controller.clear();
+    _debounce?.cancel();
+    widget.onQueryChanged('');
+    _focusNode.unfocus();
+    setState(() => _isActive = false);
+  }
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
+    final BoxDecoration containerDecoration = BoxDecoration(
+      color: colorScheme.surface,
+      borderRadius: BorderRadius.circular(Responsive.w(context, 24)),
+      boxShadow: <BoxShadow>[
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.12),
+          blurRadius: 12,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    );
+
+    if (_isActive) {
+      return Container(
+        height: Responsive.h(context, 48),
+        padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 16)),
+        decoration: containerDecoration,
+        child: Row(
+          children: <Widget>[
+            Icon(
+              Icons.search_rounded,
+              size: Responsive.w(context, 20),
+              color: colorScheme.primary,
+            ),
+            SizedBox(width: Responsive.w(context, 10)),
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                onChanged: _onChanged,
+                autofocus: true,
+                style: textTheme.bodyMedium,
+                decoration: InputDecoration(
+                  hintText: 'Search places, food, activities...',
+                  hintStyle: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+            if (_controller.text.isNotEmpty)
+              GestureDetector(
+                onTap: _clear,
+                child: Icon(
+                  Icons.close_rounded,
+                  size: Responsive.w(context, 20),
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              )
+            else
+              GestureDetector(
+                onTap: _dismiss,
+                child: Icon(
+                  Icons.close_rounded,
+                  size: Responsive.w(context, 20),
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+
     return GestureDetector(
-      onTap: () => HapticFeedback.lightImpact(),
+      onTap: () {
+        HapticFeedback.lightImpact();
+        _activate();
+      },
       child: Container(
         height: Responsive.h(context, 48),
         padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 16)),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(Responsive.w(context, 24)),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.12),
-              blurRadius: 12,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+        decoration: containerDecoration,
         child: Row(
           children: <Widget>[
             Icon(
@@ -379,10 +492,12 @@ class _ExploreBottomSheet extends ConsumerStatefulWidget {
   const _ExploreBottomSheet({
     required this.selectedCategoryIndex,
     required this.center,
+    required this.searchQuery,
   });
 
   final int selectedCategoryIndex;
   final LatLng center;
+  final String searchQuery;
 
   @override
   ConsumerState<_ExploreBottomSheet> createState() =>
@@ -409,6 +524,19 @@ class _ExploreBottomSheetState extends ConsumerState<_ExploreBottomSheet> {
         });
       } else {
         _onSeeMore(_kSectionConfigs[sectionIdx]);
+      }
+    }
+    if (oldWidget.searchQuery != widget.searchQuery) {
+      if (widget.searchQuery.isNotEmpty) {
+        setState(() {
+          _activeSection = null;
+          _activePlace = null;
+        });
+        _sheetController.animateTo(
+          0.92,
+          duration: const Duration(milliseconds: 320),
+          curve: Curves.easeOutCubic,
+        );
       }
     }
   }
@@ -592,6 +720,33 @@ class _ExploreBottomSheetState extends ConsumerState<_ExploreBottomSheet> {
                       size: Responsive.w(context, 18),
                       color: colorScheme.onSurfaceVariant,
                     ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else if (widget.searchQuery.isNotEmpty)
+          // Search header: shows query label (dismiss via search bar X)
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: Responsive.w(context, 20),
+            ),
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.search_rounded,
+                  size: Responsive.w(context, 18),
+                  color: colorScheme.primary,
+                ),
+                SizedBox(width: Responsive.w(context, 10)),
+                Expanded(
+                  child: Text(
+                    '"${widget.searchQuery}"',
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -1315,6 +1470,183 @@ class _ExploreBottomSheetState extends ConsumerState<_ExploreBottomSheet> {
     );
   }
 
+  // ── Search slivers ────────────────────────────────────────────────────────
+
+  List<Widget> _buildSearchSlivers(BuildContext context, String query) {
+    final AsyncValue<List<PlaceResult>> resultsAsync = ref.watch(
+      searchPlacesProvider(
+        SearchParams(
+          lat: widget.center.latitude,
+          lng: widget.center.longitude,
+          query: query,
+        ),
+      ),
+    );
+
+    final List<Widget> slivers = <Widget>[];
+
+    resultsAsync.when(
+      loading: () {
+        slivers.add(
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                Responsive.w(context, 20),
+                Responsive.h(context, 12),
+                Responsive.w(context, 20),
+                Responsive.h(context, 8),
+              ),
+              child: ShimmerLoading(
+                width: Responsive.w(context, 100),
+                height: Responsive.h(context, 14),
+                borderRadius: 4,
+              ),
+            ),
+          ),
+        );
+        for (int i = 0; i < 5; i++) {
+          slivers.add(
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: Responsive.w(context, 20),
+                  vertical: Responsive.h(context, 10),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    ShimmerLoading(
+                      width: Responsive.w(context, 76),
+                      height: Responsive.w(context, 76),
+                      borderRadius: Responsive.w(context, 12),
+                    ),
+                    SizedBox(width: Responsive.w(context, 14)),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          ShimmerLoading(
+                            width: double.infinity,
+                            height: Responsive.h(context, 16),
+                            borderRadius: 4,
+                          ),
+                          SizedBox(height: Responsive.h(context, 8)),
+                          ShimmerLoading(
+                            width: Responsive.w(context, 120),
+                            height: Responsive.h(context, 12),
+                            borderRadius: 4,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+          if (i < 4) {
+            slivers.add(
+              SliverToBoxAdapter(
+                child: Divider(
+                  height: 1,
+                  indent: Responsive.w(context, 20),
+                  endIndent: Responsive.w(context, 20),
+                ),
+              ),
+            );
+          }
+        }
+      },
+      error: (_, __) {
+        slivers.add(
+          const SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: EmptyState(
+                icon: Icons.search_off_rounded,
+                title: 'Search failed',
+                subtitle: 'Something went wrong. Please try again.',
+              ),
+            ),
+          ),
+        );
+      },
+      data: (List<PlaceResult> places) {
+        slivers.add(
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                Responsive.w(context, 20),
+                Responsive.h(context, 12),
+                Responsive.w(context, 20),
+                Responsive.h(context, 8),
+              ),
+              child: Text(
+                places.isEmpty
+                    ? 'No results'
+                    : '${places.length} result${places.length == 1 ? '' : 's'}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+        );
+
+        if (places.isEmpty) {
+          slivers.add(
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: EmptyState(
+                  icon: Icons.search_off_rounded,
+                  title: 'No places found',
+                  subtitle: 'Try a different search term',
+                ),
+              ),
+            ),
+          );
+          return;
+        }
+
+        for (int i = 0; i < places.length; i++) {
+          final PlaceResult place = places[i];
+          slivers.add(
+            SliverToBoxAdapter(
+              child: _ExploreListCard(
+                place: place,
+                isBookmarked: _isSaved(place.id),
+                onTap: () => _onPlaceTap(place),
+                onBookmark: () => _onBookmark(place),
+              ),
+            ),
+          );
+          if (i < places.length - 1) {
+            slivers.add(
+              SliverToBoxAdapter(
+                child: Divider(
+                  height: 1,
+                  indent: Responsive.w(context, 20),
+                  endIndent: Responsive.w(context, 20),
+                ),
+              ),
+            );
+          }
+        }
+      },
+    );
+
+    slivers.add(
+      SliverToBoxAdapter(
+        child: SizedBox(
+          height: MediaQuery.paddingOf(context).bottom + Responsive.h(context, 24),
+        ),
+      ),
+    );
+
+    return slivers;
+  }
+
   // ── Saved slivers ─────────────────────────────────────────────────────────
 
   List<Widget> _buildSavedSlivers(BuildContext context) {
@@ -1459,7 +1791,9 @@ class _ExploreBottomSheetState extends ConsumerState<_ExploreBottomSheet> {
                 child: CustomScrollView(
                   key: ValueKey<String>(
                     activePlace?.id ??
-                        (activeSection != null
+                        (widget.searchQuery.isNotEmpty
+                            ? 'search:${widget.searchQuery}'
+                            : activeSection != null
                             ? 'drill:${activeSection.title}'
                             : _selectedTabIndex == 1
                             ? 'saved'
@@ -1469,6 +1803,8 @@ class _ExploreBottomSheetState extends ConsumerState<_ExploreBottomSheet> {
                   slivers:
                       activePlace != null
                           ? _buildPlaceDetailSlivers(context, activePlace)
+                          : widget.searchQuery.isNotEmpty
+                          ? _buildSearchSlivers(context, widget.searchQuery)
                           : activeSection != null
                           ? _buildDrilldownSlivers(context, activeSection)
                           : _selectedTabIndex == 1

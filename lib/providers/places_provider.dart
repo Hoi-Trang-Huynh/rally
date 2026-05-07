@@ -59,6 +59,46 @@ final AutoDisposeFutureProviderFamily<PlaceResult, String> placeDetailsProvider 
   },
 );
 
+/// Parameters for [searchPlacesProvider].
+class SearchParams {
+  /// Creates [SearchParams].
+  const SearchParams({
+    required this.lat,
+    required this.lng,
+    required this.query,
+  });
+
+  /// Latitude of the search centre.
+  final double lat;
+
+  /// Longitude of the search centre.
+  final double lng;
+
+  /// Free-text search query.
+  final String query;
+
+  @override
+  bool operator ==(Object other) =>
+      other is SearchParams &&
+      other.lat == lat &&
+      other.lng == lng &&
+      other.query == query;
+
+  @override
+  int get hashCode => Object.hash(lat, lng, query);
+}
+
+/// Fetches places matching the [SearchParams] query near the given coordinates.
+final AutoDisposeFutureProviderFamily<List<PlaceResult>, SearchParams>
+    searchPlacesProvider = FutureProvider.autoDispose
+        .family<List<PlaceResult>, SearchParams>(
+  (Ref ref, SearchParams params) {
+    return ref
+        .watch(placesRepositoryProvider)
+        .searchPlaces(params.lat, params.lng, params.query);
+  },
+);
+
 /// Holds the place selected via a map marker tap.
 ///
 /// Written by [_DiscoveryScreenState] on marker tap; consumed (and cleared)
